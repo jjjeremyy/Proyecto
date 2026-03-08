@@ -1,0 +1,50 @@
+.who-we-are{
+    padding-left:70px;
+    display: flex;
+    flex-direction: column;
+}
+
+.who-we-are p{
+    width: 400px;
+}
+
+.why-we-started{
+    padding-left:70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.why-we-started p{
+    width: 400px;
+}
+
+.our-mission{
+    padding-left:70px;
+    display: flex;
+    flex-direction: column;
+}
+
+.our-mission p{
+    width: 400px;
+}
+
+.what-we-offer{
+    padding-left:70px;
+    display: flex;
+    flex-direction: column;
+}
+
+.what-we-offer p{
+    width: 400px;
+}
+
+.final-invitation{
+    padding-left:70px;
+    display: flex;
+    flex-direction: column;
+}
+
+.final-invitation p{
+    width: 400px;
+}
