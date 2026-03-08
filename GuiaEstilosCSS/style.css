@@ -1,0 +1,127 @@
+:root{
+    --color-primary: #043873;
+    --color-secondary: #ffffff;
+    --color-background: #f5f5f5;
+    --color-text: #ffffff;
+    --color-text-secondary: #000000;
+}
+
+body{
+    color: var(--color-text);
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header{
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--color-primary);
+    padding: 10px;
+    padding-left: 10px;
+    padding-right: 30px;
+    text-align: center;
+    border-bottom: 1px solid var(--color-secondary);
+}
+
+.logo-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo{
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.logo-container a{
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.search-container{
+    display: flex;
+    align-items: center;
+}
+
+.search-input{
+    width: 300px;
+    padding: 5px;
+    border: none;
+    border-radius: 20px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+
+}
+
+.nav-links a {
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-size: 17px;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+.welcome-section{
+    text-align: center;
+    background-color: var(--color-primary);
+    color: var(--color-text);
+    padding: 50px;
+}
+
+.recent-topics{
+    background-color: var(--color-secondary);
+    color: var(--color-text-secondary);
+}
+
+
+footer{
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-primary);
+    color: var(--color-secondary);
+    text-align: center;
+    margin: 0%;
+    padding: 20px;
+    border-top: var(--color-secondary);
+}
+
+.footer-info{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 70px;
+}
+
+.footer-logo-img{
+    width: 200px;
+    height: 200px;
+    margin-right: 10px;
+}
+
+.footer-links{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+}
+
+.footer-links a{
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-size: 17px;
+}
+
+.footer-links a:hover{
+    text-decoration: underline;
+}
