@@ -7,7 +7,6 @@
 }
 
 body{
-    color: var(--color-text);
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
@@ -50,6 +49,7 @@ header{
 
 .search-input{
     width: 300px;
+    height: 22px;
     padding: 5px;
     border: none;
     border-radius: 20px;
@@ -72,19 +72,6 @@ header{
     text-decoration: underline;
 }
 
-.welcome-section{
-    text-align: center;
-    background-color: var(--color-primary);
-    color: var(--color-text);
-    padding: 50px;
-}
-
-.recent-topics{
-    background-color: var(--color-secondary);
-    color: var(--color-text-secondary);
-}
-
-
 footer{
     display: flex;
     flex-direction: column;
@@ -93,7 +80,7 @@ footer{
     text-align: center;
     margin: 0%;
     padding: 20px;
-    border-top: var(--color-secondary);
+    border-top: 1px solid var(--color-secondary);
 }
 
 .footer-info{

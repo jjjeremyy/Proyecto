@@ -1,0 +1,25 @@
+
+.welcome-section{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 350px;
+    text-align: center;
+    background-color: var(--color-primary);
+    color: var(--color-text);
+    padding: 50px;
+}
+
+.recent-topics{
+    height: 400px;
+    display: flex;
+    background-color: var(--color-secondary);
+    color: var(--color-text-secondary);
+}
+
+.featured-content{
+    height: 400px;
+    display: flex;
+    background-color: var(--color-primary);
+    color: var(--color-text-secondary);
+}
