@@ -1,50 +1,60 @@
-.who-we-are{
-    padding-left:70px;
-    display: flex;
-    flex-direction: column;
+:root{
+    --color-primary: #043873;
+    --color-secondary: #ffffff;
+    --color-background: #f5f5f5;
+    --color-text: #ffffff;
+    --color-text-secondary: #000000;
 }
 
-.who-we-are p{
-    width: 400px;
+.who-we-are{
+    background-color: var(--color-primary);
+    color: var(--color-text);
+    padding: 70px;
+    display: flex;
+    justify-content: center;
+    gap: 250px;
 }
+
 
 .why-we-started{
-    padding-left:70px;
+    padding: 70px;
     display: flex;
-    flex-direction: column;
     justify-content: center;
-}
-
-.why-we-started p{
-    width: 400px;
+    gap: 250px;
 }
 
 .our-mission{
-    padding-left:70px;
+    background-color: var(--color-primary);
+    color: var(--color-text);
+    padding: 70px;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    gap: 250px;
 }
 
-.our-mission p{
-    width: 400px;
-}
 
 .what-we-offer{
-    padding-left:70px;
+    padding: 70px;
     display: flex;
-    flex-direction: column;
-}
-
-.what-we-offer p{
-    width: 400px;
+    justify-content: center;
+    gap: 250px;
 }
 
 .final-invitation{
-    padding-left:70px;
+    background-color: var(--color-primary);
+    color: var(--color-text);
+    padding: 70px;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    gap: 250px;
 }
 
-.final-invitation p{
-    width: 400px;
+.who-we-are-img{
+    width: 450px;
 }
+
+.text{
+    width: 450px;
+}
+
+
