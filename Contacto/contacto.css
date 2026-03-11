@@ -47,6 +47,7 @@
 .form-input{
     background-color: var(--color-secondary);
     height: 35px;
+    border: none;
     border-radius: 10px;
     padding-left: 10px;
     margin-left: 20px;

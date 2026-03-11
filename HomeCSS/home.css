@@ -23,3 +23,16 @@
     background-color: var(--color-primary);
     color: var(--color-text-secondary);
 }
+.search-container-index{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.search-input-index{
+    width: 500px;
+    height: 40px;
+    border: none;
+    border-radius: 20px;
+    padding-left: 20px;
+}
