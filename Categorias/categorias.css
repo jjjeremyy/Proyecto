@@ -1,3 +1,16 @@
+.categories-section{
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-secondary);
+    padding: 50px;
+}
+
+.categories-title{
+    text-align: center;
+    color: var(--color-text-secunday);
+    font-size: 20px;
+}
+
 .categories-container{
     padding: 70px;
     display: grid;
@@ -7,8 +20,8 @@
 
 
 .category{
-    width: 300px;
-    height: 150px;
+    width: 350px;
+    height: 100px;
     background-color:var(--color-primary);
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -16,6 +29,7 @@
     padding: 20px;
     text-align: center;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: 15px;
 }
 
 .category-image{
