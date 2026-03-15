@@ -11,7 +11,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 350px;
+    height: 450px;
     text-align: center;
     background-color: var(--color-primary);
     color: var(--color-text);
@@ -73,6 +73,10 @@ body {
 
 }
 
+.title-featured-content{
+    color: var(--color-text-secondary);
+}
+
 .featured-content{
     padding: 50px;
     padding-bottom: 70px;
@@ -80,7 +84,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 30px;
-    background-color: var(--color-primary);
+    background-color: var(--color-secondary);
     color: var(--color-text);
 }
 
@@ -96,8 +100,8 @@ body {
     flex-direction: column;
     justify-content: center;
     width: 300px;
-    background-color: var(--color-secondary);
-    color: var(--color-text-secondary);
+    background-color: var(--color-primary);
+    color: var(--color-text);
     padding: 20px;
     margin: 10px;
     border-radius: 10px;
