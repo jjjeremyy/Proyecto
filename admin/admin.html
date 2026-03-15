@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Creador de Artículos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Nuevo Artículo</h1>
+        <form id="formulario-articulo">
+            <input type="text" id="titulo" placeholder="Título del artículo" required>
+            <input type="text" id="slug" placeholder="url-del-articulo" required>
+            <textarea id="descripcion" placeholder="Breve descripción..."></textarea>
+            <textarea id="contenido" placeholder="Contenido completo en HTML o texto..." required></textarea>
+            
+            <select id="categoria_id">
+                <option value="">Selecciona Categoría</option>
+            </select>
+
+            <input type="url" id="imagen_portada" placeholder="URL de la imagen de portada">
+            
+            <button type="submit">Publicar Artículo</button>
+        </form>
+    </div>
+
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
