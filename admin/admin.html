@@ -2,26 +2,85 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Creador de Artículos</title>
-    <link rel="stylesheet" href="style.css">
+    <title>SistemaBase | Admin</title>
+    <link rel="stylesheet" href="admin.css">
+    <!-- Editor visual de texto -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css">
 </head>
 <body>
-    <div class="admin-container">
-        <h1>Nuevo Artículo</h1>
-        <form id="formulario-articulo">
-            <input type="text" id="titulo" placeholder="Título del artículo" required>
-            <input type="text" id="slug" placeholder="url-del-articulo" required>
-            <textarea id="descripcion" placeholder="Breve descripción..."></textarea>
-            <textarea id="contenido" placeholder="Contenido completo en HTML o texto..." required></textarea>
-            
-            <select id="categoria_id">
-                <option value="">Selecciona Categoría</option>
-            </select>
 
-            <input type="url" id="imagen_portada" placeholder="URL de la imagen de portada">
-            
-            <button type="submit">Publicar Artículo</button>
-        </form>
+    <!-- PANTALLA DE LOGIN -->
+    <div id="login-screen">
+        <div class="login-container">
+            <h1>Admin SistemaBase</h1>
+            <input type="password" id="password-input" placeholder="Contraseña">
+            <button id="login-btn">Entrar</button>
+            <p id="login-error" class="error hidden">Contraseña incorrecta</p>
+        </div>
+    </div>
+
+    <!-- PANEL ADMIN (oculto hasta que se loguea) -->
+    <div id="admin-panel" class="hidden">
+
+        <div class="admin-container">
+
+            <!-- FORMULARIO NUEVO ARTÍCULO -->
+            <div class="section-header">
+                <h1>Nuevo Artículo</h1>
+                <button id="logout-btn">Cerrar sesión</button>
+            </div>
+
+            <div id="formulario-articulo">
+                <input type="text" id="titulo" placeholder="Título del artículo" required>
+
+                <div class="slug-row">
+                    <input type="text" id="slug" placeholder="url-del-articulo">
+                    <button type="button" id="generar-slug-btn">Generar desde título</button>
+                </div>
+
+                <input type="text" id="descripcion" placeholder="Breve descripción...">
+
+                <label>Contenido del artículo:</label>
+                <div id="editor-contenido"></div>
+                <input type="hidden" id="contenido">
+
+                <select id="categoria_id">
+                    <option value="">Selecciona Categoría</option>
+                </select>
+
+                <div class="imagen-row">
+                    <input type="url" id="imagen_portada" placeholder="URL de la imagen de portada">
+                    <button type="button" id="preview-img-btn">Vista previa</button>
+                </div>
+                <img id="imagen-preview" class="hidden" src="" alt="Vista previa">
+
+                <button id="publicar-btn">Publicar Artículo</button>
+                <p id="mensaje-exito" class="exito hidden">¡Artículo publicado con éxito!</p>
+                <p id="mensaje-error" class="error hidden"></p>
+            </div>
+
+            <!-- LISTA DE ARTÍCULOS -->
+            <div class="section-header" style="margin-top: 60px;">
+                <h2>Artículos publicados</h2>
+                <button id="recargar-btn">Recargar lista</button>
+            </div>
+            <table id="tabla-articulos">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Categoría</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-articulos">
+                    <tr><td colspan="5">Cargando...</td></tr>
+                </tbody>
+            </table>
+
+        </div>
     </div>
 
     <script type="module" src="admin.js"></script>

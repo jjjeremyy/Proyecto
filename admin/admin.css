@@ -1,9 +1,144 @@
-body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
-.admin-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
-h1 { color: #333; }
-form { display: flex; flex-direction: column; gap: 15px; }
-input, textarea, select { padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-textarea { height: 150px; resize: vertical; }
-button { background: #3ecf8e; color: white; border: none; padding: 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-button:hover { background: #36b87d; }
+* { box-sizing: border-box; }
 
+body {
+    font-family: sans-serif;
+    background: #f4f7f6;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Login ── */
+#login-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 300px;
+    text-align: center;
+}
+
+/* ── Panel ── */
+#admin-panel {
+    display: flex;
+    justify-content: center;
+    padding: 30px 20px;
+}
+
+.admin-container {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 800px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* ── Formulario ── */
+#formulario-articulo {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input, textarea, select {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 15px;
+    width: 100%;
+}
+
+.slug-row, .imagen-row {
+    display: flex;
+    gap: 10px;
+}
+
+.slug-row input, .imagen-row input {
+    flex: 1;
+}
+
+/* Editor Quill */
+#editor-contenido {
+    height: 250px;
+    border-radius: 4px;
+}
+
+/* Vista previa imagen */
+#imagen-preview {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+/* ── Botones ── */
+button {
+    background: #043873;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+button:hover { background: #2165b3; }
+
+#publicar-btn {
+    background: #3ecf8e;
+    font-size: 16px;
+    padding: 15px;
+}
+
+#publicar-btn:hover { background: #36b87d; }
+
+#logout-btn {
+    background: #e74c3c;
+    padding: 8px 16px;
+}
+
+/* ── Tabla ── */
+#tabla-articulos {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#tabla-articulos th, #tabla-articulos td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+#tabla-articulos th {
+    background: #f4f7f6;
+    font-weight: bold;
+}
+
+.btn-activar   { background: #3ecf8e; padding: 6px 12px; }
+.btn-desactivar { background: #e74c3c; padding: 6px 12px; }
+
+/* ── Mensajes ── */
+.exito { color: #3ecf8e; font-weight: bold; text-align: center; }
+.error { color: #e74c3c; font-weight: bold; text-align: center; }
+.hidden { display: none !important; }
