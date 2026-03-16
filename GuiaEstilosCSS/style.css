@@ -4,6 +4,8 @@
     --color-background: #f5f5f5;
     --color-text: #ffffff;
     --color-text-secondary: #000000;
+    --color-button-hover: #2165b3;
+    --color-click-button: #055dc1;
 }
 
 body{
