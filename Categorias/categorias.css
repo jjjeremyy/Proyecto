@@ -23,7 +23,6 @@
     width: 350px;
     height: 100px;
     background-color:var(--color-primary);
-    border: 1px solid #ccc;
     border-radius: 8px;
     color: var(--color-text);
     padding: 20px;
