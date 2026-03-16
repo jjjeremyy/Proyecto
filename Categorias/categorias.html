@@ -30,15 +30,19 @@
         </section>
 
         <section class="categories-container">
-            <button class="category-button">Conceptos Básicos</button>
-            <button class="category-button">Hardware</button>
-            <button class="category-button">Software</button>
-            <button class="category-button">Sistemas Operativos</button>
-            <button class="category-button">Programación</button>
-            <button class="category-button">Bases de datos</button>
-            <button class="category-button">Redes</button>
-            <button class="category-button">Ciberseguridad</button>
-            <button class="category-button">Inteligencia Artificial</button>
+            <button class="category-button" data-slug="conceptos_basicos">Conceptos Básicos</button>
+            <button class="category-button" data-slug="hardware">Hardware</button>
+            <button class="category-button" data-slug="software">Software</button>
+            <button class="category-button" data-slug="sistemas_operativos">Sistemas Operativos</button>
+            <button class="category-button" data-slug="programacion">Programación</button>
+            <button class="category-button" data-slug="base_de_datos">Bases de datos</button>
+            <button class="category-button" data-slug="redes">Redes</button>
+            <button class="category-button" data-slug="ciberseguridad">Ciberseguridad</button>
+            <button class="category-button" data-slug="inteligencia_artificial">Inteligencia Artificial</button>
+        </section>
+        <section class="articles-result" id="articles-result">
+            <h2 id="category-title"></h2>
+            <div class="articles-list" id="articles-list"></div>
         </section>  
     </section>
     <footer>
@@ -61,4 +65,5 @@
         </section>
         <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
     </footer>
+    <script type="module" src="/Categorias/categorias.js"></script>
 </body>
