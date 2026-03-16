@@ -4,7 +4,7 @@ if (!session) {
     window.location.href = '../index.html'; // Patada hacia afuera si no eres tú
 }
 
-import { supabase } from '..Supabase/supabase.js';
+import { supabase } from '../Supabase/supabase.js';
 
 const form = document.getElementById('formulario-articulo');
 
