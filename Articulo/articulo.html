@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SistemaBase | Inicio</title>
     <link rel="stylesheet" href="/GuiaEstilosCSS/style.css">
+    <link rel="stylesheet" href="/Articulo/articulo.css">
     <link rel="stylesheet" href="/Home/home.css">
     
 </head>
@@ -18,10 +19,326 @@
             <a href="/Contenidos/contenidos.html">Contenidos</a>
             <a href="/Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
             <a href="/Contacto/contacto.html">Contacto</a>
-        </section>
-        
+        </section>     
     </header> 
-
+    <!-- =============================================
+         ANUNCIO SUPERIOR (Banner horizontal 728x90 / Leaderboard)
+         Visible justo debajo del header, antes del contenido.
+         Muy alta visibilidad = mayor CTR.
+    ============================================= -->
+    <div class="ad-container ad-leaderboard">
+        <p class="ad-label">Publicidad</p>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        <!-- TAMAÑO RECOMENDADO: 728x90 (escritorio) / 320x50 (móvil) -->
+    </div>
+ 
+    <main class="article-layout">
+ 
+        <!-- ==================== COLUMNA IZQUIERDA (Sidebar) ==================== -->
+        <aside class="sidebar sidebar-left">
+ 
+            <!-- ANUNCIO SIDEBAR SUPERIOR (300x250 / Medium Rectangle) -->
+            <div class="ad-container ad-sidebar sticky-ad">
+                <p class="ad-label">Publicidad</p>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                <!-- TAMAÑO RECOMENDADO: 300x250 o 160x600 (Wide Skyscraper) -->
+            </div>
+ 
+            <!-- ANUNCIO SIDEBAR INFERIOR (300x600 / Half Page) -->
+            <div class="ad-container ad-sidebar sticky-ad" style="margin-top: 30px;">
+                <p class="ad-label">Publicidad</p>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                <!-- TAMAÑO RECOMENDADO: 300x600 (Half Page) -->
+            </div>
+ 
+        </aside>
+ 
+        <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+        <article class="article-content">
+ 
+            <!-- BREADCRUMB -->
+            <nav class="breadcrumb">
+                <a href="/index.html">Inicio</a>
+                <span>›</span>
+                <a href="/Categorias/categorias.html">[CATEGORÍA]</a>
+                <span>›</span>
+                <span>[TÍTULO CORTO]</span>
+            </nav>
+ 
+            <!-- CABECERA DEL ARTÍCULO -->
+            <header class="article-header">
+                <div class="article-meta-top">
+                    <span class="article-category">[CATEGORÍA]</span>
+                    <span class="article-date">[DD de MES de AAAA]</span>
+                </div>
+                <h1 class="article-title">[TÍTULO PRINCIPAL DEL ARTÍCULO]</h1>                
+            <!-- 
+                <div class="article-meta-bottom">
+                    <div class="article-actions">
+                        <button class="btn-share">Compartir</button>
+                    </div>
+                </div>
+            -->    
+            </header>
+ 
+            <!-- IMAGEN DESTACADA -->
+            <figure class="article-featured-image">
+                <img src="/IMG/[IMAGEN-ARTICULO].png" alt="[Descripción de la imagen]" class="featured-img">
+                <figcaption>[Pie de foto opcional]</figcaption>
+            </figure>
+ 
+            <!-- =============================================
+                 ANUNCIO IN-CONTENT SUPERIOR (336x280 / Large Rectangle)
+                 Colocado justo después de la imagen, antes del primer párrafo.
+                 Alta visibilidad al inicio de la lectura.
+            ============================================= -->
+            <div class="ad-container ad-in-content">
+                <p class="ad-label">Publicidad</p>
+                <ins class="adsbygoogle"
+                     style="display:block; text-align:center;"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                <!-- TAMAÑO RECOMENDADO: 336x280 o 728x90 -->
+            </div>
+ 
+            <!-- ==================== CUERPO DEL ARTÍCULO ==================== -->
+            <div class="article-body">
+ 
+                <!-- INTRODUCCIÓN -->
+                <p class="article-intro">[Párrafo de introducción. Explica de qué trata el artículo y por qué es importante para el lector. 2-3 oraciones.]</p>
+ 
+                <!-- SECCIÓN 1 -->
+                <h2>[Título de la Sección 1]</h2>
+                <p>[Contenido de la sección 1. Desarrolla el tema con claridad.]</p>
+                <p>[Continúa el desarrollo. Puedes añadir más párrafos aquí.]</p>
+ 
+                <!-- CAJA DESTACADA (opcional) -->
+                <div class="highlight-box">
+                    <strong>💡 Dato importante:</strong> [Texto destacado, concepto clave o dato relevante que quieras resaltar.]
+                </div>
+ 
+                <!-- SECCIÓN 2 -->
+                <h2>[Título de la Sección 2]</h2>
+                <p>[Contenido de la sección 2.]</p>
+ 
+                <!-- IMAGEN DENTRO DEL ARTÍCULO (opcional) -->
+                <figure class="article-inline-image">
+                    <img src="/IMG/[IMAGEN-SECUNDARIA].png" alt="[Descripción]" class="inline-img">
+                    <figcaption>[Pie de foto]</figcaption>
+                </figure>
+ 
+                <!-- =============================================
+                     ANUNCIO IN-CONTENT MEDIO (728x90 / Leaderboard)
+                     Colocado a mitad del artículo para captar lectores activos.
+                     Ideal entre secciones largas.
+                ============================================= -->
+                <div class="ad-container ad-in-content">
+                    <p class="ad-label">Publicidad</p>
+                    <ins class="adsbygoogle"
+                         style="display:block; text-align:center;"
+                         data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+                         data-ad-slot="XXXXXXXXXX"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                    <!-- TAMAÑO RECOMENDADO: 728x90 (escritorio) / 300x250 (móvil) -->
+                </div>
+ 
+                <!-- SECCIÓN 3 -->
+                <h2>[Título de la Sección 3]</h2>
+                <p>[Contenido de la sección 3.]</p>
+ 
+                <!-- LISTA (opcional) -->
+                <h3>[Subtítulo de lista]</h3>
+                <ul class="article-list">
+                    <li>[Elemento 1]</li>
+                    <li>[Elemento 2]</li>
+                    <li>[Elemento 3]</li>
+                    <li>[Elemento 4]</li>
+                </ul>
+ 
+                <!-- BLOQUE DE CÓDIGO (opcional, para artículos técnicos) -->
+                <pre class="code-block">
+                    <code>// [Comentario del código]
+                            [Tu código aquí]
+                            [Línea 2]
+                            [Línea 3]
+                    </code>
+                </pre>
+ 
+                <!-- SECCIÓN 4 -->
+                <h2>[Título de la Sección 4]</h2>
+                <p>[Contenido de la sección 4.]</p>
+ 
+                <!-- TABLA (opcional) -->
+                <div class="table-wrapper">
+                    <table class="article-table">
+                        <thead>
+                            <tr>
+                                <th>[Columna 1]</th>
+                                <th>[Columna 2]</th>
+                                <th>[Columna 3]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>[Dato 1]</td>
+                                <td>[Dato 2]</td>
+                                <td>[Dato 3]</td>
+                            </tr>
+                            <tr>
+                                <td>[Dato 4]</td>
+                                <td>[Dato 5]</td>
+                                <td>[Dato 6]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+ 
+                <!-- CONCLUSIÓN -->
+                <h2>Conclusión</h2>
+                <p>[Párrafo de cierre. Resume los puntos clave y da una opinión o recomendación final al lector.]</p>
+ 
+            </div>
+            <!-- FIN CUERPO DEL ARTÍCULO -->
+ 
+            <!-- =============================================
+                 ANUNCIO POST-ARTÍCULO (300x250 / Rectangle)
+                 Justo al terminar el artículo, antes de artículos relacionados.
+                 El lector acabó de leer: alta intención de clic.
+            ============================================= -->
+            <div class="ad-container ad-post-article">
+                <p class="ad-label">Publicidad</p>
+                <ins class="adsbygoogle"
+                     style="display:block; text-align:center;"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                <!-- TAMAÑO RECOMENDADO: 300x250 o 728x90 -->
+            </div>
+ 
+            <!-- ETIQUETAS -->
+            <div class="article-tags">
+                <span class="tags-label">Etiquetas:</span>
+                <a href="#" class="tag">[tag1]</a>
+                <a href="#" class="tag">[tag2]</a>
+                <a href="#" class="tag">[tag3]</a>
+            </div>
+ 
+            <!-- ARTÍCULOS RELACIONADOS -->
+            <section class="related-articles">
+                <h3>Artículos Relacionados</h3>
+                <div class="related-grid">
+                    <a href="#" class="related-card">
+                        <img src="/IMG/IMGprueba.png" alt="Artículo relacionado 1">
+                        <div class="related-card-info">
+                            <span class="related-category">[Categoría]</span>
+                            <h4>[Título del artículo relacionado 1]</h4>
+                        </div>
+                    </a>
+                    <a href="#" class="related-card">
+                        <img src="/IMG/IMGprueba.png" alt="Artículo relacionado 2">
+                        <div class="related-card-info">
+                            <span class="related-category">[Categoría]</span>
+                            <h4>[Título del artículo relacionado 2]</h4>
+                        </div>
+                    </a>
+                    <a href="#" class="related-card">
+                        <img src="/IMG/IMGprueba.png" alt="Artículo relacionado 3">
+                        <div class="related-card-info">
+                            <span class="related-category">[Categoría]</span>
+                            <h4>[Título del artículo relacionado 3]</h4>
+                        </div>
+                    </a>
+                </div>
+            </section>
+ 
+        </article>
+        <!-- FIN CONTENIDO PRINCIPAL -->
+ 
+        <!-- ==================== COLUMNA DERECHA (Sidebar) ==================== -->
+        <aside class="sidebar sidebar-right">
+ 
+            <!-- TABLA DE CONTENIDOS -->
+            <div class="toc-box">
+                <h4 class="toc-title">Contenidos</h4>
+                <ol class="toc-list">
+                    <li><a href="#">[Sección 1]</a></li>
+                    <li><a href="#">[Sección 2]</a></li>
+                    <li><a href="#">[Sección 3]</a></li>
+                    <li><a href="#">[Sección 4]</a></li>
+                    <li><a href="#">Conclusión</a></li>
+                </ol>
+            </div>
+ 
+            <!-- ANUNCIO SIDEBAR DERECHO SUPERIOR (300x250) -->
+            <div class="ad-container ad-sidebar sticky-ad">
+                <p class="ad-label">Publicidad</p>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                <!-- TAMAÑO RECOMENDADO: 300x250 -->
+            </div>
+ 
+            <!-- ANUNCIO SIDEBAR DERECHO INFERIOR (300x600) -->
+            <div class="ad-container ad-sidebar" style="margin-top: 30px;">
+                <p class="ad-label">Publicidad</p>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                <!-- TAMAÑO RECOMENDADO: 300x600 -->
+            </div>
+ 
+        </aside>
+ 
+    </main>
+ 
+    <!-- =============================================
+         ANUNCIO PIE DE PÁGINA (728x90 / Leaderboard)
+         Antes del footer. Capta a lectores que llegaron al final.
+    ============================================= -->
+    <div class="ad-container ad-footer-banner">
+        <p class="ad-label">Publicidad</p>
+        <ins class="adsbygoogle"
+             style="display:block; text-align:center;"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        <!-- TAMAÑO RECOMENDADO: 728x90 (escritorio) / 320x50 (móvil) -->
+    </div>
 
     <footer>
         <section class="footer-info">
@@ -43,6 +360,5 @@
         </section>
         <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
     </footer>
-    <script src="/Home/home.js"></script>
 </body>
 </html>
