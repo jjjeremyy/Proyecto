@@ -6,7 +6,6 @@
     <title>SistemaBase | Inicio</title>
     <link rel="stylesheet" href="/GuiaEstilosCSS/style.css">
     <link rel="stylesheet" href="/Home/home.css">
-    
 </head>
 <body>  
     <header>
@@ -19,31 +18,62 @@
             <a href="/Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
             <a href="/Contacto/contacto.html">Contacto</a>
         </section>
-        
     </header> 
 
+    <!-- HERO -->
     <section class="welcome-section">
         <div> 
             <h1>Si no lo sabes, SistemaBase lo sabe</h1>
-            <h2> Te ofrecemos información sobre computación de la mejor manera posible  </h2>
+            <h2>Te ofrecemos información sobre computación de la mejor manera posible</h2>
         </div>
     </section>
 
-    
+    <!-- ==========================================
+         BUSCADOR DE ARTÍCULOS
+    =========================================== -->
+    <section class="search-section">
+        <div class="search-inner">
+            <p class="search-label">¿Qué quieres aprender hoy?</p>
+            <div class="search-wrapper">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                    type="text"
+                    id="search-input"
+                    class="search-input"
+                    placeholder="Busca artículos: hardware, redes, IA..."
+                    autocomplete="off"
+                >
+                <!-- Resultados desplegables -->
+                <div id="search-results" class="search-results hidden"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         ARTÍCULOS RECIENTES (dinámico desde Supabase)
+    =========================================== -->
+    <section class="recent-topics">
+        <div class="title-recent-topics">
+            <h2>Artículos Recientes</h2>
+        </div>
+        <!-- home.js rellena este contenedor -->
+        <div id="recent-articles-list" class="recent-articles-grid"></div>
+    </section>
 
     <footer>
         <section class="footer-info">
             <section class="footer-logo">
                 <img src="/IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
             </section>
-
             <section class="footer-links">
                 <a href="/index.html">Inicio</a>
                 <a href="/Categorias/categorias.html">Categorías</a>
                 <a href="/Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
                 <a href="/Contacto/contacto.html">Contacto</a>
             </section> 
-            
             <section class="contact-info">
                 <h3>Contacto</h3>
                 <p>Email: sistemabase@gmail.com</p>
@@ -51,6 +81,8 @@
         </section>
         <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
     </footer>
-    <script src="/Home/home.js"></script>
+
+    <!-- Cambiado a module para poder importar supabase -->
+    <script type="module" src="/Home/home.js"></script>
 </body>
 </html>
