@@ -1,27 +1,27 @@
 // =============================================
 // ARTICULO.JS — SistemaBase
-// Lee ?babosa= de la URL y carga el artículo
+// Lee ?slug= de la URL y carga el artículo
 // desde Supabase rellenando la plantilla HTML.
 // =============================================
 import { supabase } from '../Supabase/supabase.js';
 
 // --------------------------------------------------
-// 1. LEER LA BABOSA (slug) DE LA URL
-//    Ejemplo: /articulo/?babosa=que-es-la-ia
+// 1. LEER LA slug (slug) DE LA URL
+//    Ejemplo: /articulo/?slug=que-es-la-ia
 // --------------------------------------------------
 const params = new URLSearchParams(window.location.search);
-const babosa = params.get('babosa');
+const slug = params.get('slug');
 
-if (!babosa) {
+if (!slug) {
     mostrarError('No se ha especificado ningún artículo.');
 } else {
-    cargarArticulo(babosa);
+    cargarArticulo(slug);
 }
 
 // --------------------------------------------------
 // 2. CARGAR EL ARTÍCULO DESDE SUPABASE
 // --------------------------------------------------
-async function cargarArticulo(babosa) {
+async function cargarArticulo(slug) {
     document.getElementById('article-loading').classList.remove('hidden');
     document.getElementById('article-main').classList.add('hidden');
 
@@ -31,7 +31,7 @@ async function cargarArticulo(babosa) {
         .select(`
             id,
             titulo,
-            babosa,
+            slug,
             descripcion,
             contenido,
             imagen_portada,
@@ -40,7 +40,7 @@ async function cargarArticulo(babosa) {
             categoria_id,
             categorias ( id, nombre )
         `)
-        .eq('babosa', babosa)
+        .eq('slug', slug)
         .eq('estado', true)        // estado es BOOLEAN en tu BD
         .maybeSingle();
 
@@ -100,7 +100,7 @@ function rellenarArticulo(a) {
     document.getElementById('article-main').classList.remove('hidden');
 
     // Botón compartir
-    configurarCompartir(a.titulo, a.babosa);
+    configurarCompartir(a.titulo, a.slug);
 }
 
 // --------------------------------------------------
@@ -109,7 +109,7 @@ function rellenarArticulo(a) {
 async function cargarRelacionados(categoriaId, articuloActualId) {
     const { data, error } = await supabase
         .from('articulos')
-        .select('titulo, babosa, imagen_portada, descripcion, categorias(nombre)')
+        .select('titulo, slug, imagen_portada, descripcion, categorias(nombre)')
         .eq('categoria_id', categoriaId)
         .eq('estado', true)
         .neq('id', articuloActualId)
@@ -126,7 +126,7 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
     if (!grid) return;
 
     grid.innerHTML = data.map(art => `
-        <a href="/articulo/?babosa=${art.babosa}" class="related-card">
+        <a href="/articulo/?slug=${art.slug}" class="related-card">
             <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}" alt="${art.titulo}">
             <div class="related-card-info">
                 <span class="related-category">${art.categorias?.nombre || ''}</span>
@@ -139,12 +139,12 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
 // --------------------------------------------------
 // 5. BOTÓN COMPARTIR
 // --------------------------------------------------
-function configurarCompartir(titulo, babosa) {
+function configurarCompartir(titulo, slug) {
     const btn = document.getElementById('btn-share');
     if (!btn) return;
 
     btn.addEventListener('click', async () => {
-        const url = `${window.location.origin}/articulo/?babosa=${babosa}`;
+        const url = `${window.location.origin}/articulo/?slug=${slug}`;
         if (navigator.share) {
             try { await navigator.share({ title: titulo, url }); } catch (_) {}
         } else {
