@@ -2,87 +2,128 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SistemaBase | Admin</title>
-    <link rel="stylesheet" href="admin.css">
-    <!-- Editor visual de texto -->
-    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css">
+    <link rel="stylesheet" href="/admin/admin.css">
+    <!-- TinyMCE: regístrate gratis en tiny.cloud y sustituye 'no-api-key' por tu clave -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 </head>
 <body>
 
-    <!-- PANTALLA DE LOGIN -->
-    <div id="login-screen">
-        <div class="login-container">
-            <h1>Admin SistemaBase</h1>
-            <input type="password" id="password-input" placeholder="Contraseña">
-            <button id="login-btn">Entrar</button>
-            <p id="login-error" class="error hidden">Contraseña incorrecta</p>
-        </div>
-    </div>
+    <div class="admin-wrapper">
 
-    <!-- PANEL ADMIN (oculto hasta que se loguea) -->
-    <div id="admin-panel" class="hidden">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                <img src="/IMG/LogoSistemaBaseBlanco.png" alt="Logo" class="admin-logo">
+                <span>SistemaBase</span>
+            </div>
+            <nav class="admin-nav">
+                <a href="#" class="admin-nav-link active">✏️ Nuevo artículo</a>
+                <a href="/index.html" class="admin-nav-link">🌐 Ver web</a>
+            </nav>
+        </aside>
 
-        <div class="admin-container">
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="admin-main">
 
-            <!-- FORMULARIO NUEVO ARTÍCULO -->
-            <div class="section-header">
+            <div class="admin-topbar">
                 <h1>Nuevo Artículo</h1>
-                <button id="logout-btn">Cerrar sesión</button>
-            </div>
-
-            <div id="formulario-articulo">
-                <input type="text" id="titulo" placeholder="Título del artículo" required>
-
-                <div class="slug-row">
-                    <input type="text" id="slug" placeholder="url-del-articulo">
-                    <button type="button" id="generar-slug-btn">Generar desde título</button>
+                <div class="admin-topbar-actions">
+                    <button type="button" id="btn-preview" class="btn-secondary">👁 Previsualizar</button>
+                    <button type="button" id="btn-submit"  class="btn-primary">🚀 Publicar</button>
                 </div>
+            </div>
 
-                <input type="text" id="descripcion" placeholder="Breve descripción...">
+            <!-- MENSAJE DE ESTADO (éxito / error / cargando) -->
+            <div id="status-message" class="status-message hidden"></div>
 
-                <label>Contenido del artículo:</label>
-                <div id="editor-contenido"></div>
-                <input type="hidden" id="contenido">
+            <form id="formulario-articulo" novalidate>
+                <div class="admin-grid">
 
-                <select id="categoria_id">
-                    <option value="">Selecciona Categoría</option>
-                </select>
+                    <!-- COLUMNA PRINCIPAL -->
+                    <div class="admin-col-main">
 
-                <div class="imagen-row">
-                    <input type="url" id="imagen_portada" placeholder="URL de la imagen de portada">
-                    <button type="button" id="preview-img-btn">Vista previa</button>
+                        <div class="field-group">
+                            <label for="titulo">Título <span class="required">*</span></label>
+                            <input type="text" id="titulo" placeholder="Escribe el título aquí..." required>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="descripcion">Descripción breve</label>
+                            <input type="text" id="descripcion" placeholder="Resumen corto del artículo...">
+                        </div>
+
+                        <div class="field-group">
+                            <label>Contenido <span class="required">*</span></label>
+                            <!-- TinyMCE se inicializa sobre este textarea -->
+                            <textarea id="contenido"></textarea>
+                        </div>
+
+                    </div>
+
+                    <!-- COLUMNA LATERAL -->
+                    <div class="admin-col-side">
+
+                        <div class="admin-card">
+                            <h3 class="admin-card-title">📋 Publicación</h3>
+
+                            <div class="field-group">
+                                <label for="estado">Estado</label>
+                                <!-- En la BD "estado" es BOOLEAN: true=publicado, false=borrador -->
+                                <select id="estado">
+                                    <option value="true">✅ Publicado</option>
+                                    <option value="false">📝 Borrador</option>
+                                </select>
+                            </div>
+
+                            <div class="field-group">
+                                <label for="categoria_id">Categoría <span class="required">*</span></label>
+                                <select id="categoria_id" required>
+                                    <option value="">Selecciona categoría...</option>
+                                    <!-- Se rellena dinámicamente desde Supabase -->
+                                </select>
+                            </div>
+
+                            <div class="field-group">
+                                <label for="babosa">URL del artículo <span class="required">*</span></label>
+                                <div class="slug-wrapper">
+                                    <span class="slug-prefix">/articulo/?babosa=</span>
+                                    <input type="text" id="babosa" placeholder="url-del-articulo" required>
+                                </div>
+                                <small>Se genera automáticamente desde el título. Solo letras, números y guiones.</small>
+                            </div>
+                        </div>
+
+                        <div class="admin-card">
+                            <h3 class="admin-card-title">🖼 Imagen de portada</h3>
+                            <div class="field-group">
+                                <label for="imagen_portada">URL de la imagen</label>
+                                <input type="url" id="imagen_portada" placeholder="https://...">
+                            </div>
+                            <div id="img-preview-box" class="img-preview-box hidden">
+                                <img id="img-preview" src="" alt="Vista previa">
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-                <img id="imagen-preview" class="hidden" src="" alt="Vista previa">
+            </form>
+        </main>
+    </div>
 
-                <button id="publicar-btn">Publicar Artículo</button>
-                <p id="mensaje-exito" class="exito hidden">¡Artículo publicado con éxito!</p>
-                <p id="mensaje-error" class="error hidden"></p>
+    <!-- MODAL DE PREVISUALIZACIÓN -->
+    <div id="preview-modal" class="modal hidden">
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Vista previa</h2>
+                <button id="close-preview" class="modal-close">✕</button>
             </div>
-
-            <!-- LISTA DE ARTÍCULOS -->
-            <div class="section-header" style="margin-top: 60px;">
-                <h2>Artículos publicados</h2>
-                <button id="recargar-btn">Recargar lista</button>
-            </div>
-            <table id="tabla-articulos">
-                <thead>
-                    <tr>
-                        <th>Título</th>
-                        <th>Categoría</th>
-                        <th>Fecha</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="tbody-articulos">
-                    <tr><td colspan="5">Cargando...</td></tr>
-                </tbody>
-            </table>
-
+            <div class="modal-body" id="preview-body"></div>
         </div>
     </div>
 
-    <script type="module" src="admin.js"></script>
+    <script type="module" src="/admin/admin.js"></script>
 </body>
 </html>

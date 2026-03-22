@@ -1,43 +1,48 @@
 // =============================================
 // ARTICULO.JS — SistemaBase
-// Carga dinámicamente los datos del artículo
-// desde Supabase usando el slug de la URL.
-//
-// URL esperada: /articulo/?slug=nombre-del-articulo
+// Lee ?babosa= de la URL y carga el artículo
+// desde Supabase rellenando la plantilla HTML.
 // =============================================
-
 import { supabase } from '../Supabase/supabase.js';
 
 // --------------------------------------------------
-// 1. LEER EL SLUG DE LA URL
+// 1. LEER LA BABOSA (slug) DE LA URL
+//    Ejemplo: /articulo/?babosa=que-es-la-ia
 // --------------------------------------------------
 const params = new URLSearchParams(window.location.search);
-const slug   = params.get('slug');
+const babosa = params.get('babosa');
 
-if (!slug) {
+if (!babosa) {
     mostrarError('No se ha especificado ningún artículo.');
 } else {
-    cargarArticulo(slug);
+    cargarArticulo(babosa);
 }
 
 // --------------------------------------------------
 // 2. CARGAR EL ARTÍCULO DESDE SUPABASE
 // --------------------------------------------------
-async function cargarArticulo(slug) {
-    // Mostrar estado de carga
+async function cargarArticulo(babosa) {
     document.getElementById('article-loading').classList.remove('hidden');
     document.getElementById('article-main').classList.add('hidden');
 
-    // Consultar artículo + su categoría en una sola query
+    // JOIN con categorías para obtener el nombre de la categoría
     const { data: articulo, error } = await supabase
         .from('articulos')
         .select(`
-            *,
+            id,
+            titulo,
+            babosa,
+            descripcion,
+            contenido,
+            imagen_portada,
+            fecha_publicacion,
+            estado,
+            categoria_id,
             categorias ( id, nombre )
         `)
-        .eq('slug', slug)
-        .eq('estado', 'publicado')
-        .single();
+        .eq('babosa', babosa)
+        .eq('estado', true)        // estado es BOOLEAN en tu BD
+        .maybeSingle();
 
     document.getElementById('article-loading').classList.add('hidden');
 
@@ -46,53 +51,34 @@ async function cargarArticulo(slug) {
         return;
     }
 
-    // --------------------------------------------------
-    // 3. RELLENAR LA PLANTILLA CON LOS DATOS
-    // --------------------------------------------------
     rellenarArticulo(articulo);
-
-    // --------------------------------------------------
-    // 4. CARGAR ARTÍCULOS RELACIONADOS (misma categoría)
-    // --------------------------------------------------
-    if (articulo.categoria_id) {
-        cargarRelacionados(articulo.categoria_id, articulo.id);
-    }
+    cargarRelacionados(articulo.categoria_id, articulo.id);
 }
 
 // --------------------------------------------------
-// FUNCIÓN PRINCIPAL: rellena todos los elementos HTML
+// 3. RELLENAR LA PLANTILLA CON LOS DATOS
 // --------------------------------------------------
 function rellenarArticulo(a) {
     const categoria = a.categorias?.nombre || '';
 
-    // <title> del navegador
+    // Pestaña del navegador
     document.title = `SistemaBase | ${a.titulo}`;
 
-    // Meta descripción (SEO)
-    setMeta('description', a.subtitulo || a.titulo);
-
-    // Open Graph (redes sociales)
-    setMeta('og:title',       a.titulo,        'property');
-    setMeta('og:description', a.subtitulo || '', 'property');
-    setMeta('og:image',       a.imagen_portada || '', 'property');
-    setMeta('og:type',        'article',        'property');
+    // Meta descripción SEO
+    setMeta('description', a.descripcion || a.titulo);
 
     // Breadcrumb
     setText('breadcrumb-categoria-text', categoria);
-    setAttr('breadcrumb-categoria-link', 'href', `/Categorias/categorias.html?cat=${a.categoria_id}`);
-    setText('breadcrumb-titulo-text', truncar(a.titulo, 40));
+    setAttr('breadcrumb-categoria-link', 'href', `/Categorias/categorias.html`);
+    setText('breadcrumb-titulo-text', truncar(a.titulo, 45));
 
-    // Meta superior
-    setText('article-category-badge',   categoria.toUpperCase());
-    setText('article-date',             formatearFecha(a.fecha_publicacion));
-    setText('article-read-time',        a.tiempo_lectura ? `⏱ ${a.tiempo_lectura} min de lectura` : '');
+    // Cabecera
+    setText('article-category-badge', categoria.toUpperCase());
+    setText('article-date', formatearFecha(a.fecha_publicacion));
 
-    // Título y subtítulo
+    // Título y descripción
     setText('article-title',    a.titulo);
-    setText('article-subtitle', a.subtitulo || '');
-
-    // Autor
-    setText('article-author-name', a.autor || 'SistemaBase');
+    setText('article-subtitle', a.descripcion || '');
 
     // Imagen de portada
     if (a.imagen_portada) {
@@ -102,46 +88,31 @@ function rellenarArticulo(a) {
             img.alt = a.titulo;
         }
     } else {
-        // Ocultar figura si no hay imagen
         const fig = document.getElementById('article-featured-figure');
         if (fig) fig.style.display = 'none';
     }
 
-    // Contenido principal (HTML sanitizado)
-    const contenidoEl = document.getElementById('article-body-content');
-    if (contenidoEl) {
-        contenidoEl.innerHTML = a.contenido || '';
-    }
-
-    // Etiquetas
-    const tagsContainer = document.getElementById('article-tags-container');
-    if (tagsContainer && a.etiquetas && a.etiquetas.length > 0) {
-        tagsContainer.innerHTML =
-            `<span class="tags-label">Etiquetas:</span>` +
-            a.etiquetas.map(tag =>
-                `<a href="/Categorias/categorias.html?tag=${encodeURIComponent(tag)}" class="tag">${tag}</a>`
-            ).join('');
-    } else if (tagsContainer) {
-        tagsContainer.style.display = 'none';
-    }
+    // Contenido (HTML generado por TinyMCE en el admin)
+    const bodyEl = document.getElementById('article-body-content');
+    if (bodyEl) bodyEl.innerHTML = a.contenido || '';
 
     // Mostrar el artículo
     document.getElementById('article-main').classList.remove('hidden');
 
     // Botón compartir
-    configurarCompartir(a.titulo, slug);
+    configurarCompartir(a.titulo, a.babosa);
 }
 
 // --------------------------------------------------
-// ARTÍCULOS RELACIONADOS
+// 4. ARTÍCULOS RELACIONADOS (misma categoría)
 // --------------------------------------------------
 async function cargarRelacionados(categoriaId, articuloActualId) {
     const { data, error } = await supabase
         .from('articulos')
-        .select('titulo, slug, imagen_portada, categorias(nombre)')
+        .select('titulo, babosa, imagen_portada, descripcion, categorias(nombre)')
         .eq('categoria_id', categoriaId)
-        .eq('estado', 'publicado')
-        .neq('id', articuloActualId)     // Excluir el artículo actual
+        .eq('estado', true)
+        .neq('id', articuloActualId)
         .order('fecha_publicacion', { ascending: false })
         .limit(3);
 
@@ -155,7 +126,7 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
     if (!grid) return;
 
     grid.innerHTML = data.map(art => `
-        <a href="/articulo/?slug=${art.slug}" class="related-card">
+        <a href="/articulo/?babosa=${art.babosa}" class="related-card">
             <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}" alt="${art.titulo}">
             <div class="related-card-info">
                 <span class="related-category">${art.categorias?.nombre || ''}</span>
@@ -166,39 +137,32 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
 }
 
 // --------------------------------------------------
-// BOTÓN COMPARTIR
+// 5. BOTÓN COMPARTIR
 // --------------------------------------------------
-function configurarCompartir(titulo, slug) {
-    const btnShare = document.getElementById('btn-share');
-    if (!btnShare) return;
+function configurarCompartir(titulo, babosa) {
+    const btn = document.getElementById('btn-share');
+    if (!btn) return;
 
-    btnShare.addEventListener('click', async () => {
-        const url = `${window.location.origin}/articulo/?slug=${slug}`;
-
+    btn.addEventListener('click', async () => {
+        const url = `${window.location.origin}/articulo/?babosa=${babosa}`;
         if (navigator.share) {
-            // API nativa de compartir (móvil)
-            try {
-                await navigator.share({ title: titulo, url });
-            } catch (e) { /* El usuario canceló */ }
+            try { await navigator.share({ title: titulo, url }); } catch (_) {}
         } else {
-            // Fallback: copiar al portapapeles
             await navigator.clipboard.writeText(url);
-            btnShare.textContent = '✅ ¡Enlace copiado!';
-            setTimeout(() => { btnShare.textContent = 'Compartir'; }, 2500);
+            btn.textContent = '✅ ¡Enlace copiado!';
+            setTimeout(() => { btn.textContent = 'Compartir'; }, 2500);
         }
     });
 }
 
 // --------------------------------------------------
-// ERROR: artículo no encontrado
+// ERROR
 // --------------------------------------------------
 function mostrarError(mensaje) {
     document.getElementById('article-loading').classList.add('hidden');
-    const errorEl = document.getElementById('article-error');
-    if (errorEl) {
-        errorEl.textContent = mensaje;
-        errorEl.classList.remove('hidden');
-    }
+    const el = document.getElementById('article-error-msg');
+    if (el) el.textContent = mensaje;
+    document.getElementById('article-error').classList.remove('hidden');
 }
 
 // --------------------------------------------------
@@ -214,19 +178,20 @@ function setAttr(id, attr, valor) {
     if (el) el.setAttribute(attr, valor);
 }
 
-function setMeta(name, content, attr = 'name') {
-    let tag = document.querySelector(`meta[${attr}="${name}"]`);
+function setMeta(name, content) {
+    let tag = document.querySelector(`meta[name="${name}"]`);
     if (!tag) {
         tag = document.createElement('meta');
-        tag.setAttribute(attr, name);
+        tag.setAttribute('name', name);
         document.head.appendChild(tag);
     }
     tag.setAttribute('content', content);
 }
 
-function formatearFecha(isoString) {
-    if (!isoString) return '';
-    return new Date(isoString).toLocaleDateString('es-ES', {
+function formatearFecha(fecha) {
+    if (!fecha) return '';
+    // fecha_publicacion es tipo DATE ('YYYY-MM-DD'), añadimos T00:00 para evitar desfase de zona horaria
+    return new Date(fecha + 'T00:00').toLocaleDateString('es-ES', {
         day: 'numeric', month: 'long', year: 'numeric'
     });
 }

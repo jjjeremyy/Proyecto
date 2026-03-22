@@ -1,0 +1,320 @@
+/* =============================================
+   LOGIN.CSS — SistemaBase
+   Página de acceso al panel de administración
+============================================= */
+
+:root {
+    --color-primary:       #043873;
+    --color-primary-light: #2165b3;
+    --color-primary-dark:  #022550;
+    --color-secondary:     #ffffff;
+    --color-bg:            #f0f4fa;
+    --color-border:        #dce5f5;
+    --color-text:          #1a2a4a;
+    --color-text-muted:    #6b7a99;
+    --color-error:         #e02424;
+    --color-error-bg:      #fee2e2;
+    --color-error-border:  #fca5a5;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Source Sans 3', Arial, sans-serif;
+    background-color: var(--color-bg);
+    min-height: 100vh;
+}
+
+/* ==========================================
+   LAYOUT: dos columnas
+========================================== */
+.login-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+    .login-page {
+        grid-template-columns: 1fr;
+    }
+    .login-left {
+        display: none;
+    }
+}
+
+/* ==========================================
+   PANEL IZQUIERDO (decorativo)
+========================================== */
+.login-left {
+    background-color: var(--color-primary);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-left-inner {
+    position: relative;
+    z-index: 2;
+    padding: 60px 50px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+/* Brand */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-logo {
+    width: 48px;
+    height: 48px;
+}
+
+.brand-name {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+}
+
+/* Texto */
+.login-left-text h2 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    line-height: 1.2;
+    color: #fff;
+}
+
+.login-left-text p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Círculos decorativos */
+.login-decoration {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.deco-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.deco-1 {
+    width: 400px;
+    height: 400px;
+    bottom: -120px;
+    right: -100px;
+    background: rgba(255,255,255,0.04);
+}
+
+.deco-2 {
+    width: 250px;
+    height: 250px;
+    top: -60px;
+    left: -80px;
+    background: rgba(255,255,255,0.03);
+}
+
+.deco-3 {
+    width: 150px;
+    height: 150px;
+    bottom: 80px;
+    left: 40px;
+    background: rgba(255,255,255,0.05);
+}
+
+/* ==========================================
+   PANEL DERECHO (formulario)
+========================================== */
+.login-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 30px;
+    background-color: var(--color-bg);
+}
+
+.login-box {
+    width: 100%;
+    max-width: 400px;
+    animation: fadeUp 0.4s ease both;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Cabecera del formulario */
+.login-header {
+    margin-bottom: 32px;
+}
+
+.login-header h1 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0 0 8px 0;
+}
+
+.login-header p {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+/* ==========================================
+   MENSAJE DE ERROR
+========================================== */
+.login-error {
+    background-color: var(--color-error-bg);
+    border: 1px solid var(--color-error-border);
+    color: var(--color-error);
+    border-radius: 6px;
+    padding: 11px 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.hidden { display: none !important; }
+
+/* ==========================================
+   CAMPOS
+========================================== */
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    background-color: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(4, 56, 115, 0.1);
+}
+
+.input-icon {
+    padding: 0 12px;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.input-wrapper input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 12px 12px 0;
+    font-size: 15px;
+    font-family: 'Source Sans 3', Arial, sans-serif;
+    color: var(--color-text);
+    background: transparent;
+}
+
+.input-wrapper input::placeholder {
+    color: #b0bcd4;
+}
+
+/* Botón mostrar/ocultar contraseña */
+.toggle-pw {
+    background: none;
+    border: none;
+    padding: 0 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    transition: color 0.15s;
+    flex-shrink: 0;
+}
+
+.toggle-pw:hover {
+    color: var(--color-primary);
+}
+
+/* ==========================================
+   BOTÓN PRINCIPAL
+========================================== */
+.btn-login {
+    width: 100%;
+    background-color: var(--color-primary);
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Source Sans 3', Arial, sans-serif;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background-color 0.2s, transform 0.1s;
+    letter-spacing: 0.03em;
+}
+
+.btn-login:hover {
+    background-color: var(--color-primary-light);
+}
+
+.btn-login:active {
+    transform: scale(0.98);
+}
+
+.btn-login:disabled {
+    background-color: #8a9ab5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==========================================
+   ENLACE VOLVER
+========================================== */
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+}

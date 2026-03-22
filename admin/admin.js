@@ -1,80 +1,79 @@
+// =============================================
+// ADMIN.JS — SistemaBase
+// El import SIEMPRE primero en módulos ES
+// =============================================
 import { supabase } from '../Supabase/supabase.js';
 
-// ── Contraseña ─────────────────────────────────────────
-const PASSWORD = 'sistemabase2026';
-
-const loginScreen = document.getElementById('login-screen');
-const adminPanel  = document.getElementById('admin-panel');
-const loginError  = document.getElementById('login-error');
-
-// Verificar si ya estaba logueado en esta sesión
-if (sessionStorage.getItem('admin_ok') === 'true') {
-    mostrarPanel();
+// --------------------------------------------------
+// 0. PROTECCIÓN: redirige si no hay sesión activa
+// --------------------------------------------------
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) {
+    window.location.href = '../Login/login.html';
 }
 
-document.getElementById('login-btn').addEventListener('click', () => {
-    const val = document.getElementById('password-input').value;
-    if (val === PASSWORD) {
-        sessionStorage.setItem('admin_ok', 'true');
-        mostrarPanel();
-    } else {
-        loginError.classList.remove('hidden');
+// --------------------------------------------------
+// 1. INICIALIZAR TINYMCE
+// --------------------------------------------------
+tinymce.init({
+    selector: '#contenido',
+    height: 520,
+    menubar: false,
+    plugins: [
+        'advlist', 'autolink', 'lists', 'link', 'image',
+        'charmap', 'preview', 'searchreplace', 'visualblocks',
+        'fullscreen', 'insertdatetime', 'media', 'table',
+        'code', 'codesample', 'wordcount'
+    ],
+    toolbar:
+        'undo redo | formatselect | bold italic underline strikethrough | ' +
+        'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
+        'bullist numlist outdent indent | link image media | ' +
+        'codesample blockquote | removeformat | fullscreen code',
+    content_style: `
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.7;
+            color: #1a2a4a;
+            padding: 12px 16px;
+        }
+        h1, h2, h3 { color: #043873; }
+        pre { background: #0d1b33; color: #a8d4ff; padding: 16px; border-radius: 6px; }
+    `,
+    paste_data_images: true,
+    // Subida de imágenes insertadas en el editor a Supabase Storage
+    images_upload_handler: async (blobInfo) => {
+        const file = blobInfo.blob();
+        const fileName = `${Date.now()}-${blobInfo.filename()}`;
+        const { data, error } = await supabase.storage
+            .from('imagenes-articulos')
+            .upload(fileName, file, { contentType: file.type });
+
+        if (error) throw new Error('Error al subir imagen: ' + error.message);
+
+        const { data: urlData } = supabase.storage
+            .from('imagenes-articulos')
+            .getPublicUrl(data.path);
+
+        return urlData.publicUrl;
     }
 });
 
-document.getElementById('logout-btn').addEventListener('click', () => {
-    sessionStorage.removeItem('admin_ok');
-    location.reload();
-});
-
-function mostrarPanel() {
-    loginScreen.classList.add('hidden');
-    adminPanel.classList.remove('hidden');
-    cargarCategorias();
-    cargarTablaArticulos();
-}
-
-// ── Editor Quill ───────────────────────────────────────
-const quill = new Quill('#editor-contenido', {
-    theme: 'snow',
-    placeholder: 'Escribí el contenido del artículo...',
-    modules: {
-        toolbar: [
-            ['bold', 'italic', 'underline'],
-            [{ 'header': [1, 2, 3, false] }],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            ['link', 'image'],
-            ['clean']
-        ]
-    }
-});
-
-// ── Generar slug automático ────────────────────────────
-document.getElementById('generar-slug-btn').addEventListener('click', () => {
-    const titulo = document.getElementById('titulo').value;
-    const slug = titulo
-        .toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // saca tildes
-        .replace(/[^a-z0-9\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-');
-    document.getElementById('slug').value = slug;
-});
-
-// ── Vista previa imagen ────────────────────────────────
-document.getElementById('preview-img-btn').addEventListener('click', () => {
-    const url = document.getElementById('imagen_portada').value;
-    const preview = document.getElementById('imagen-preview');
-    if (url) {
-        preview.src = url;
-        preview.classList.remove('hidden');
-    }
-});
-
-// ── Cargar categorías en el select ─────────────────────
+// --------------------------------------------------
+// 2. CARGAR CATEGORÍAS en el <select>
+// --------------------------------------------------
 async function cargarCategorias() {
-    const { data, error } = await supabase.from('categorias').select('*');
-    if (error) return;
+    const { data, error } = await supabase
+        .from('categorias')
+        .select('*')
+        .order('nombre');
+
+    if (error) {
+        console.error('Error cargando categorías:', error);
+        return;
+    }
+
     const select = document.getElementById('categoria_id');
     data.forEach(cat => {
         const option = document.createElement('option');
@@ -83,94 +82,190 @@ async function cargarCategorias() {
         select.appendChild(option);
     });
 }
+cargarCategorias();
 
-// ── Publicar artículo ──────────────────────────────────
-document.getElementById('publicar-btn').addEventListener('click', async () => {
-    const titulo     = document.getElementById('titulo').value.trim();
-    const slug       = document.getElementById('slug').value.trim();
-    const contenido  = quill.root.innerHTML; // HTML del editor
-    const categoria  = document.getElementById('categoria_id').value;
+// --------------------------------------------------
+// 3. GENERADOR AUTOMÁTICO DE BABOSA (slug)
+//    En tu BD el campo slug se llama "babosa"
+// --------------------------------------------------
+const inputTitulo = document.getElementById('titulo');
+const inputBabosa = document.getElementById('babosa');
+let babosaManual  = false;
 
-    const msgExito = document.getElementById('mensaje-exito');
-    const msgError = document.getElementById('mensaje-error');
-    msgExito.classList.add('hidden');
-    msgError.classList.add('hidden');
-
-    if (!titulo || !slug || !categoria) {
-        msgError.textContent = 'Título, slug y categoría son obligatorios.';
-        msgError.classList.remove('hidden');
-        return;
-    }
-
-    const nuevoArticulo = {
-        titulo,
-        slug,
-        descripcion: document.getElementById('descripcion').value,
-        contenido,
-        categoria_id: categoria,
-        imagen_portada: document.getElementById('imagen_portada').value || null,
-        fecha_publicacion: new Date().toISOString(),
-        estado: true
-    };
-
-    const { error } = await supabase.from('articulos').insert([nuevoArticulo]);
-
-    if (error) {
-        msgError.textContent = 'Error: ' + error.message;
-        msgError.classList.remove('hidden');
-    } else {
-        msgExito.classList.remove('hidden');
-        document.getElementById('titulo').value = '';
-        document.getElementById('slug').value = '';
-        document.getElementById('descripcion').value = '';
-        document.getElementById('imagen_portada').value = '';
-        document.getElementById('imagen-preview').classList.add('hidden');
-        document.getElementById('categoria_id').value = '';
-        quill.setText('');
-        cargarTablaArticulos();
+inputTitulo.addEventListener('input', () => {
+    if (!babosaManual) {
+        inputBabosa.value = generarBabosa(inputTitulo.value);
     }
 });
 
-// ── Tabla de artículos ─────────────────────────────────
-document.getElementById('recargar-btn').addEventListener('click', cargarTablaArticulos);
+inputBabosa.addEventListener('input', () => {
+    babosaManual = true;
+    inputBabosa.value = generarBabosa(inputBabosa.value);
+});
 
-async function cargarTablaArticulos() {
-    const tbody = document.getElementById('tbody-articulos');
-    tbody.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
+function generarBabosa(texto) {
+    return texto
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')   // quita acentos
+        .replace(/[^a-z0-9\s-]/g, '')      // solo letras, números, espacios y guiones
+        .trim()
+        .replace(/\s+/g, '-')              // espacios → guiones
+        .replace(/-+/g, '-');              // guiones dobles → uno
+}
 
-    const { data, error } = await supabase
+// --------------------------------------------------
+// 4. VISTA PREVIA DE IMAGEN DE PORTADA
+// --------------------------------------------------
+const inputImagen   = document.getElementById('imagen_portada');
+const imgPreviewBox = document.getElementById('img-preview-box');
+const imgPreview    = document.getElementById('img-preview');
+
+inputImagen.addEventListener('input', () => {
+    const url = inputImagen.value.trim();
+    if (url) {
+        imgPreview.src = url;
+        imgPreviewBox.classList.remove('hidden');
+    } else {
+        imgPreviewBox.classList.add('hidden');
+    }
+});
+
+// --------------------------------------------------
+// 5. MODAL DE PREVISUALIZACIÓN
+// --------------------------------------------------
+document.getElementById('btn-preview').addEventListener('click', () => {
+    const titulo      = document.getElementById('titulo').value;
+    const descripcion = document.getElementById('descripcion').value;
+    const contenido   = tinymce.get('contenido').getContent();
+    const imagen      = document.getElementById('imagen_portada').value;
+    const catSelect   = document.getElementById('categoria_id');
+    const categoria   = catSelect.options[catSelect.selectedIndex]?.text || '';
+    const fecha       = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    document.getElementById('preview-body').innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <span class="preview-category">${categoria}</span>
+        </div>
+        <div class="preview-meta">
+            <span>📅 ${fecha}</span>
+        </div>
+        <h1>${titulo || '(Sin título)'}</h1>
+        <p style="font-style:italic;color:#4a5a78;">${descripcion || ''}</p>
+        ${imagen ? `<img src="${imagen}" alt="Imagen de portada" class="preview-featured-img" style="width:100%;border-radius:8px;margin-bottom:20px;">` : ''}
+        <div>${contenido || '<p style="color:#999">(Sin contenido aún)</p>'}</div>
+    `;
+
+    document.getElementById('preview-modal').classList.remove('hidden');
+});
+
+document.getElementById('close-preview').addEventListener('click', cerrarModal);
+document.getElementById('modal-overlay').addEventListener('click', cerrarModal);
+
+function cerrarModal() {
+    document.getElementById('preview-modal').classList.add('hidden');
+}
+
+// --------------------------------------------------
+// 6. PUBLICAR ARTÍCULO EN SUPABASE
+// --------------------------------------------------
+document.getElementById('btn-submit').addEventListener('click', publicarArticulo);
+
+async function publicarArticulo() {
+    limpiarErrores();
+
+    // Valores — nombres exactos de columnas de tu tabla "artículos"
+    const titulo         = document.getElementById('titulo').value.trim();
+    const babosa         = document.getElementById('babosa').value.trim();
+    const descripcion    = document.getElementById('descripcion').value.trim();
+    const contenido      = tinymce.get('contenido').getContent();
+    const categoria_id   = document.getElementById('categoria_id').value;
+    const imagen_portada = document.getElementById('imagen_portada').value.trim();
+    // "estado" en tu BD es BOOLEANO: true = publicado, false = borrador
+    const estado         = document.getElementById('estado').value === 'true';
+
+    // Validación
+    let valido = true;
+    if (!titulo)       { marcarError('titulo',       'El título es obligatorio.');  valido = false; }
+    if (!babosa)       { marcarError('babosa',        'La URL es obligatoria.');     valido = false; }
+    if (!categoria_id) { marcarError('categoria_id', 'Selecciona una categoría.');  valido = false; }
+    if (!contenido || contenido === '<p></p>') {
+        mostrarStatus('El contenido no puede estar vacío.', 'error');
+        valido = false;
+    }
+    if (!valido) return;
+
+    mostrarStatus('⏳ Publicando artículo...', 'loading');
+
+    // Verificar que la babosa no exista ya en la BD
+    const { data: existente } = await supabase
         .from('articulos')
-        .select('*, categorias(nombre)')
-        .order('fecha_publicacion', { ascending: false });
+        .select('id')
+        .eq('babosa', babosa)
+        .maybeSingle(); // maybeSingle no lanza error si no encuentra nada
 
-    if (error) {
-        tbody.innerHTML = '<tr><td colspan="5">Error al cargar.</td></tr>';
+    if (existente) {
+        marcarError('babosa', 'Esta URL ya existe. Elige otra.');
+        mostrarStatus('Error: la URL del artículo ya está en uso.', 'error');
         return;
     }
 
-    tbody.innerHTML = data.map(a => `
-        <tr>
-            <td>${a.titulo}</td>
-            <td>${a.categorias?.nombre || '-'}</td>
-            <td>${a.fecha_publicacion?.slice(0, 10) || '-'}</td>
-            <td>${a.estado ? '✅ Activo' : '❌ Inactivo'}</td>
-            <td>
-                <button 
-                    class="${a.estado ? 'btn-desactivar' : 'btn-activar'}"
-                    onclick="toggleEstado('${a.id}', ${a.estado})">
-                    ${a.estado ? 'Desactivar' : 'Activar'}
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
+    // Objeto con los campos exactos de tu tabla
+    const nuevoArticulo = {
+        titulo,
+        babosa,
+        descripcion:      descripcion || null,
+        contenido,
+        categoria_id:     parseInt(categoria_id),
+        imagen_portada:   imagen_portada || null,
+        fecha_publicacion: new Date().toISOString().split('T')[0], // campo tipo DATE → 'YYYY-MM-DD'
+        estado                                                      // campo tipo BOOLEAN
+    };
 
-// ── Activar / Desactivar artículo ──────────────────────
-window.toggleEstado = async (id, estadoActual) => {
     const { error } = await supabase
         .from('articulos')
-        .update({ estado: !estadoActual })
-        .eq('id', id);
+        .insert([nuevoArticulo]);
 
-    if (!error) cargarTablaArticulos();
-};
+    if (error) {
+        mostrarStatus('❌ Error al publicar: ' + error.message, 'error');
+        return;
+    }
+
+    mostrarStatus('✅ ¡Artículo publicado! URL pública: /articulo/?babosa=' + babosa, 'success');
+    document.getElementById('formulario-articulo').reset();
+    tinymce.get('contenido').setContent('');
+    imgPreviewBox.classList.add('hidden');
+    babosaManual = false;
+}
+
+// --------------------------------------------------
+// UTILIDADES
+// --------------------------------------------------
+function mostrarStatus(mensaje, tipo) {
+    const el = document.getElementById('status-message');
+    el.textContent = mensaje;
+    el.className   = `status-message ${tipo}`;
+    el.classList.remove('hidden');
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function marcarError(idCampo, mensaje) {
+    const campo = document.getElementById(idCampo);
+    if (campo) {
+        campo.classList.add('error');
+        if (!campo.parentNode.querySelector('.field-error-msg')) {
+            const small = document.createElement('small');
+            small.textContent = mensaje;
+            small.style.color  = '#e02424';
+            small.className    = 'field-error-msg';
+            campo.parentNode.appendChild(small);
+        }
+    }
+    mostrarStatus('Por favor corrige los errores marcados.', 'error');
+}
+
+function limpiarErrores() {
+    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.field-error-msg').forEach(el => el.remove());
+    document.getElementById('status-message').classList.add('hidden');
+}
