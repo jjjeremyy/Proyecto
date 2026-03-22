@@ -98,16 +98,16 @@ let slugManual  = false;
 
 inputTitulo.addEventListener('input', () => {
     if (!slugManual) {
-        inputslug.value = generarslug(inputTitulo.value);
+        inputSlug.value = generarSlug(inputTitulo.value);
     }
 });
 
-inputslug.addEventListener('input', () => {
+inputSlug.addEventListener('input', () => {
     slugManual = true;
-    inputslug.value = generarslug(inputslug.value);
+    inputSlug.value = generarSlug(inputSlug.value);
 });
 
-function generarslug(texto) {
+function generarSlug(texto) {
     return texto
         .toLowerCase()
         .normalize('NFD')
