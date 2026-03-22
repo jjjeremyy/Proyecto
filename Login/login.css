@@ -6,8 +6,6 @@
 :root {
     --color-primary:       #043873;
     --color-primary-light: #2165b3;
-    --color-primary-dark:  #022550;
-    --color-secondary:     #ffffff;
     --color-bg:            #f0f4fa;
     --color-border:        #dce5f5;
     --color-text:          #1a2a4a;
@@ -26,6 +24,8 @@ body {
     background-color: var(--color-bg);
     min-height: 100vh;
 }
+
+.hidden { display: none !important; }
 
 /* ==========================================
    LAYOUT: dos columnas
@@ -46,7 +46,7 @@ body {
 }
 
 /* ==========================================
-   PANEL IZQUIERDO (decorativo)
+   PANEL IZQUIERDO (decorativo, color primario)
 ========================================== */
 .login-left {
     background-color: var(--color-primary);
@@ -67,7 +67,6 @@ body {
     gap: 40px;
 }
 
-/* Brand */
 .brand {
     display: flex;
     align-items: center;
@@ -87,7 +86,6 @@ body {
     letter-spacing: 0.02em;
 }
 
-/* Texto */
 .login-left-text h2 {
     font-family: 'Lora', Georgia, serif;
     font-size: clamp(1.6rem, 3vw, 2.2rem);
@@ -164,7 +162,6 @@ body {
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Cabecera del formulario */
 .login-header {
     margin-bottom: 32px;
 }
@@ -197,8 +194,6 @@ body {
     margin-bottom: 20px;
 }
 
-.hidden { display: none !important; }
-
 /* ==========================================
    CAMPOS
 ========================================== */
@@ -213,6 +208,7 @@ label {
     font-size: 13px;
     font-weight: 600;
     color: var(--color-text);
+    font-family: Arial, sans-serif;
 }
 
 .input-wrapper {
@@ -247,6 +243,8 @@ label {
     font-family: 'Source Sans 3', Arial, sans-serif;
     color: var(--color-text);
     background: transparent;
+    /* Evitar que el navegador ponga fondo amarillo en autocompletado */
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
 }
 
 .input-wrapper input::placeholder {
@@ -263,6 +261,7 @@ label {
     color: var(--color-text-muted);
     transition: color 0.15s;
     flex-shrink: 0;
+    line-height: 1;
 }
 
 .toggle-pw:hover {
@@ -281,7 +280,7 @@ label {
     border-radius: 8px;
     font-size: 15px;
     font-weight: 700;
-    font-family: 'Source Sans 3', Arial, sans-serif;
+    font-family: Arial, sans-serif;
     cursor: pointer;
     margin-top: 8px;
     transition: background-color 0.2s, transform 0.1s;
@@ -313,6 +312,7 @@ label {
     color: var(--color-text-muted);
     text-decoration: none;
     transition: color 0.15s;
+    font-family: Arial, sans-serif;
 }
 
 .back-link:hover {

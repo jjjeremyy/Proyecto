@@ -1,6 +1,6 @@
 // =============================================
 // ADMIN.JS — SistemaBase
-// El import SIEMPRE primero en módulos ES
+// Editor WYSIWYG: Quill.js (100% gratuito)
 // =============================================
 import { supabase } from '../Supabase/supabase.js';
 
@@ -13,52 +13,35 @@ if (!session) {
 }
 
 // --------------------------------------------------
-// 1. INICIALIZAR TINYMCE
+// 1. INICIALIZAR QUILL (editor WYSIWYG gratuito)
 // --------------------------------------------------
-tinymce.init({
-    selector: '#contenido',
-    height: 520,
-    menubar: false,
-    plugins: [
-        'advlist', 'autolink', 'lists', 'link', 'image',
-        'charmap', 'preview', 'searchreplace', 'visualblocks',
-        'fullscreen', 'insertdatetime', 'media', 'table',
-        'code', 'codesample', 'wordcount'
-    ],
-    toolbar:
-        'undo redo | formatselect | bold italic underline strikethrough | ' +
-        'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
-        'bullist numlist outdent indent | link image media | ' +
-        'codesample blockquote | removeformat | fullscreen code',
-    content_style: `
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 16px;
-            line-height: 1.7;
-            color: #1a2a4a;
-            padding: 12px 16px;
-        }
-        h1, h2, h3 { color: #043873; }
-        pre { background: #0d1b33; color: #a8d4ff; padding: 16px; border-radius: 6px; }
-    `,
-    paste_data_images: true,
-    // Subida de imágenes insertadas en el editor a Supabase Storage
-    images_upload_handler: async (blobInfo) => {
-        const file = blobInfo.blob();
-        const fileName = `${Date.now()}-${blobInfo.filename()}`;
-        const { data, error } = await supabase.storage
-            .from('imagenes-articulos')
-            .upload(fileName, file, { contentType: file.type });
-
-        if (error) throw new Error('Error al subir imagen: ' + error.message);
-
-        const { data: urlData } = supabase.storage
-            .from('imagenes-articulos')
-            .getPublicUrl(data.path);
-
-        return urlData.publicUrl;
+const quill = new Quill('#quill-editor', {
+    theme: 'snow',
+    placeholder: 'Escribe el contenido del artículo aquí...',
+    modules: {
+        toolbar: [
+            [{ header: [2, 3, 4, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ color: [] }, { background: [] }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ indent: '-1' }, { indent: '+1' }],
+            [{ align: [] }],
+            ['link', 'image', 'video'],
+            ['blockquote', 'code-block'],
+            ['clean']
+        ]
     }
 });
+
+// Función para obtener el HTML de Quill
+function getContenido() {
+    return quill.root.innerHTML;
+}
+
+// Función para limpiar Quill
+function limpiarContenido() {
+    quill.setContents([]);
+}
 
 // --------------------------------------------------
 // 2. CARGAR CATEGORÍAS en el <select>
@@ -86,7 +69,6 @@ cargarCategorias();
 
 // --------------------------------------------------
 // 3. GENERADOR AUTOMÁTICO DE BABOSA (slug)
-//    En tu BD el campo slug se llama "babosa"
 // --------------------------------------------------
 const inputTitulo = document.getElementById('titulo');
 const inputBabosa = document.getElementById('babosa');
@@ -107,11 +89,11 @@ function generarBabosa(texto) {
     return texto
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')   // quita acentos
-        .replace(/[^a-z0-9\s-]/g, '')      // solo letras, números, espacios y guiones
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
         .trim()
-        .replace(/\s+/g, '-')              // espacios → guiones
-        .replace(/-+/g, '-');              // guiones dobles → uno
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
 }
 
 // --------------------------------------------------
@@ -137,7 +119,7 @@ inputImagen.addEventListener('input', () => {
 document.getElementById('btn-preview').addEventListener('click', () => {
     const titulo      = document.getElementById('titulo').value;
     const descripcion = document.getElementById('descripcion').value;
-    const contenido   = tinymce.get('contenido').getContent();
+    const contenido   = getContenido();
     const imagen      = document.getElementById('imagen_portada').value;
     const catSelect   = document.getElementById('categoria_id');
     const categoria   = catSelect.options[catSelect.selectedIndex]?.text || '';
@@ -152,8 +134,8 @@ document.getElementById('btn-preview').addEventListener('click', () => {
         </div>
         <h1>${titulo || '(Sin título)'}</h1>
         <p style="font-style:italic;color:#4a5a78;">${descripcion || ''}</p>
-        ${imagen ? `<img src="${imagen}" alt="Imagen de portada" class="preview-featured-img" style="width:100%;border-radius:8px;margin-bottom:20px;">` : ''}
-        <div>${contenido || '<p style="color:#999">(Sin contenido aún)</p>'}</div>
+        ${imagen ? `<img src="${imagen}" alt="Imagen de portada" style="width:100%;border-radius:8px;margin-bottom:20px;">` : ''}
+        <div class="ql-snow"><div class="ql-editor" style="padding:0">${contenido || '<p style="color:#999">(Sin contenido aún)</p>'}</div></div>
     `;
 
     document.getElementById('preview-modal').classList.remove('hidden');
@@ -174,22 +156,23 @@ document.getElementById('btn-submit').addEventListener('click', publicarArticulo
 async function publicarArticulo() {
     limpiarErrores();
 
-    // Valores — nombres exactos de columnas de tu tabla "artículos"
     const titulo         = document.getElementById('titulo').value.trim();
     const babosa         = document.getElementById('babosa').value.trim();
     const descripcion    = document.getElementById('descripcion').value.trim();
-    const contenido      = tinymce.get('contenido').getContent();
+    const contenido      = getContenido();
     const categoria_id   = document.getElementById('categoria_id').value;
     const imagen_portada = document.getElementById('imagen_portada').value.trim();
-    // "estado" en tu BD es BOOLEANO: true = publicado, false = borrador
     const estado         = document.getElementById('estado').value === 'true';
+
+    // Quill vacío devuelve '<p><br></p>'
+    const contenidoVacio = !contenido || contenido === '<p><br></p>' || contenido === '<p></p>';
 
     // Validación
     let valido = true;
-    if (!titulo)       { marcarError('titulo',       'El título es obligatorio.');  valido = false; }
-    if (!babosa)       { marcarError('babosa',        'La URL es obligatoria.');     valido = false; }
-    if (!categoria_id) { marcarError('categoria_id', 'Selecciona una categoría.');  valido = false; }
-    if (!contenido || contenido === '<p></p>') {
+    if (!titulo)         { marcarError('titulo',       'El título es obligatorio.');  valido = false; }
+    if (!babosa)         { marcarError('babosa',        'La URL es obligatoria.');     valido = false; }
+    if (!categoria_id)   { marcarError('categoria_id', 'Selecciona una categoría.');  valido = false; }
+    if (contenidoVacio)  {
         mostrarStatus('El contenido no puede estar vacío.', 'error');
         valido = false;
     }
@@ -197,12 +180,12 @@ async function publicarArticulo() {
 
     mostrarStatus('⏳ Publicando artículo...', 'loading');
 
-    // Verificar que la babosa no exista ya en la BD
+    // Verificar que la babosa no exista ya
     const { data: existente } = await supabase
         .from('articulos')
         .select('id')
         .eq('babosa', babosa)
-        .maybeSingle(); // maybeSingle no lanza error si no encuentra nada
+        .maybeSingle();
 
     if (existente) {
         marcarError('babosa', 'Esta URL ya existe. Elige otra.');
@@ -210,16 +193,15 @@ async function publicarArticulo() {
         return;
     }
 
-    // Objeto con los campos exactos de tu tabla
     const nuevoArticulo = {
         titulo,
         babosa,
-        descripcion:      descripcion || null,
+        descripcion:       descripcion || null,
         contenido,
-        categoria_id:     parseInt(categoria_id),
-        imagen_portada:   imagen_portada || null,
-        fecha_publicacion: new Date().toISOString().split('T')[0], // campo tipo DATE → 'YYYY-MM-DD'
-        estado                                                      // campo tipo BOOLEAN
+        categoria_id:      parseInt(categoria_id),
+        imagen_portada:    imagen_portada || null,
+        fecha_publicacion: new Date().toISOString().split('T')[0],
+        estado
     };
 
     const { error } = await supabase
@@ -231,9 +213,9 @@ async function publicarArticulo() {
         return;
     }
 
-    mostrarStatus('✅ ¡Artículo publicado! URL pública: /articulo/?babosa=' + babosa, 'success');
+    mostrarStatus('✅ ¡Artículo publicado! URL: /articulo/?babosa=' + babosa, 'success');
     document.getElementById('formulario-articulo').reset();
-    tinymce.get('contenido').setContent('');
+    limpiarContenido();
     imgPreviewBox.classList.add('hidden');
     babosaManual = false;
 }

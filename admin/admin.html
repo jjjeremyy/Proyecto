@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SistemaBase | Admin</title>
     <link rel="stylesheet" href="/admin/admin.css">
-    <!-- TinyMCE: regístrate gratis en tiny.cloud y sustituye 'no-api-key' por tu clave -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
+    <!-- Quill.js — editor WYSIWYG 100% gratuito, sin registro ni API key -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 </head>
 <body>
 
@@ -35,7 +37,7 @@
                 </div>
             </div>
 
-            <!-- MENSAJE DE ESTADO (éxito / error / cargando) -->
+            <!-- MENSAJE DE ESTADO -->
             <div id="status-message" class="status-message hidden"></div>
 
             <form id="formulario-articulo" novalidate>
@@ -56,8 +58,10 @@
 
                         <div class="field-group">
                             <label>Contenido <span class="required">*</span></label>
-                            <!-- TinyMCE se inicializa sobre este textarea -->
-                            <textarea id="contenido"></textarea>
+                            <!-- Quill se monta aquí -->
+                            <div id="quill-editor"></div>
+                            <!-- Campo oculto donde guardamos el HTML generado por Quill -->
+                            <input type="hidden" id="contenido">
                         </div>
 
                     </div>
@@ -70,7 +74,6 @@
 
                             <div class="field-group">
                                 <label for="estado">Estado</label>
-                                <!-- En la BD "estado" es BOOLEAN: true=publicado, false=borrador -->
                                 <select id="estado">
                                     <option value="true">✅ Publicado</option>
                                     <option value="false">📝 Borrador</option>
@@ -81,7 +84,6 @@
                                 <label for="categoria_id">Categoría <span class="required">*</span></label>
                                 <select id="categoria_id" required>
                                     <option value="">Selecciona categoría...</option>
-                                    <!-- Se rellena dinámicamente desde Supabase -->
                                 </select>
                             </div>
 
@@ -91,7 +93,7 @@
                                     <span class="slug-prefix">/articulo/?babosa=</span>
                                     <input type="text" id="babosa" placeholder="url-del-articulo" required>
                                 </div>
-                                <small>Se genera automáticamente desde el título. Solo letras, números y guiones.</small>
+                                <small>Se genera automáticamente desde el título.</small>
                             </div>
                         </div>
 
