@@ -20,7 +20,7 @@ async function cargarArticulos(slug, nombre) {
     listaArticulos.innerHTML = '<p class="no-articles">Cargando...</p>';
     seccionResultados.scrollIntoView({ behavior: 'smooth' });
 
-    // 1. Obtener el ID de la categoría por su babosa (campo slug en tu BD = "babosa")
+    // 1. Obtener el ID de la categoría por su slug (campo slug en tu BD = "slug")
     const categoriaId = await obtenerIdCategoria(slug);
 
     if (!categoriaId) {
@@ -32,7 +32,7 @@ async function cargarArticulos(slug, nombre) {
     //    estado es BOOLEAN en tu BD → true = publicado
     const { data, error } = await supabase
         .from('articulos')
-        .select('titulo, babosa, imagen_portada, descripcion')
+        .select('titulo, slug, imagen_portada, descripcion')
         .eq('estado', true)
         .eq('categoria_id', categoriaId)
         .order('fecha_publicacion', { ascending: false });
@@ -48,9 +48,9 @@ async function cargarArticulos(slug, nombre) {
     }
 
     // 3. Renderizar tarjetas
-    //    La URL usa "babosa" (no slug) como en el resto del proyecto
+    //    La URL usa "slug" (no slug) como en el resto del proyecto
     listaArticulos.innerHTML = data.map(articulo => `
-        <div class="article-card" onclick="window.location.href='/Articulo/articulo.html?babosa=${articulo.babosa}'">
+        <div class="article-card" onclick="window.location.href='/Articulo/articulo.html?slug=${articulo.slug}'">
             <img src="${articulo.imagen_portada || '/IMG/IMGprueba.png'}" alt="${articulo.titulo}">
             <h3>${articulo.titulo}</h3>
             <p>${articulo.descripcion || ''}</p>
@@ -58,12 +58,12 @@ async function cargarArticulos(slug, nombre) {
     `).join('');
 }
 
-// Obtiene el ID de la categoría buscando por su "babosa" (campo slug)
+// Obtiene el ID de la categoría buscando por su "slug" (campo slug)
 async function obtenerIdCategoria(slug) {
     const { data, error } = await supabase
         .from('categorias')
         .select('id')
-        .eq('babosa', slug)   // campo slug en tu tabla categorías = "babosa"
+        .eq('slug', slug)   // campo slug en tu tabla categorías = "slug"
         .maybeSingle();       // no lanza error si no encuentra nada
 
     if (error) {

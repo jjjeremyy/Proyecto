@@ -90,24 +90,24 @@ async function cargarCategorias() {
 cargarCategorias();
 
 // --------------------------------------------------
-// 3. GENERADOR AUTOMÁTICO DE BABOSA (slug)
+// 3. GENERADOR AUTOMÁTICO DE slug (slug)
 // --------------------------------------------------
 const inputTitulo = document.getElementById('titulo');
-const inputBabosa = document.getElementById('babosa');
-let babosaManual  = false;
+const inputSlug = document.getElementById('slug');
+let slugManual  = false;
 
 inputTitulo.addEventListener('input', () => {
-    if (!babosaManual) {
-        inputBabosa.value = generarBabosa(inputTitulo.value);
+    if (!slugManual) {
+        inputslug.value = generarslug(inputTitulo.value);
     }
 });
 
-inputBabosa.addEventListener('input', () => {
-    babosaManual = true;
-    inputBabosa.value = generarBabosa(inputBabosa.value);
+inputslug.addEventListener('input', () => {
+    slugManual = true;
+    inputslug.value = generarslug(inputslug.value);
 });
 
-function generarBabosa(texto) {
+function generarslug(texto) {
     return texto
         .toLowerCase()
         .normalize('NFD')
@@ -177,7 +177,7 @@ async function publicarArticulo() {
     limpiarErrores();
 
     const titulo         = document.getElementById('titulo').value.trim();
-    const babosa         = document.getElementById('babosa').value.trim();
+    const slug         = document.getElementById('slug').value.trim();
     const descripcion    = document.getElementById('descripcion').value.trim();
     const contenido      = getContenido();
     const categoria_id   = document.getElementById('categoria_id').value;
@@ -188,29 +188,29 @@ async function publicarArticulo() {
 
     let valido = true;
     if (!titulo)        { marcarError('titulo',       'El título es obligatorio.');  valido = false; }
-    if (!babosa)        { marcarError('babosa',        'La URL es obligatoria.');     valido = false; }
+    if (!slug)        { marcarError('slug',        'La URL es obligatoria.');     valido = false; }
     if (!categoria_id)  { marcarError('categoria_id', 'Selecciona una categoría.');  valido = false; }
     if (contenidoVacio) { mostrarStatus('El contenido no puede estar vacío.', 'error'); valido = false; }
     if (!valido) return;
 
     mostrarStatus('⏳ Publicando artículo...', 'loading');
 
-    // Verificar que la babosa no exista ya
+    // Verificar que la slug no exista ya
     const { data: existente } = await supabase
         .from('articulos')
         .select('id')
-        .eq('babosa', babosa)
+        .eq('slug', slug)
         .maybeSingle();
 
     if (existente) {
-        marcarError('babosa', 'Esta URL ya existe. Elige otra.');
+        marcarError('slug', 'Esta URL ya existe. Elige otra.');
         mostrarStatus('Error: la URL del artículo ya está en uso.', 'error');
         return;
     }
 
     const nuevoArticulo = {
         titulo,
-        babosa,
+        slug,
         descripcion:       descripcion || null,
         contenido,
         categoria_id:      parseInt(categoria_id),
@@ -228,11 +228,11 @@ async function publicarArticulo() {
         return;
     }
 
-    mostrarStatus('✅ ¡Artículo publicado! URL: /articulo/?babosa=' + babosa, 'success');
+    mostrarStatus('✅ ¡Artículo publicado! URL: /articulo/?slug=' + slug, 'success');
     document.getElementById('formulario-articulo').reset();
     limpiarContenido();
     imgPreviewBox.classList.add('hidden');
-    babosaManual = false;
+    slugManual = false;
 }
 
 // --------------------------------------------------
