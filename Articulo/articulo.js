@@ -25,7 +25,6 @@ async function cargarArticulo(slug) {
     document.getElementById('article-loading').classList.remove('hidden');
     document.getElementById('article-main').classList.add('hidden');
 
-    // JOIN con categorías para obtener el nombre de la categoría
     const { data: articulo, error } = await supabase
         .from('articulos')
         .select(`
@@ -41,12 +40,12 @@ async function cargarArticulo(slug) {
             categorias ( id, nombre )
         `)
         .eq('slug', slug)
-        .eq('estado', true)        // estado es BOOLEAN en tu BD
-        .maybeSingle();
+        .maybeSingle();  // ← quitamos el .eq('estado', true)
 
     document.getElementById('article-loading').classList.add('hidden');
 
-    if (error || !articulo) {
+    // Comprobación más robusta del estado
+    if (error || !articulo || articulo.estado === false) {
         mostrarError('Artículo no encontrado o no está publicado.');
         return;
     }
