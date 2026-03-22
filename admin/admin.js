@@ -33,31 +33,53 @@ const quill = new Quill('#quill-editor', {
     }
 });
 
-// Función para obtener el HTML de Quill
 function getContenido() {
     return quill.root.innerHTML;
 }
 
-// Función para limpiar Quill
 function limpiarContenido() {
     quill.setContents([]);
 }
 
 // --------------------------------------------------
 // 2. CARGAR CATEGORÍAS en el <select>
+//    CAUSA DEL PROBLEMA: si RLS está activado en
+//    Supabase sin política de lectura, la query
+//    devuelve array vacío sin dar error.
+//    SOLUCIÓN: usamos la sesión activa (ya logado)
+//    que tiene permisos, y mostramos el error claro.
 // --------------------------------------------------
 async function cargarCategorias() {
+    const select = document.getElementById('categoria_id');
+
     const { data, error } = await supabase
         .from('categorias')
-        .select('*')
+        .select('id, nombre')
         .order('nombre');
 
+    // Error de red o permisos
     if (error) {
         console.error('Error cargando categorías:', error);
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '⚠️ Error al cargar categorías';
+        opt.disabled = true;
+        select.appendChild(opt);
         return;
     }
 
-    const select = document.getElementById('categoria_id');
+    // Sin datos: RLS bloqueando o tabla vacía
+    if (!data || data.length === 0) {
+        console.warn('No se encontraron categorías. Verifica RLS en Supabase.');
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '⚠️ Sin categorías — revisa RLS en Supabase';
+        opt.disabled = true;
+        select.appendChild(opt);
+        return;
+    }
+
+    // Éxito: rellenar el select
     data.forEach(cat => {
         const option = document.createElement('option');
         option.value = cat.id;
@@ -129,9 +151,7 @@ document.getElementById('btn-preview').addEventListener('click', () => {
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
             <span class="preview-category">${categoria}</span>
         </div>
-        <div class="preview-meta">
-            <span>📅 ${fecha}</span>
-        </div>
+        <div class="preview-meta"><span>📅 ${fecha}</span></div>
         <h1>${titulo || '(Sin título)'}</h1>
         <p style="font-style:italic;color:#4a5a78;">${descripcion || ''}</p>
         ${imagen ? `<img src="${imagen}" alt="Imagen de portada" style="width:100%;border-radius:8px;margin-bottom:20px;">` : ''}
@@ -164,18 +184,13 @@ async function publicarArticulo() {
     const imagen_portada = document.getElementById('imagen_portada').value.trim();
     const estado         = document.getElementById('estado').value === 'true';
 
-    // Quill vacío devuelve '<p><br></p>'
     const contenidoVacio = !contenido || contenido === '<p><br></p>' || contenido === '<p></p>';
 
-    // Validación
     let valido = true;
-    if (!titulo)         { marcarError('titulo',       'El título es obligatorio.');  valido = false; }
-    if (!babosa)         { marcarError('babosa',        'La URL es obligatoria.');     valido = false; }
-    if (!categoria_id)   { marcarError('categoria_id', 'Selecciona una categoría.');  valido = false; }
-    if (contenidoVacio)  {
-        mostrarStatus('El contenido no puede estar vacío.', 'error');
-        valido = false;
-    }
+    if (!titulo)        { marcarError('titulo',       'El título es obligatorio.');  valido = false; }
+    if (!babosa)        { marcarError('babosa',        'La URL es obligatoria.');     valido = false; }
+    if (!categoria_id)  { marcarError('categoria_id', 'Selecciona una categoría.');  valido = false; }
+    if (contenidoVacio) { mostrarStatus('El contenido no puede estar vacío.', 'error'); valido = false; }
     if (!valido) return;
 
     mostrarStatus('⏳ Publicando artículo...', 'loading');
