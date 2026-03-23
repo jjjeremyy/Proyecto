@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SistemaBase | Política de Privacidad y Cookies</title>
+    <meta name="description" content="Política de privacidad y política de cookies de SistemaBase. Información sobre cómo usamos tus datos y las cookies.">
+    <link rel="stylesheet" href="/GuiaEstilosCSS/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/Cookies/cookies-banner.css">
+    <style>
+        /* ==========================================
+           PÁGINA DE POLÍTICAS — estilos propios
+        ========================================== */
+        body {
+            font-family: 'Source Sans 3', Arial, sans-serif;
+            background-color: #f5f7fc;
+            color: #1e2a40;
+        }
+
+        /* Hero de cabecera */
+        .policy-hero {
+            background-color: #043873;
+            padding: 56px 24px 48px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .policy-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 70% 50%, rgba(33, 101, 179, 0.4) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .policy-hero h1 {
+            font-family: 'Lora', Georgia, serif;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 10px 0;
+            position: relative;
+        }
+
+        .policy-hero p {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.7);
+            margin: 0;
+            position: relative;
+        }
+
+        /* Contenedor principal */
+        .policy-container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 48px 24px 72px;
+        }
+
+        /* Índice de navegación */
+        .policy-toc {
+            background-color: #edf3ff;
+            border-left: 4px solid #043873;
+            border-radius: 0 8px 8px 0;
+            padding: 20px 24px;
+            margin-bottom: 48px;
+        }
+
+        .policy-toc h2 {
+            font-family: 'Lora', Georgia, serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #043873;
+            margin: 0 0 12px 0;
+        }
+
+        .policy-toc ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .policy-toc li {
+            margin-bottom: 6px;
+        }
+
+        .policy-toc a {
+            font-size: 0.9rem;
+            color: #043873;
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        .policy-toc a:hover {
+            color: #2165b3;
+            text-decoration: underline;
+        }
+
+        /* Secciones */
+        .policy-section {
+            margin-bottom: 52px;
+            scroll-margin-top: 24px;
+        }
+
+        .policy-section h2 {
+            font-family: 'Lora', Georgia, serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #043873;
+            margin: 0 0 14px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d0daf0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .policy-section h2 .section-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: #043873;
+            color: #fff;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .policy-section h3 {
+            font-family: 'Lora', Georgia, serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a2a4a;
+            margin: 28px 0 10px 0;
+        }
+
+        .policy-section p {
+            line-height: 1.8;
+            margin: 0 0 16px 0;
+            color: #2a3a5a;
+        }
+
+        .policy-section ul,
+        .policy-section ol {
+            padding-left: 22px;
+            margin: 0 0 18px 0;
+        }
+
+        .policy-section li {
+            line-height: 1.75;
+            margin-bottom: 7px;
+            color: #2a3a5a;
+        }
+
+        /* Tabla de cookies */
+        .cookies-table-wrapper {
+            overflow-x: auto;
+            margin: 16px 0 24px 0;
+            border-radius: 8px;
+            border: 1px solid #d0daf0;
+        }
+
+        .cookies-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            font-family: Arial, sans-serif;
+        }
+
+        .cookies-table th {
+            background-color: #043873;
+            color: #fff;
+            padding: 11px 14px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .cookies-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #d8e2f4;
+            color: #2a3a5a;
+            vertical-align: top;
+        }
+
+        .cookies-table tr:nth-child(even) td {
+            background-color: #f4f7ff;
+        }
+
+        .cookies-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Caja de aviso */
+        .policy-notice {
+            background-color: #fff8e1;
+            border-left: 4px solid #f59e0b;
+            border-radius: 0 6px 6px 0;
+            padding: 14px 18px;
+            margin: 20px 0;
+            font-size: 0.92rem;
+            color: #78350f;
+        }
+
+        .policy-notice strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Fecha de actualización */
+        .policy-updated {
+            font-size: 0.82rem;
+            color: #8a9ab5;
+            font-family: Arial, sans-serif;
+            margin-bottom: 40px;
+            padding: 10px 14px;
+            background-color: #fff;
+            border: 1px solid #e2e8f4;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Botón volver al inicio de la página */
+        .back-to-top {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #043873;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            transition: color 0.15s;
+        }
+
+        .back-to-top:hover {
+            color: #2165b3;
+            text-decoration: underline;
+        }
+
+        /* Separador */
+        .policy-divider {
+            border: none;
+            border-top: 1px solid #e2e8f4;
+            margin: 0 0 48px 0;
+        }
+
+        /* Enlace de contacto */
+        .policy-contact-box {
+            background-color: #043873;
+            color: #fff;
+            border-radius: 10px;
+            padding: 28px 32px;
+            text-align: center;
+            margin-top: 48px;
+        }
+
+        .policy-contact-box h3 {
+            font-family: 'Lora', Georgia, serif;
+            font-size: 1.2rem;
+            margin: 0 0 10px 0;
+            color: #fff;
+        }
+
+        .policy-contact-box p {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.75);
+            margin: 0 0 16px 0;
+        }
+
+        .policy-contact-box a {
+            display: inline-block;
+            background-color: #fff;
+            color: #043873;
+            padding: 10px 26px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .policy-contact-box a:hover {
+            background-color: #d0daf0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <section class="logo-container">
+            <img src="/IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo">
+            <a href="/index.html" class="home">SistemaBase</a>
+        </section>
+        <section class="nav-links">
+            <a href="/Categorias/categorias.html">Categorías</a>
+            <a href="/Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
+            <a href="/Contacto/contacto.html">Contacto</a>
+        </section>
+    </header>
+
+    <!-- HERO -->
+    <div class="policy-hero" id="top">
+        <h1>Política de Privacidad y Cookies</h1>
+        <p>Información sobre cómo tratamos tus datos y usamos las cookies</p>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="policy-container">
+
+        <span class="policy-updated">📅 Última actualización: marzo de 2025</span>
+
+        <!-- ÍNDICE -->
+        <nav class="policy-toc" aria-label="Índice de contenidos">
+            <h2>Índice</h2>
+            <ol>
+                <li><a href="#responsable">Responsable del tratamiento</a></li>
+                <li><a href="#datos-recogidos">Datos que recogemos</a></li>
+                <li><a href="#finalidad">Finalidad y base legal</a></li>
+                <li><a href="#cookies">Política de cookies</a></li>
+                <li><a href="#adsense">Google AdSense y publicidad</a></li>
+                <li><a href="#terceros">Transferencias a terceros</a></li>
+                <li><a href="#derechos">Tus derechos</a></li>
+                <li><a href="#menores">Menores de edad</a></li>
+                <li><a href="#cambios">Cambios en esta política</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ol>
+        </nav>
+
+        <!-- 1. RESPONSABLE -->
+        <section class="policy-section" id="responsable">
+            <h2><span class="section-num">1</span> Responsable del tratamiento</h2>
+            <p>
+                En cumplimiento del Reglamento General de Protección de Datos (RGPD) (UE) 2016/679 y
+                la Ley Orgánica 3/2018 de Protección de Datos Personales (LOPDGDD), te informamos de que
+                el responsable del tratamiento de los datos personales recogidos en este sitio web es:
+            </p>
+            <ul>
+                <li><strong>Denominación:</strong> SistemaBase</li>
+                <li><strong>Correo electrónico de contacto:</strong> sistemabase@gmail.com</li>
+                <li><strong>Sitio web:</strong> sistemabase.es (o el dominio en el que se aloje)</li>
+            </ul>
+        </section>
+
+        <hr class="policy-divider">
+
+        <!-- 2. DATOS RECOGIDOS -->
+        <section class="policy-section" id="datos-recogidos">
+            <h2><span class="section-num">2</span> Datos que recogemos</h2>
+            <p>SistemaBase puede recoger los siguientes tipos de datos:</p>
+
+            <h3>2.1 Datos de navegación (automáticos)</h3>
+            <p>
+                Cuando visitas el sitio se registran de forma automática: dirección IP, tipo de navegador,
+                sistema operativo, páginas visitadas, tiempo de permanencia y fuente de tráfico.
+                Estos datos se recogen a través de cookies técnicas y de análisis.
+            </p>
+
+            <h3>2.2 Datos que nos proporcionas voluntariamente</h3>
+            <p>
+                A través del formulario de <a href="/Contacto/contacto.html">contacto</a> puedes enviarnos
+                tu nombre, dirección de correo electrónico y el mensaje que desees hacernos llegar.
+                Estos datos se usan exclusivamente para responder tu consulta.
+            </p>
+        </section>
+
+        <hr class="policy-divider">
+
+        <!-- 3. FINALIDAD -->
+        <section class="policy-section" id="finalidad">
+            <h2><span class="section-num">3</span> Finalidad y base legal del tratamiento</h2>
+            <table class="cookies-table" style="margin-top:8px;">
+                <thead>
+                    <tr>
+                        <th>Finalidad</th>
+                        <th>Base legal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Responder consultas del formulario de contacto</td>
+                        <td>Consentimiento del interesado (Art. 6.1.a RGPD)</td>
+                    </tr>
+                    <tr>
+                        <td>Análisis estadístico de navegación</td>
+                        <td>Interés legítimo (Art. 6.1.f RGPD)</td>
+                    </tr>
+                    <tr>
+                        <td>Mostrar publicidad personalizada (AdSense)</td>
+                        <td>Consentimiento del interesado (Art. 6.1.a RGPD)</td>
+                    </tr>
+                    <tr>
+                        <td>Funcionamiento técnico del sitio</td>
+                        <td>Interés legítimo / necesidad contractual</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Los datos de contacto se conservan el tiempo necesario para resolver la consulta y, como máximo, durante 2 años.</p>
+        </section>
+
+        <hr class="policy-divider">
+
+        <!-- 4. COOKIES -->
+        <section class="policy-section" id="cookies">
+            <h2><span class="section-num">4</span> Política de cookies</h2>
+            <p>
+                Una <strong>cookie</strong> es un pequeño fichero de texto que un sitio web almacena en tu
+                navegador cuando lo visitas. Las cookies permiten que el sitio recuerde tus acciones y
+                preferencias durante un período de tiempo.
+            </p>
+
+            <h3>4.1 Tipos de cookies que usamos</h3>
+            <div class="cookies-table-wrapper">
+                <table class="cookies-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre / Proveedor</th>
+                            <th>Tipo</th>
+                            <th>Duración</th>
+                            <th>Finalidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>sistemabase_cookie_consent</code></td>
+                            <td>Esencial (propia)</td>
+                            <td>1 año</td>
+                            <td>Guarda tu decisión sobre las cookies para no volver a mostrarte el aviso.</td>
+                        </tr>
+                        <tr>
+                            <td>Google Analytics (<code>_ga</code>, <code>_gid</code>)</td>
+                            <td>Análisis (tercero)</td>
+                            <td>2 años / 24 h</td>
+                            <td>Mide el tráfico y el comportamiento de los usuarios en el sitio.</td>
+                        </tr>
+                        <tr>
+                            <td>Google AdSense (<code>IDE</code>, <code>DSID</code>)</td>
+                            <td>Publicidad (tercero)</td>
+                            <td>13 meses</td>
+                            <td>Muestra anuncios personalizados basados en tu historial de navegación.</td>
+                        </tr>
+                        <tr>
+                            <td>Supabase (sesión admin)</td>
+                            <td>Esencial (propia)</td>
+                            <td>Sesión</td>
+                            <td>Mantiene activa la sesión del administrador del panel. Solo se activa al iniciar sesión.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>4.2 Cómo gestionar o rechazar las cookies</h3>
+            <p>Puedes gestionar las cookies de varias maneras:</p>
+            <ul>
+                <li>
+                    <strong>Desde el banner:</strong> al entrar al sitio por primera vez puedes aceptar
+                    todas las cookies o solo las esenciales.
+                </li>
+                <li>
+                    <strong>Desde tu navegador:</strong> puedes configurar tu navegador para que bloquee
+                    o elimine las cookies. Ten en cuenta que esto puede afectar al funcionamiento del sitio.
+                    <ul>
+                        <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener">Chrome</a></li>
+                        <li><a href="https://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-sitios-web-rastrear-preferencias" target="_blank" rel="noopener">Firefox</a></li>
+                        <li><a href="https://support.apple.com/es-es/guide/safari/sfri11471/mac" target="_blank" rel="noopener">Safari</a></li>
+                        <li><a href="https://support.microsoft.com/es-es/windows/eliminar-y-administrar-cookies-168dab11-0753-043d-7c16-ede5947fc64d" target="_blank" rel="noopener">Edge</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="policy-notice">
+                <strong>⚠️ Cookies esenciales</strong>
+                Las cookies marcadas como «esenciales» son necesarias para el funcionamiento básico del sitio
+                y no pueden desactivarse desde nuestro banner (aunque sí desde el navegador).
+            </div>
+        </section>
+
+        <hr class="policy-divider">
+
+        <!-- 5. ADSENSE -->
+        <section class="policy-section" id="adsense">
+            <h2><span class="section-num">5</span> Google AdSense y publicidad</h2>
+            <p>
+                SistemaBase utiliza <strong>Google AdSense</strong> para mostrar anuncios. Google puede usar
+                información sobre tus visitas a este y otros sitios web para proporcionarte publicidad
+                sobre productos y servicios de tu interés.
+            </p>
+            <p>
+                Puedes obtener más información y optar por no recibir publicidad personalizada de Google en:
+                <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">www.google.com/settings/ads</a>.
+            </p>
+            <p>
+                También puedes consultar la
+                <a href="https://policies.google.com/privacy?hl=es" target="_blank" rel="noopener">Política de Privacidad de Google</a>.
+            </p>
+        </section>
+
+        <hr class="policy-divider">
+
+        <!-- 6. TERCEROS -->
+        <section class="policy-section" id="terceros">
+            <h2><span class="section-num">6</span> Transferencias a terceros</h2>
+            <p>
+                Los datos no se ceden a terceros salvo por obligación legal o por los servicios
+                estrictamente necesarios para el funcionamiento del sitio:
+            </p>
+            <ul>
+                <li>
+                    <strong>Supabase Inc.</strong> — proveedor de base de datos y autenticación.
+                    Sus servidores pueden estar ubicados en la UE o EE. UU. (con garantías adecuadas
+                    según Cláusulas Contractuales Tipo).
+                    <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Política de Privacidad de Supabase</a>.
+                </li>
+                <li>
+                    <strong>Google LLC</strong> — servicios de publicidad (AdSense) y análisis.
+                    Datos transferidos a EE. UU. bajo el Data Privacy Framework.
+                </li>
+            </ul>
+        </section>
+
+        <hr class="policy-divider">
+
+        <!-- 7. DERECHOS -->
+        <section class="policy-section" id="derechos">
+            <h2><span class="section-num">7</span> Tus derechos</h2>
+            <p>De acuerdo con el RGPD y la LOPDGDD, tienes derecho a:</p>
+            <ul>
+                <li><strong>Acceso:</strong> conocer qué datos tuyos tratamos.</li>
+                <li><strong>Rectificación:</strong> corregir datos inexactos o incompletos.</li>
+                <li><strong>Supresión («derecho al olvido»):</strong> solicitar que eliminemos tus datos.</li>
+                <li><strong>Oposición:</strong> oponerte al tratamiento de tus datos.</li>
+                <li><strong>Limitación:</strong> solicitar que restrinjamos el tratamiento.</li>
+                <li><strong>Portabilidad:</strong> recibir tus datos en formato estructurado.</li>
+                <li>
+                    <strong>Retirar el consentimiento</strong> en cualquier momento, sin que ello
+                    afecte a la licitud del tratamiento anterior.
+                </li>
+            </ul>
+            <p>
+                Para ejercer estos derechos, envíanos un correo a
+                <a href="mailto:sistemabase@gmail.com">sistemabase@gmail.com</a> indicando tu solicitud.
+                También tienes derecho a presentar una reclamación ante la
+                <a href="https://www.aepd.es" target="_blank" rel="noopener">Agencia Española de Protección de Datos (AEPD)</a>.
+            </p>
+        </section>
+
+        <hr class="policy-divider">
+
+        <!-- 8. MENORES -->
+        <section class="policy-section" id="menores">
+            <h2><span class="section-num">8</span> Menores de edad</h2>
+            <p>
+                SistemaBase no está dirigido a menores de 14 años. No recogemos conscientemente datos de
+                menores. Si tienes conocimiento de que un menor nos ha proporcionado datos personales,
+                contacta con nosotros para proceder a su eliminación.
+            </p>
+        </section>
+
+        <hr class="policy-divider">
+
+        <!-- 9. CAMBIOS -->
+        <section class="policy-section" id="cambios">
+            <h2><span class="section-num">9</span> Cambios en esta política</h2>
+            <p>
+                Podemos actualizar esta política periódicamente. La fecha de «última actualización» al
+                comienzo de este documento reflejará cualquier cambio. Te recomendamos revisarla con
+                regularidad. Si los cambios fueran sustanciales, lo notificaremos mediante un aviso
+                visible en el sitio.
+            </p>
+        </section>
+
+        <hr class="policy-divider">
+
+        <!-- 10. CONTACTO -->
+        <section class="policy-section" id="contacto">
+            <h2><span class="section-num">10</span> Contacto</h2>
+            <p>
+                Si tienes dudas sobre esta política o sobre el tratamiento de tus datos, puedes contactarnos en:
+            </p>
+        </section>
+
+        <!-- CAJA DE CONTACTO -->
+        <div class="policy-contact-box">
+            <h3>¿Tienes alguna pregunta?</h3>
+            <p>Escríbenos y te responderemos lo antes posible.</p>
+            <a href="/Contacto/contacto.html">Ir al formulario de contacto</a>
+        </div>
+
+        <br>
+        <a href="#top" class="back-to-top">↑ Volver al inicio de la página</a>
+
+    </div>
+
+    <footer>
+        <section class="footer-info">
+            <section class="footer-logo">
+                <img src="/IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
+            </section>
+            <section class="footer-links">
+                <a href="/index.html">Inicio</a>
+                <a href="/Categorias/categorias.html">Categorías</a>
+                <a href="/Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
+                <a href="/Contacto/contacto.html">Contacto</a>
+                <a href="/Politicas/politicas.html">Privacidad y Cookies</a>
+            </section>
+            <section class="contact-info">
+                <h3>Contacto</h3>
+                <p>Email: sistemabase@gmail.com</p>
+            </section>
+        </section>
+        <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Banner de cookies (no se muestra en esta página para no entrar en bucle) -->
+    <script>
+        // En la propia página de políticas no mostramos el banner
+        // para no ser redundante, pero sí cargamos el script por coherencia
+    </script>
+    <script src="/Cookies/cookies-banner.js"></script>
+
+</body>
+</html>

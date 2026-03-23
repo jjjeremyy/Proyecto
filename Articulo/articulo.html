@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" href="/GuiaEstilosCSS/style.css">
     <link rel="stylesheet" href="/Articulo/articulo.css">
+    <link rel="stylesheet" href="/Cookies/cookies-banner.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
@@ -198,6 +199,7 @@
                 <a href="/Categorias/categorias.html">Categorías</a>
                 <a href="/Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
                 <a href="/Contacto/contacto.html">Contacto</a>
+                <a href="/Politicas/politicas.html">Privacidad y Cookies</a>
             </section>
             <section class="contact-info">
                 <h3>Contacto</h3>
@@ -206,6 +208,22 @@
         </section>
         <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
     </footer>
+    <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
+    <div class="cookie-banner-inner">
+        <span class="cookie-icon" aria-hidden="true">🍪</span>
+        <div class="cookie-text">
+            <strong>Este sitio usa cookies</strong>
+            <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
+               <a href="/Politicas/politicas.html">Política de Cookies y Privacidad</a>.
+            </p>
+            </div>
+            <div class="cookie-actions">
+                <button id="btn-cookie-accept" class="btn-cookie-accept">Aceptar todas</button>
+                <button id="btn-cookie-reject" class="btn-cookie-reject">Solo esenciales</button>
+            </div>
+        </div>
+    </div>
+    <script src="/Cookies/cookies-banner.js"></script>
 
     <!-- articulo.js: lee ?slug= y carga el artículo desde Supabase -->
     <script type="module" src="/Articulo/articulo.js"></script>
