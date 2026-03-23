@@ -1,36 +1,56 @@
-body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: var(--color-background);
-    color: var(--color-text);
+/* ══════════════════════════════════════════════
+   HOME.CSS — solo estilos propios de la home
+   Header, footer y body vienen de style.css
+   ══════════════════════════════════════════════ */
 
-}
-
-.welcome-section{
+/* ── HERO WELCOME ── */
+.welcome-section {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 200px;
+    min-height: 220px;
     text-align: center;
     background-color: var(--color-primary);
+    background-image:
+        radial-gradient(ellipse 70% 60% at 50% 110%, rgba(78,155,255,0.14) 0%, transparent 70%);
     color: var(--color-text);
-    padding: 30px;
-    padding-bottom: 0px;
+    padding: 48px 30px 40px;
+    position: relative;
+    overflow: hidden;
 }
 
+.welcome-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(78,155,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(78,155,255,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+}
 
-/* =============================================
-   AÑADIR AL FINAL DE home.css
-   Secciones: Buscador + Artículos Recientes
-============================================= */
+.welcome-section h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    position: relative;
+}
 
-/* ==========================================
-   BUSCADOR
-========================================== */
+.welcome-section h2 {
+    font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+    font-weight: 400;
+    opacity: 0.65;
+    position: relative;
+}
+
+/* ── BUSCADOR ── */
 .search-section {
     background-color: var(--color-primary);
-    padding: 16px 20px 35px 20px;
+    padding: 0 20px 44px;
 }
 
 .search-inner {
@@ -43,11 +63,11 @@ body {
 }
 
 .search-label {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 15px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
     margin: 0;
-    font-family: Arial, sans-serif;
-    letter-spacing: 0.02em;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.5px;
 }
 
 .search-wrapper {
@@ -60,8 +80,8 @@ body {
     left: 18px;
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     color: #8a9ab5;
     pointer-events: none;
     z-index: 1;
@@ -69,21 +89,21 @@ body {
 
 .search-input {
     width: 100%;
-    padding: 18px 20px 18px 52px;
+    padding: 16px 20px 16px 50px;
     border: none;
-    border-radius: 8px;
-    font-size: 17px;
-    font-family: Arial, sans-serif;
-    color: #1a2a4a;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--color-text-secondary);
     background-color: #fff;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
     outline: none;
     transition: box-shadow 0.2s;
     box-sizing: border-box;
 }
 
 .search-input:focus {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 28px rgba(0, 0, 0, 0.28), 0 0 0 3px rgba(78,155,255,0.25);
 }
 
 /* Dropdown de resultados */
@@ -93,7 +113,7 @@ body {
     left: 0;
     right: 0;
     background: #fff;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: 0 8px 32px rgba(4, 56, 115, 0.18);
     z-index: 200;
     overflow: hidden;
@@ -106,18 +126,13 @@ body {
     gap: 12px;
     padding: 10px 14px;
     text-decoration: none;
-    color: #1a2a4a;
+    color: var(--color-text-secondary);
     border-bottom: 1px solid #f0f4fa;
     transition: background 0.15s;
 }
 
-.search-result-item:last-child {
-    border-bottom: none;
-}
-
-.search-result-item:hover {
-    background-color: #f0f5ff;
-}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background-color: #f0f5ff; }
 
 .search-result-item img {
     width: 46px;
@@ -139,19 +154,18 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--color-primary);
-    font-family: Arial, sans-serif;
+    font-family: 'Space Mono', monospace;
 }
 
 .search-result-item p {
     margin: 0;
     font-size: 13px;
-    font-family: Arial, sans-serif;
     line-height: 1.4;
 }
 
 .search-result-item mark {
     background-color: #fff3b0;
-    color: #1a2a4a;
+    color: var(--color-text-secondary);
     border-radius: 2px;
     padding: 0 1px;
 }
@@ -160,61 +174,80 @@ body {
     padding: 16px 18px;
     font-size: 13px;
     color: #6b7a99;
-    font-family: Arial, sans-serif;
     margin: 0;
     text-align: center;
+    font-family: 'Space Mono', monospace;
 }
 
-/* ==========================================
-   ARTÍCULOS RECIENTES — Grid dinámico
-========================================== */
+/* ── ARTÍCULOS RECIENTES ── */
+.recent-topics {
+    background: var(--color-background);
+    padding-bottom: 60px;
+}
 
-/* Fix color del título para que sea visible */
-.recent-topics .title-recent-topics h2 {
-    padding-top: 40px;
-    padding-left: 60px;
+.title-recent-topics {
+    padding: 48px 60px 24px;
+}
+
+.title-recent-topics h2 {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 700;
     color: var(--color-primary);
+    letter-spacing: -0.5px;
+    position: relative;
+    display: inline-block;
+}
+
+.title-recent-topics h2::after {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 3px;
+    background: var(--color-accent);
+    margin-top: 8px;
+    border-radius: 2px;
 }
 
 .recent-articles-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-    padding: 0 50px 50px 50px;
+    padding: 0 60px;
 }
 
 @media (max-width: 1100px) {
-    .recent-articles-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .recent-articles-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 600px) {
-    .recent-articles-grid {
-        grid-template-columns: 1fr;
-        padding: 0 20px 30px 20px;
-    }
+    .recent-articles-grid { grid-template-columns: 1fr; padding: 0 20px; }
+    .title-recent-topics { padding: 36px 20px 20px; }
 }
 
+/* ── Tarjeta reciente ── */
 .recent-card {
     background-color: #fff;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
-    border: 1px solid #dce5f5;
+    border: 1px solid rgba(4,56,115,0.08);
     text-decoration: none;
     color: inherit;
     display: flex;
     flex-direction: column;
-    transition: box-shadow 0.2s, transform 0.2s;
+    transition: box-shadow 0.25s, transform 0.25s, border-color 0.25s;
+    box-shadow: 0 2px 10px rgba(4,56,115,0.05);
 }
 
 .recent-card:hover {
-    box-shadow: 0 8px 28px rgba(4, 56, 115, 0.13);
+    box-shadow: 0 10px 36px rgba(4, 56, 115, 0.13);
     transform: translateY(-4px);
+    border-color: rgba(78,155,255,0.25);
 }
 
 .recent-card-img-wrap {
     position: relative;
+    overflow: hidden;
 }
 
 .recent-card-img-wrap img {
@@ -222,6 +255,11 @@ body {
     height: 160px;
     object-fit: cover;
     display: block;
+    transition: transform 0.4s ease;
+}
+
+.recent-card:hover .recent-card-img-wrap img {
+    transform: scale(1.04);
 }
 
 .recent-card-cat {
@@ -235,12 +273,12 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     padding: 3px 8px;
-    border-radius: 3px;
-    font-family: Arial, sans-serif;
+    border-radius: 4px;
+    font-family: 'Space Mono', monospace;
 }
 
 .recent-card-body {
-    padding: 14px 16px;
+    padding: 14px 16px 18px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -249,36 +287,33 @@ body {
 
 .recent-card-body h3 {
     font-size: 15px;
-    font-weight: 700;
-    color: #0a1a35;
+    font-weight: 600;
+    color: var(--color-primary);
     margin: 0;
     line-height: 1.4;
-    font-family: Arial, sans-serif;
 }
 
 .recent-card-body p {
     font-size: 13px;
-    color: #6b7a99;
+    color: rgba(26,26,46,0.55);
     margin: 0;
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    font-family: Arial, sans-serif;
 }
 
 .recent-card-date {
     font-size: 11px;
-    color: #a0b0cc;
-    font-family: Arial, sans-serif;
+    color: rgba(26,26,46,0.35);
+    font-family: 'Space Mono', monospace;
     margin-top: auto;
-    padding-top: 8px;
+    padding-top: 10px;
+    letter-spacing: 0.3px;
 }
 
-/* ==========================================
-   ESTADOS: CARGANDO / SIN RESULTADOS
-========================================== */
+/* ── Estados: cargando / sin resultados ── */
 .home-loading {
     grid-column: 1 / -1;
     display: flex;
@@ -289,29 +324,21 @@ body {
 .home-spinner {
     width: 36px;
     height: 36px;
-    border: 4px solid #d0daf0;
+    border: 3px solid rgba(4,56,115,0.12);
     border-top-color: var(--color-primary);
     border-radius: 50%;
     animation: home-spin 0.8s linear infinite;
 }
 
-@keyframes home-spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes home-spin { to { transform: rotate(360deg); } }
 
 .home-no-results {
     grid-column: 1 / -1;
     text-align: center;
     color: #8a9ab5;
-    font-family: Arial, sans-serif;
     padding: 30px 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
 }
 
-.hidden {
-    display: none !important;
-}
-
-
-
-
-
+.hidden { display: none !important; }
