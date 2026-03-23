@@ -19,36 +19,42 @@
             <a href="/Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
             <a href="/Contacto/contacto.html">Contacto</a>
         </section>
-        
     </header> 
+
     <section class="categories-section">
         
-        <section class="categories-title">
+        <div class="categories-title">
             <h1>Categorías</h1>
-        </section>
+            <p class="categories-subtitle">Explora los contenidos por tema</p>
+        </div>
 
-        <section class="categories-container">
-            <button class="category-button" data-slug="conceptos_basicos">Conceptos Básicos</button>
-            <button class="category-button" data-slug="hardware">Hardware</button>
-            <button class="category-button" data-slug="software">Software</button>
-            <button class="category-button" data-slug="sistemas_operativos">Sistemas Operativos</button>
-            <button class="category-button" data-slug="programacion">Programación</button>
-            <button class="category-button" data-slug="base_de_datos">Bases de datos</button>
-            <button class="category-button" data-slug="redes">Redes</button>
-            <button class="category-button" data-slug="ciberseguridad">Ciberseguridad</button>
-            <button class="category-button" data-slug="inteligencia_artificial">Inteligencia Artificial</button>
-        </section>
-        <section class="articles-result" id="articles-result">
-            <h2 id="category-title"></h2>
-            <div class="articles-list" id="articles-list"></div>
-        </section>  
+        <div class="categories-container">
+            <button class="category-button" data-slug="conceptos_basicos" data-index="01">Conceptos Básicos</button>
+            <button class="category-button" data-slug="hardware"           data-index="02">Hardware</button>
+            <button class="category-button" data-slug="software"           data-index="03">Software</button>
+            <button class="category-button" data-slug="sistemas_operativos" data-index="04">Sistemas Operativos</button>
+            <button class="category-button" data-slug="programacion"       data-index="05">Programación</button>
+            <button class="category-button" data-slug="base_de_datos"      data-index="06">Bases de datos</button>
+            <button class="category-button" data-slug="redes"              data-index="07">Redes</button>
+            <button class="category-button" data-slug="ciberseguridad"     data-index="08">Ciberseguridad</button>
+            <button class="category-button" data-slug="inteligencia_artificial" data-index="09">Inteligencia Artificial</button>
+        </div>
+
     </section>
+
+    <section class="articles-result hidden" id="articles-result">
+        <div class="articles-result-header">
+            <h2 id="category-title"></h2>
+            <p class="articles-count" id="articles-count"></p>
+        </div>
+        <div class="articles-list" id="articles-list"></div>
+    </section>
+
     <footer>
         <section class="footer-info">
             <section class="footer-logo">
                 <img src="/IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
             </section>
-
             <section class="footer-links">
                 <h4>Navegación</h4>
                 <a href="/index.html">Inicio</a>
@@ -57,7 +63,6 @@
                 <a href="/Contacto/contacto.html">Contacto</a>
                 <a href="/Politicas/politicas.html">Privacidad y Cookies</a>
             </section> 
-            
             <section class="contact-info">
                 <h3>Contacto</h3>
                 <p>Email: sistemabase00@gmail.com</p>
@@ -65,14 +70,15 @@
         </section>
         <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
     </footer>
+
     <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
-    <div class="cookie-banner-inner">
-        <span class="cookie-icon" aria-hidden="true">🍪</span>
-        <div class="cookie-text">
-            <strong>Este sitio usa cookies</strong>
-            <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
-               <a href="/Politicas/politicas.html">Política de Cookies y Privacidad</a>.
-            </p>
+        <div class="cookie-banner-inner">
+            <span class="cookie-icon" aria-hidden="true">🍪</span>
+            <div class="cookie-text">
+                <strong>Este sitio usa cookies</strong>
+                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
+                   <a href="/Politicas/politicas.html">Política de Cookies y Privacidad</a>.
+                </p>
             </div>
             <div class="cookie-actions">
                 <button id="btn-cookie-accept" class="btn-cookie-accept">Aceptar todas</button>
@@ -80,6 +86,8 @@
             </div>
         </div>
     </div>
+
     <script src="/Cookies/cookies-banner.js"></script>
     <script type="module" src="/Categorias/categorias.js"></script>
 </body>
+</html>
