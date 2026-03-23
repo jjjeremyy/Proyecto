@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SistemaBase | Admin</title>
     <link rel="stylesheet" href="/admin/admin.css">
+    <link rel="stylesheet" href="/admin/admin_imagen_extra.css"> 
 
     <!-- Quill.js — editor WYSIWYG 100% gratuito, sin registro ni API key -->
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
@@ -99,12 +100,40 @@
 
                         <div class="admin-card">
                             <h3 class="admin-card-title">🖼 Imagen de portada</h3>
-                            <div class="field-group">
-                                <label for="imagen_portada">URL de la imagen</label>
-                                <input type="url" id="imagen_portada" placeholder="https://...">
+
+                            <!-- Pestañas para elegir método -->
+                            <div class="img-tabs">
+                                <button type="button" class="img-tab active" data-tab="upload">📁 Subir archivo</button>
+                                <button type="button" class="img-tab" data-tab="url">🔗 URL externa</button>
                             </div>
+
+                            <!-- Panel: subir desde ordenador -->
+                            <div class="img-tab-panel" id="panel-upload">
+                                <div class="field-group">
+                                    <label for="imagen_archivo">Selecciona imagen</label>
+                                    <div class="file-drop-area" id="file-drop-area">
+                                        <input type="file" id="imagen_archivo" accept="image/*" class="file-input">
+                                        <div class="file-drop-label">
+                                            <span class="file-drop-icon">🖼</span>
+                                            <span class="file-drop-text">Arrastra una imagen aquí<br><small>o haz clic para seleccionar</small></span>
+                                        </div>
+                                    </div>
+                                    <small id="file-name-display"></small>
+                                </div>
+                            </div>
+
+                            <!-- Panel: URL externa -->
+                            <div class="img-tab-panel hidden" id="panel-url">
+                                <div class="field-group">
+                                    <label for="imagen_portada">URL de la imagen</label>
+                                    <input type="url" id="imagen_portada" placeholder="https://...">
+                                </div>
+                            </div>
+
+                            <!-- Vista previa compartida -->
                             <div id="img-preview-box" class="img-preview-box hidden">
                                 <img id="img-preview" src="" alt="Vista previa">
+                                <button type="button" id="btn-remove-img" class="btn-remove-img">✕ Quitar imagen</button>
                             </div>
                         </div>
 

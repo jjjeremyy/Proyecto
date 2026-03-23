@@ -43,11 +43,6 @@ function limpiarContenido() {
 
 // --------------------------------------------------
 // 2. CARGAR CATEGORÍAS en el <select>
-//    CAUSA DEL PROBLEMA: si RLS está activado en
-//    Supabase sin política de lectura, la query
-//    devuelve array vacío sin dar error.
-//    SOLUCIÓN: usamos la sesión activa (ya logado)
-//    que tiene permisos, y mostramos el error claro.
 // --------------------------------------------------
 async function cargarCategorias() {
     const select = document.getElementById('categoria_id');
@@ -57,7 +52,6 @@ async function cargarCategorias() {
         .select('id, nombre')
         .order('nombre');
 
-    // Error de red o permisos
     if (error) {
         console.error('Error cargando categorías:', error);
         const opt = document.createElement('option');
@@ -68,7 +62,6 @@ async function cargarCategorias() {
         return;
     }
 
-    // Sin datos: RLS bloqueando o tabla vacía
     if (!data || data.length === 0) {
         console.warn('No se encontraron categorías. Verifica RLS en Supabase.');
         const opt = document.createElement('option');
@@ -79,7 +72,6 @@ async function cargarCategorias() {
         return;
     }
 
-    // Éxito: rellenar el select
     data.forEach(cat => {
         const option = document.createElement('option');
         option.value = cat.id;
@@ -90,11 +82,11 @@ async function cargarCategorias() {
 cargarCategorias();
 
 // --------------------------------------------------
-// 3. GENERADOR AUTOMÁTICO DE slug (slug)
+// 3. GENERADOR AUTOMÁTICO DE slug
 // --------------------------------------------------
 const inputTitulo = document.getElementById('titulo');
-const inputSlug = document.getElementById('slug');
-let slugManual  = false;
+const inputSlug   = document.getElementById('slug');
+let slugManual    = false;
 
 inputTitulo.addEventListener('input', () => {
     if (!slugManual) {
@@ -119,21 +111,125 @@ function generarSlug(texto) {
 }
 
 // --------------------------------------------------
-// 4. VISTA PREVIA DE IMAGEN DE PORTADA
+// 4. GESTIÓN DE IMAGEN DE PORTADA
+//    — Pestañas: subir archivo / URL externa
+//    — Drag & drop + clic en la zona de subida
+//    — Vista previa unificada
 // --------------------------------------------------
-const inputImagen   = document.getElementById('imagen_portada');
-const imgPreviewBox = document.getElementById('img-preview-box');
-const imgPreview    = document.getElementById('img-preview');
+const imgPreviewBox  = document.getElementById('img-preview-box');
+const imgPreview     = document.getElementById('img-preview');
+const fileInput      = document.getElementById('imagen_archivo');
+const fileDropArea   = document.getElementById('file-drop-area');
+const fileNameDisplay = document.getElementById('file-name-display');
+const inputImagenUrl = document.getElementById('imagen_portada');
+const btnRemoveImg   = document.getElementById('btn-remove-img');
 
-inputImagen.addEventListener('input', () => {
-    const url = inputImagen.value.trim();
-    if (url) {
-        imgPreview.src = url;
-        imgPreviewBox.classList.remove('hidden');
-    } else {
-        imgPreviewBox.classList.add('hidden');
+// Almacena el File seleccionado (si se elige subir desde ordenador)
+let archivoImagenSeleccionado = null;
+// Almacena la URL pública ya subida (para no subir dos veces)
+let imagenUrlFinal = null;
+
+// — Pestañas —
+document.querySelectorAll('.img-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.img-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const panel = tab.dataset.tab;
+        document.getElementById('panel-upload').classList.toggle('hidden', panel !== 'upload');
+        document.getElementById('panel-url').classList.toggle('hidden', panel !== 'url');
+    });
+});
+
+// — Clic en zona de drop activa el input file —
+fileDropArea.addEventListener('click', () => fileInput.click());
+
+// — Drag & drop visual —
+fileDropArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    fileDropArea.classList.add('dragging');
+});
+fileDropArea.addEventListener('dragleave', () => {
+    fileDropArea.classList.remove('dragging');
+});
+fileDropArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileDropArea.classList.remove('dragging');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+        procesarArchivoImagen(file);
     }
 });
+
+// — Selección mediante input file —
+fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (file) procesarArchivoImagen(file);
+});
+
+function procesarArchivoImagen(file) {
+    archivoImagenSeleccionado = file;
+    imagenUrlFinal = null; // resetear URL previa si la había
+
+    fileNameDisplay.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
+    // Vista previa local (ObjectURL, sin subir aún)
+    const objectUrl = URL.createObjectURL(file);
+    mostrarPreviewImagen(objectUrl);
+}
+
+// — Preview por URL externa —
+inputImagenUrl.addEventListener('input', () => {
+    const url = inputImagenUrl.value.trim();
+    archivoImagenSeleccionado = null; // si introduce URL, descartamos archivo
+    imagenUrlFinal = null;
+    if (url) {
+        mostrarPreviewImagen(url);
+    } else {
+        ocultarPreviewImagen();
+    }
+});
+
+function mostrarPreviewImagen(src) {
+    imgPreview.src = src;
+    imgPreviewBox.classList.remove('hidden');
+}
+
+function ocultarPreviewImagen() {
+    imgPreviewBox.classList.add('hidden');
+    imgPreview.src = '';
+    archivoImagenSeleccionado = null;
+    imagenUrlFinal = null;
+    fileInput.value = '';
+    fileNameDisplay.textContent = '';
+    inputImagenUrl.value = '';
+}
+
+btnRemoveImg.addEventListener('click', ocultarPreviewImagen);
+
+// — Sube el archivo a Supabase Storage y devuelve la URL pública —
+// El bucket debe llamarse "portadas" y ser público (o ajusta el nombre aquí).
+async function subirImagenAStorage(file) {
+    const extension = file.name.split('.').pop();
+    const nombreArchivo = `portada-${Date.now()}.${extension}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('portadas')                        // ← nombre del bucket en Supabase Storage
+        .upload(nombreArchivo, file, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: file.type
+        });
+
+    if (uploadError) {
+        throw new Error('Error subiendo imagen: ' + uploadError.message);
+    }
+
+    const { data: urlData } = supabase.storage
+        .from('portadas')
+        .getPublicUrl(nombreArchivo);
+
+    return urlData.publicUrl;
+}
 
 // --------------------------------------------------
 // 5. MODAL DE PREVISUALIZACIÓN
@@ -142,7 +238,8 @@ document.getElementById('btn-preview').addEventListener('click', () => {
     const titulo      = document.getElementById('titulo').value;
     const descripcion = document.getElementById('descripcion').value;
     const contenido   = getContenido();
-    const imagen      = document.getElementById('imagen_portada').value;
+    // Para la preview usamos el src actual de la imagen (puede ser ObjectURL o URL externa)
+    const imagen      = imgPreview.src && !imgPreviewBox.classList.contains('hidden') ? imgPreview.src : '';
     const catSelect   = document.getElementById('categoria_id');
     const categoria   = catSelect.options[catSelect.selectedIndex]?.text || '';
     const fecha       = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -177,18 +274,17 @@ async function publicarArticulo() {
     limpiarErrores();
 
     const titulo         = document.getElementById('titulo').value.trim();
-    const slug         = document.getElementById('slug').value.trim();
+    const slug           = document.getElementById('slug').value.trim();
     const descripcion    = document.getElementById('descripcion').value.trim();
     const contenido      = getContenido();
     const categoria_id   = document.getElementById('categoria_id').value;
-    const imagen_portada = document.getElementById('imagen_portada').value.trim();
     const estado         = document.getElementById('estado').value === 'true';
 
     const contenidoVacio = !contenido || contenido === '<p><br></p>' || contenido === '<p></p>';
 
     let valido = true;
     if (!titulo)        { marcarError('titulo',       'El título es obligatorio.');  valido = false; }
-    if (!slug)        { marcarError('slug',        'La URL es obligatoria.');     valido = false; }
+    if (!slug)          { marcarError('slug',          'La URL es obligatoria.');     valido = false; }
     if (!categoria_id)  { marcarError('categoria_id', 'Selecciona una categoría.');  valido = false; }
     if (contenidoVacio) { mostrarStatus('El contenido no puede estar vacío.', 'error'); valido = false; }
     if (!valido) return;
@@ -208,6 +304,24 @@ async function publicarArticulo() {
         return;
     }
 
+    // — Resolver la imagen de portada —
+    let imagen_portada = null;
+
+    if (archivoImagenSeleccionado) {
+        // Si hay un archivo local, lo subimos ahora a Storage
+        try {
+            mostrarStatus('⏳ Subiendo imagen...', 'loading');
+            imagenUrlFinal = await subirImagenAStorage(archivoImagenSeleccionado);
+            imagen_portada = imagenUrlFinal;
+        } catch (err) {
+            mostrarStatus('❌ ' + err.message, 'error');
+            return;
+        }
+    } else if (inputImagenUrl.value.trim()) {
+        // Si se introdujo una URL externa, la usamos directamente
+        imagen_portada = inputImagenUrl.value.trim();
+    }
+
     const nuevoArticulo = {
         titulo,
         slug,
@@ -218,6 +332,8 @@ async function publicarArticulo() {
         fecha_publicacion: new Date().toISOString().split('T')[0],
         estado
     };
+
+    mostrarStatus('⏳ Guardando artículo...', 'loading');
 
     const { error } = await supabase
         .from('articulos')
@@ -231,7 +347,7 @@ async function publicarArticulo() {
     mostrarStatus('✅ ¡Artículo publicado! URL: /articulo/?slug=' + slug, 'success');
     document.getElementById('formulario-articulo').reset();
     limpiarContenido();
-    imgPreviewBox.classList.add('hidden');
+    ocultarPreviewImagen();
     slugManual = false;
 }
 
