@@ -1,0 +1,17 @@
+// ── HAMBURGER MENU ──
+const toggle = document.getElementById('menuToggle');
+const nav = document.getElementById('navLinks');
+
+toggle.addEventListener('click', () => nav.classList.toggle('open'));
+
+// ── FADE-IN ON SCROLL ──
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
