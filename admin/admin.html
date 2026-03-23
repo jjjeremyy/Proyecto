@@ -59,6 +59,46 @@
 
                         <div class="field-group">
                             <label>Contenido <span class="required">*</span></label>
+
+                            <!-- Barra de inserción de tabla -->
+                            <div class="table-actions" id="table-actions">
+                                <span class="table-actions-label">📊 Tabla:</span>
+                                <select id="table-cols" class="table-size-select" title="Número de columnas">
+                                    <option value="1">1 col</option>
+                                    <option value="2">2 col</option>
+                                    <option value="3" selected>3 col</option>
+                                    <option value="4">4 col</option>
+                                    <option value="5">5 col</option>
+                                    <option value="6">6 col</option>
+                                    <option value="7">7 col</option>
+                                    <option value="8">8 col</option>
+                                    <option value="9">9 col</option>
+                                    <option value="10">10 col</option>
+                                </select>
+                                <span class="table-actions-sep">×</span>
+                                <select id="table-rows" class="table-size-select" title="Número de filas">
+                                    <option value="1">1 fila</option>
+                                    <option value="2">2 filas</option>
+                                    <option value="3" selected>3 filas</option>
+                                    <option value="4">4 filas</option>
+                                    <option value="5">5 filas</option>
+                                    <option value="6">6 filas</option>
+                                    <option value="7">7 filas</option>
+                                    <option value="8">8 filas</option>
+                                    <option value="9">9 filas</option>
+                                    <option value="10">10 filas</option>
+                                    <option value="15">15 filas</option>
+                                    <option value="20">20 filas</option>
+                                </select>
+                                <label class="table-header-toggle" title="Primera fila como cabecera">
+                                    <input type="checkbox" id="table-header" checked>
+                                    <span>Con cabecera</span>
+                                </label>
+                                <button type="button" id="btn-insert-table" class="btn-table-action">
+                                    ＋ Insertar tabla
+                                </button>
+                            </div>
+
                             <!-- Quill se monta aquí -->
                             <div id="quill-editor"></div>
                             <!-- Campo oculto donde guardamos el HTML generado por Quill -->
@@ -101,13 +141,11 @@
                         <div class="admin-card">
                             <h3 class="admin-card-title">🖼 Imagen de portada</h3>
 
-                            <!-- Pestañas para elegir método -->
                             <div class="img-tabs">
                                 <button type="button" class="img-tab active" data-tab="upload">📁 Subir archivo</button>
                                 <button type="button" class="img-tab" data-tab="url">🔗 URL externa</button>
                             </div>
 
-                            <!-- Panel: subir desde ordenador -->
                             <div class="img-tab-panel" id="panel-upload">
                                 <div class="field-group">
                                     <label for="imagen_archivo">Selecciona imagen</label>
@@ -122,7 +160,6 @@
                                 </div>
                             </div>
 
-                            <!-- Panel: URL externa -->
                             <div class="img-tab-panel hidden" id="panel-url">
                                 <div class="field-group">
                                     <label for="imagen_portada">URL de la imagen</label>
@@ -130,7 +167,6 @@
                                 </div>
                             </div>
 
-                            <!-- Vista previa compartida -->
                             <div id="img-preview-box" class="img-preview-box hidden">
                                 <img id="img-preview" src="" alt="Vista previa">
                                 <button type="button" id="btn-remove-img" class="btn-remove-img">✕ Quitar imagen</button>

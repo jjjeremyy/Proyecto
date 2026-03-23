@@ -42,7 +42,46 @@ function limpiarContenido() {
 }
 
 // --------------------------------------------------
-// 2. CARGAR CATEGORÍAS en el <select>
+// 2. INSERTAR TABLA COMO HTML NATIVO
+//    Quill 1.x acepta HTML completo vía
+//    clipboard.dangerouslyPasteHTML — funciona
+//    sin ningún módulo externo adicional.
+// --------------------------------------------------
+document.getElementById('btn-insert-table').addEventListener('click', () => {
+    const cols      = parseInt(document.getElementById('table-cols').value, 10);
+    const rows      = parseInt(document.getElementById('table-rows').value, 10);
+    const conHeader = document.getElementById('table-header').checked;
+
+    // Construir el HTML de la tabla
+    let html = '<table><tbody>';
+
+    for (let r = 0; r < rows; r++) {
+        html += '<tr>';
+        for (let c = 0; c < cols; c++) {
+            if (r === 0 && conHeader) {
+                html += `<th>Cabecera ${c + 1}</th>`;
+            } else {
+                html += '<td> </td>';
+            }
+        }
+        html += '</tr>';
+    }
+
+    html += '</tbody></table><p><br></p>';
+
+    // Obtener el índice actual del cursor (o el final si no hay foco)
+    const range = quill.getSelection() || { index: quill.getLength() };
+
+    // Insertar en la posición del cursor
+    quill.clipboard.dangerouslyPasteHTML(range.index, html);
+
+    // Mover el cursor justo después de la tabla
+    quill.setSelection(range.index + 1, 0);
+    quill.focus();
+});
+
+// --------------------------------------------------
+// 3. CARGAR CATEGORÍAS en el <select>
 // --------------------------------------------------
 async function cargarCategorias() {
     const select = document.getElementById('categoria_id');
@@ -82,7 +121,7 @@ async function cargarCategorias() {
 cargarCategorias();
 
 // --------------------------------------------------
-// 3. GENERADOR AUTOMÁTICO DE slug
+// 4. GENERADOR AUTOMÁTICO DE slug
 // --------------------------------------------------
 const inputTitulo = document.getElementById('titulo');
 const inputSlug   = document.getElementById('slug');
@@ -111,22 +150,17 @@ function generarSlug(texto) {
 }
 
 // --------------------------------------------------
-// 4. GESTIÓN DE IMAGEN DE PORTADA
-//    — Pestañas: subir archivo / URL externa
-//    — Drag & drop + clic en la zona de subida
-//    — Vista previa unificada
+// 5. GESTIÓN DE IMAGEN DE PORTADA
 // --------------------------------------------------
-const imgPreviewBox  = document.getElementById('img-preview-box');
-const imgPreview     = document.getElementById('img-preview');
-const fileInput      = document.getElementById('imagen_archivo');
-const fileDropArea   = document.getElementById('file-drop-area');
+const imgPreviewBox   = document.getElementById('img-preview-box');
+const imgPreview      = document.getElementById('img-preview');
+const fileInput       = document.getElementById('imagen_archivo');
+const fileDropArea    = document.getElementById('file-drop-area');
 const fileNameDisplay = document.getElementById('file-name-display');
-const inputImagenUrl = document.getElementById('imagen_portada');
-const btnRemoveImg   = document.getElementById('btn-remove-img');
+const inputImagenUrl  = document.getElementById('imagen_portada');
+const btnRemoveImg    = document.getElementById('btn-remove-img');
 
-// Almacena el File seleccionado (si se elige subir desde ordenador)
 let archivoImagenSeleccionado = null;
-// Almacena la URL pública ya subida (para no subir dos veces)
 let imagenUrlFinal = null;
 
 // — Pestañas —
@@ -140,10 +174,8 @@ document.querySelectorAll('.img-tab').forEach(tab => {
     });
 });
 
-// — Clic en zona de drop activa el input file —
 fileDropArea.addEventListener('click', () => fileInput.click());
 
-// — Drag & drop visual —
 fileDropArea.addEventListener('dragover', (e) => {
     e.preventDefault();
     fileDropArea.classList.add('dragging');
@@ -160,7 +192,6 @@ fileDropArea.addEventListener('drop', (e) => {
     }
 });
 
-// — Selección mediante input file —
 fileInput.addEventListener('change', () => {
     const file = fileInput.files[0];
     if (file) procesarArchivoImagen(file);
@@ -168,19 +199,15 @@ fileInput.addEventListener('change', () => {
 
 function procesarArchivoImagen(file) {
     archivoImagenSeleccionado = file;
-    imagenUrlFinal = null; // resetear URL previa si la había
-
+    imagenUrlFinal = null;
     fileNameDisplay.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-
-    // Vista previa local (ObjectURL, sin subir aún)
     const objectUrl = URL.createObjectURL(file);
     mostrarPreviewImagen(objectUrl);
 }
 
-// — Preview por URL externa —
 inputImagenUrl.addEventListener('input', () => {
     const url = inputImagenUrl.value.trim();
-    archivoImagenSeleccionado = null; // si introduce URL, descartamos archivo
+    archivoImagenSeleccionado = null;
     imagenUrlFinal = null;
     if (url) {
         mostrarPreviewImagen(url);
@@ -206,14 +233,12 @@ function ocultarPreviewImagen() {
 
 btnRemoveImg.addEventListener('click', ocultarPreviewImagen);
 
-// — Sube el archivo a Supabase Storage y devuelve la URL pública —
-// El bucket debe llamarse "portadas" y ser público (o ajusta el nombre aquí).
 async function subirImagenAStorage(file) {
     const extension = file.name.split('.').pop();
     const nombreArchivo = `portada-${Date.now()}.${extension}`;
 
     const { error: uploadError } = await supabase.storage
-        .from('portadas')                        // ← nombre del bucket en Supabase Storage
+        .from('portadas')
         .upload(nombreArchivo, file, {
             cacheControl: '3600',
             upsert: false,
@@ -232,13 +257,12 @@ async function subirImagenAStorage(file) {
 }
 
 // --------------------------------------------------
-// 5. MODAL DE PREVISUALIZACIÓN
+// 6. MODAL DE PREVISUALIZACIÓN
 // --------------------------------------------------
 document.getElementById('btn-preview').addEventListener('click', () => {
     const titulo      = document.getElementById('titulo').value;
     const descripcion = document.getElementById('descripcion').value;
     const contenido   = getContenido();
-    // Para la preview usamos el src actual de la imagen (puede ser ObjectURL o URL externa)
     const imagen      = imgPreview.src && !imgPreviewBox.classList.contains('hidden') ? imgPreview.src : '';
     const catSelect   = document.getElementById('categoria_id');
     const categoria   = catSelect.options[catSelect.selectedIndex]?.text || '';
@@ -266,7 +290,7 @@ function cerrarModal() {
 }
 
 // --------------------------------------------------
-// 6. PUBLICAR ARTÍCULO EN SUPABASE
+// 7. PUBLICAR ARTÍCULO EN SUPABASE
 // --------------------------------------------------
 document.getElementById('btn-submit').addEventListener('click', publicarArticulo);
 
@@ -291,7 +315,6 @@ async function publicarArticulo() {
 
     mostrarStatus('⏳ Publicando artículo...', 'loading');
 
-    // Verificar que la slug no exista ya
     const { data: existente } = await supabase
         .from('articulos')
         .select('id')
@@ -304,11 +327,9 @@ async function publicarArticulo() {
         return;
     }
 
-    // — Resolver la imagen de portada —
     let imagen_portada = null;
 
     if (archivoImagenSeleccionado) {
-        // Si hay un archivo local, lo subimos ahora a Storage
         try {
             mostrarStatus('⏳ Subiendo imagen...', 'loading');
             imagenUrlFinal = await subirImagenAStorage(archivoImagenSeleccionado);
@@ -318,7 +339,6 @@ async function publicarArticulo() {
             return;
         }
     } else if (inputImagenUrl.value.trim()) {
-        // Si se introdujo una URL externa, la usamos directamente
         imagen_portada = inputImagenUrl.value.trim();
     }
 
