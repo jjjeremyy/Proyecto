@@ -16,6 +16,7 @@ body {
     background-color: var(--color-primary);
     color: var(--color-text);
     padding: 30px;
+    padding-bottom: 0px;
 }
 
 
@@ -29,7 +30,7 @@ body {
 ========================================== */
 .search-section {
     background-color: var(--color-primary);
-    padding: 16px 20px 28px 20px;
+    padding: 16px 20px 35px 20px;
 }
 
 .search-inner {
@@ -170,6 +171,8 @@ body {
 
 /* Fix color del título para que sea visible */
 .recent-topics .title-recent-topics h2 {
+    padding-top: 40px;
+    padding-left: 60px;
     color: var(--color-primary);
 }
 
