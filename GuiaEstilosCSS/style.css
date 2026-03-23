@@ -74,43 +74,29 @@ header{
     text-decoration: underline;
 }
 
-footer{
+footer {
     display: flex;
     flex-direction: column;
     background-color: var(--color-primary);
     color: var(--color-secondary);
     text-align: center;
-    margin: 0%;
-    padding: 20px;
-    border-top: 1px solid var(--color-secondary);
+    padding: 40px 20px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
 }
-
-.footer-info{
+.footer-info {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-around;
-    gap: 70px;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
 }
-
-.footer-logo-img{
-    width: 200px;
-    height: 200px;
-    margin-right: 10px;
-}
-
-.footer-links{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 20px;
-}
-
-.footer-links a{
-    color: var(--color-secondary);
-    text-decoration: none;
-    font-size: 17px;
-}
-
-.footer-links a:hover{
-    text-decoration: underline;
-}
+.footer-logo-img { width: 100px; height: 100px; }
+.footer-links { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+.footer-links a { color: rgba(255,255,255,0.75); text-decoration: none; font-size: 15px; transition: color 0.2s; }
+.footer-links a:hover { color: #fff; }
+.footer-links h4 { font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.4; margin-bottom: 4px; }
+.contact-info { text-align: left; }
+.contact-info h3 { font-family: 'Space Mono', monospace; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.4; margin-bottom: 8px; }
+.contact-info p { font-size: 14px; opacity: 0.7; }
+footer > p { font-size: 13px; opacity: 0.4; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; font-family: 'Space Mono', monospace; }
