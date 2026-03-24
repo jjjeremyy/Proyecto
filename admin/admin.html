@@ -22,7 +22,8 @@
                 <span>SistemaBase</span>
             </div>
             <nav class="admin-nav">
-                <a href="#" class="admin-nav-link active">✏️ Nuevo artículo</a>
+                <a href="#" class="admin-nav-link active" data-section="seccion-editor" id="nav-nuevo">✏️ Nuevo artículo</a>
+                <a href="#" class="admin-nav-link" data-section="seccion-articulos" id="nav-articulos">📄 Mis artículos</a>
                 <a href="/index.html" class="admin-nav-link">🌐 Ver web</a>
             </nav>
         </aside>
@@ -30,9 +31,13 @@
         <!-- CONTENIDO PRINCIPAL -->
         <main class="admin-main">
 
+            <!-- ====== SECCIÓN EDITOR ====== -->
+            <section id="seccion-editor">
+
             <div class="admin-topbar">
-                <h1>Nuevo Artículo</h1>
+                <h1 id="editor-title">Nuevo Artículo</h1>
                 <div class="admin-topbar-actions">
+                    <button type="button" id="btn-cancel-edit" class="btn-secondary hidden">✕ Cancelar edición</button>
                     <button type="button" id="btn-preview" class="btn-secondary">👁 Previsualizar</button>
                     <button type="button" id="btn-submit"  class="btn-primary">🚀 Publicar</button>
                 </div>
@@ -176,6 +181,39 @@
                     </div>
                 </div>
             </form>
+
+            </section><!-- /seccion-editor -->
+
+            <!-- ====== SECCIÓN MIS ARTÍCULOS ====== -->
+            <section id="seccion-articulos" class="hidden">
+                <div class="admin-topbar">
+                    <h1>Mis Artículos</h1>
+                    <div class="admin-topbar-actions">
+                        <button type="button" id="btn-nuevo-desde-lista" class="btn-primary">✏️ Nuevo artículo</button>
+                    </div>
+                </div>
+
+                <div id="status-message-lista" class="status-message hidden"></div>
+
+                <div class="articles-table-wrapper">
+                    <table class="articles-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Categoría</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="articles-tbody">
+                            <!-- Se rellena dinámicamente -->
+                        </tbody>
+                    </table>
+                    <p id="articles-empty" class="articles-empty hidden">No hay artículos todavía.</p>
+                </div>
+            </section><!-- /seccion-articulos -->
+
         </main>
     </div>
 
@@ -188,6 +226,25 @@
                 <button id="close-preview" class="modal-close">✕</button>
             </div>
             <div class="modal-body" id="preview-body"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN DE BORRADO -->
+    <div id="delete-modal" class="modal hidden">
+        <div class="modal-overlay" id="delete-modal-overlay"></div>
+        <div class="modal-content modal-content--small">
+            <div class="modal-header modal-header--danger">
+                <h2>🗑 Confirmar eliminación</h2>
+                <button id="delete-modal-close" class="modal-close">✕</button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p id="delete-modal-text">¿Estás seguro de que quieres eliminar este artículo?</p>
+                <p style="font-size:13px;color:#6b7a99;">Esta acción no se puede deshacer.</p>
+                <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+                    <button type="button" id="btn-delete-cancel" class="btn-secondary">Cancelar</button>
+                    <button type="button" id="btn-delete-confirm" class="btn-danger">🗑 Eliminar</button>
+                </div>
+            </div>
         </div>
     </div>
 

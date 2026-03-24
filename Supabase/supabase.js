@@ -27,10 +27,40 @@ export async function crearArticulo(nuevoArticulo) {
   return data
 }
 
+export async function obtenerTodosArticulos() {
+  const { data, error } = await supabase
+    .from('articulos')
+    .select(`*, categorias (nombre, slug)`)
+    .order('fecha_publicacion', { ascending: false })
+
+  if (error) console.error('Error:', error)
+  return data
+}
+
 export async function cambiarEstadoArticulo(id, nuevoEstado) {
   const { data, error } = await supabase
     .from('articulos')
     .update({ estado: nuevoEstado })
+    .eq('id', id)
+
+  if (error) throw error
+  return data
+}
+
+export async function actualizarArticulo(id, datos) {
+  const { data, error } = await supabase
+    .from('articulos')
+    .update(datos)
+    .eq('id', id)
+
+  if (error) throw error
+  return data
+}
+
+export async function eliminarArticulo(id) {
+  const { data, error } = await supabase
+    .from('articulos')
+    .delete()
     .eq('id', id)
 
   if (error) throw error

@@ -13,6 +13,11 @@ if (!session) {
 }
 
 // --------------------------------------------------
+// 0b. VARIABLE DE EDICIÓN
+// --------------------------------------------------
+let articuloEditandoId = null;
+
+// --------------------------------------------------
 // 1. INICIALIZAR QUILL (editor WYSIWYG gratuito)
 // --------------------------------------------------
 const quill = new Quill('#quill-editor', {
@@ -43,16 +48,12 @@ function limpiarContenido() {
 
 // --------------------------------------------------
 // 2. INSERTAR TABLA COMO HTML NATIVO
-//    Quill 1.x acepta HTML completo vía
-//    clipboard.dangerouslyPasteHTML — funciona
-//    sin ningún módulo externo adicional.
 // --------------------------------------------------
 document.getElementById('btn-insert-table').addEventListener('click', () => {
     const cols      = parseInt(document.getElementById('table-cols').value, 10);
     const rows      = parseInt(document.getElementById('table-rows').value, 10);
     const conHeader = document.getElementById('table-header').checked;
 
-    // Construir el HTML de la tabla
     let html = '<table><tbody>';
 
     for (let r = 0; r < rows; r++) {
@@ -69,13 +70,8 @@ document.getElementById('btn-insert-table').addEventListener('click', () => {
 
     html += '</tbody></table><p><br></p>';
 
-    // Obtener el índice actual del cursor (o el final si no hay foco)
     const range = quill.getSelection() || { index: quill.getLength() };
-
-    // Insertar en la posición del cursor
     quill.clipboard.dangerouslyPasteHTML(range.index, html);
-
-    // Mover el cursor justo después de la tabla
     quill.setSelection(range.index + 1, 0);
     quill.focus();
 });
@@ -290,7 +286,7 @@ function cerrarModal() {
 }
 
 // --------------------------------------------------
-// 7. PUBLICAR ARTÍCULO EN SUPABASE
+// 7. PUBLICAR / GUARDAR ARTÍCULO EN SUPABASE
 // --------------------------------------------------
 document.getElementById('btn-submit').addEventListener('click', publicarArticulo);
 
@@ -313,13 +309,14 @@ async function publicarArticulo() {
     if (contenidoVacio) { mostrarStatus('El contenido no puede estar vacío.', 'error'); valido = false; }
     if (!valido) return;
 
-    mostrarStatus('⏳ Publicando artículo...', 'loading');
+    // --- Verificar slug duplicado (excluir el artículo actual si estamos editando) ---
+    mostrarStatus('⏳ Verificando URL...', 'loading');
 
-    const { data: existente } = await supabase
-        .from('articulos')
-        .select('id')
-        .eq('slug', slug)
-        .maybeSingle();
+    let query = supabase.from('articulos').select('id').eq('slug', slug);
+    if (articuloEditandoId) {
+        query = query.neq('id', articuloEditandoId);
+    }
+    const { data: existente } = await query.maybeSingle();
 
     if (existente) {
         marcarError('slug', 'Esta URL ya existe. Elige otra.');
@@ -327,6 +324,7 @@ async function publicarArticulo() {
         return;
     }
 
+    // --- Imagen ---
     let imagen_portada = null;
 
     if (archivoImagenSeleccionado) {
@@ -340,36 +338,280 @@ async function publicarArticulo() {
         }
     } else if (inputImagenUrl.value.trim()) {
         imagen_portada = inputImagenUrl.value.trim();
+    } else if (articuloEditandoId && imgPreview.src && !imgPreviewBox.classList.contains('hidden')) {
+        // Mantener la imagen existente si no se ha cambiado
+        imagen_portada = imgPreview.src;
     }
 
-    const nuevoArticulo = {
+    const datosArticulo = {
         titulo,
         slug,
         descripcion:       descripcion || null,
         contenido,
         categoria_id:      parseInt(categoria_id),
         imagen_portada:    imagen_portada || null,
-        fecha_publicacion: new Date().toISOString().split('T')[0],
         estado
     };
 
-    mostrarStatus('⏳ Guardando artículo...', 'loading');
+    // --- INSERT o UPDATE ---
+    if (articuloEditandoId) {
+        mostrarStatus('⏳ Guardando cambios...', 'loading');
+        const { error } = await supabase
+            .from('articulos')
+            .update(datosArticulo)
+            .eq('id', articuloEditandoId);
 
-    const { error } = await supabase
+        if (error) {
+            mostrarStatus('❌ Error al guardar: ' + error.message, 'error');
+            return;
+        }
+
+        mostrarStatus('✅ ¡Artículo actualizado correctamente!', 'success');
+        resetearEditor();
+    } else {
+        datosArticulo.fecha_publicacion = new Date().toISOString().split('T')[0];
+
+        mostrarStatus('⏳ Publicando artículo...', 'loading');
+        const { error } = await supabase
+            .from('articulos')
+            .insert([datosArticulo]);
+
+        if (error) {
+            mostrarStatus('❌ Error al publicar: ' + error.message, 'error');
+            return;
+        }
+
+        mostrarStatus('✅ ¡Artículo publicado! URL: /articulo/?slug=' + slug, 'success');
+        document.getElementById('formulario-articulo').reset();
+        limpiarContenido();
+        ocultarPreviewImagen();
+        slugManual = false;
+    }
+}
+
+// --------------------------------------------------
+// 8. NAVEGACIÓN ENTRE SECCIONES
+// --------------------------------------------------
+const navLinks = document.querySelectorAll('.admin-nav-link[data-section]');
+const seccionEditor    = document.getElementById('seccion-editor');
+const seccionArticulos = document.getElementById('seccion-articulos');
+
+navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = link.dataset.section;
+
+        // Actualizar clase active en sidebar
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+
+        // Mostrar/ocultar secciones
+        if (target === 'seccion-articulos') {
+            seccionEditor.classList.add('hidden');
+            seccionArticulos.classList.remove('hidden');
+            cargarListaArticulos();
+        } else {
+            seccionArticulos.classList.add('hidden');
+            seccionEditor.classList.remove('hidden');
+        }
+    });
+});
+
+// Botón "Nuevo artículo" desde la lista
+document.getElementById('btn-nuevo-desde-lista').addEventListener('click', () => {
+    resetearEditor();
+    document.getElementById('nav-nuevo').click();
+});
+
+// --------------------------------------------------
+// 9. LISTAR ARTÍCULOS
+// --------------------------------------------------
+async function cargarListaArticulos() {
+    const tbody = document.getElementById('articles-tbody');
+    const emptyMsg = document.getElementById('articles-empty');
+
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#6b7a99;">Cargando artículos...</td></tr>';
+    emptyMsg.classList.add('hidden');
+
+    const { data, error } = await supabase
         .from('articulos')
-        .insert([nuevoArticulo]);
+        .select('*, categorias (nombre)')
+        .order('fecha_publicacion', { ascending: false });
 
     if (error) {
-        mostrarStatus('❌ Error al publicar: ' + error.message, 'error');
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#e02424;">❌ Error al cargar artículos</td></tr>';
+        console.error(error);
         return;
     }
 
-    mostrarStatus('✅ ¡Artículo publicado! URL: /articulo/?slug=' + slug, 'success');
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '';
+        emptyMsg.classList.remove('hidden');
+        return;
+    }
+
+    tbody.innerHTML = '';
+
+    data.forEach(art => {
+        const tr = document.createElement('tr');
+        const fecha = art.fecha_publicacion
+            ? new Date(art.fecha_publicacion).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
+            : '—';
+        const estadoBadge = art.estado
+            ? '<span class="badge badge--published">Publicado</span>'
+            : '<span class="badge badge--draft">Borrador</span>';
+        const categoria = art.categorias?.nombre || '—';
+
+        tr.innerHTML = `
+            <td class="article-title-cell" title="${art.titulo}">${art.titulo}</td>
+            <td>${categoria}</td>
+            <td>${estadoBadge}</td>
+            <td class="articles-date">${fecha}</td>
+            <td>
+                <div class="actions-cell">
+                    <button class="btn-action btn-action--edit" data-id="${art.id}" title="Editar artículo">✏️ Editar</button>
+                    <button class="btn-action btn-action--delete" data-id="${art.id}" data-title="${art.titulo}" title="Eliminar artículo">🗑 Eliminar</button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // Delegar eventos de editar y eliminar
+    tbody.addEventListener('click', handleArticleAction);
+}
+
+function handleArticleAction(e) {
+    const btn = e.target.closest('.btn-action');
+    if (!btn) return;
+
+    const id = parseInt(btn.dataset.id);
+
+    if (btn.classList.contains('btn-action--edit')) {
+        editarArticulo(id);
+    } else if (btn.classList.contains('btn-action--delete')) {
+        const title = btn.dataset.title;
+        abrirModalEliminar(id, title);
+    }
+}
+
+// --------------------------------------------------
+// 10. EDITAR ARTÍCULO
+// --------------------------------------------------
+async function editarArticulo(id) {
+    mostrarStatusLista('⏳ Cargando artículo...', 'loading');
+
+    const { data: art, error } = await supabase
+        .from('articulos')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error || !art) {
+        mostrarStatusLista('❌ No se pudo cargar el artículo.', 'error');
+        return;
+    }
+
+    // Rellenar formulario
+    document.getElementById('titulo').value = art.titulo || '';
+    document.getElementById('slug').value = art.slug || '';
+    document.getElementById('descripcion').value = art.descripcion || '';
+    document.getElementById('categoria_id').value = art.categoria_id || '';
+    document.getElementById('estado').value = art.estado ? 'true' : 'false';
+
+    // Cargar contenido en Quill
+    quill.root.innerHTML = art.contenido || '';
+
+    // Imagen de portada
+    if (art.imagen_portada) {
+        inputImagenUrl.value = art.imagen_portada;
+        mostrarPreviewImagen(art.imagen_portada);
+        // Activar pestaña URL
+        document.querySelectorAll('.img-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('.img-tab[data-tab="url"]').classList.add('active');
+        document.getElementById('panel-upload').classList.add('hidden');
+        document.getElementById('panel-url').classList.remove('hidden');
+    } else {
+        ocultarPreviewImagen();
+    }
+
+    // Configurar modo edición
+    articuloEditandoId = id;
+    slugManual = true;
+
+    document.getElementById('editor-title').textContent = 'Editar Artículo';
+    document.getElementById('btn-submit').innerHTML = '💾 Guardar cambios';
+    document.getElementById('btn-cancel-edit').classList.remove('hidden');
+
+    // Ocultar lista de status
+    document.getElementById('status-message-lista').classList.add('hidden');
+
+    // Navegar al editor
+    document.getElementById('nav-nuevo').click();
+}
+
+// --------------------------------------------------
+// 11. CANCELAR EDICIÓN → volver a modo creación
+// --------------------------------------------------
+document.getElementById('btn-cancel-edit').addEventListener('click', () => {
+    resetearEditor();
+});
+
+function resetearEditor() {
+    articuloEditandoId = null;
+    slugManual = false;
+
     document.getElementById('formulario-articulo').reset();
     limpiarContenido();
     ocultarPreviewImagen();
-    slugManual = false;
+
+    document.getElementById('editor-title').textContent = 'Nuevo Artículo';
+    document.getElementById('btn-submit').innerHTML = '🚀 Publicar';
+    document.getElementById('btn-cancel-edit').classList.add('hidden');
+    document.getElementById('status-message').classList.add('hidden');
 }
+
+// --------------------------------------------------
+// 12. ELIMINAR ARTÍCULO — Modal de confirmación
+// --------------------------------------------------
+let articuloAEliminarId = null;
+
+function abrirModalEliminar(id, titulo) {
+    articuloAEliminarId = id;
+    document.getElementById('delete-modal-text').textContent = `¿Estás seguro de que quieres eliminar "${titulo}"?`;
+    document.getElementById('delete-modal').classList.remove('hidden');
+}
+
+function cerrarModalEliminar() {
+    articuloAEliminarId = null;
+    document.getElementById('delete-modal').classList.add('hidden');
+}
+
+document.getElementById('btn-delete-cancel').addEventListener('click', cerrarModalEliminar);
+document.getElementById('delete-modal-close').addEventListener('click', cerrarModalEliminar);
+document.getElementById('delete-modal-overlay').addEventListener('click', cerrarModalEliminar);
+
+document.getElementById('btn-delete-confirm').addEventListener('click', async () => {
+    if (!articuloAEliminarId) return;
+
+    const id = articuloAEliminarId;
+    cerrarModalEliminar();
+
+    mostrarStatusLista('⏳ Eliminando artículo...', 'loading');
+
+    const { error } = await supabase
+        .from('articulos')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        mostrarStatusLista('❌ Error al eliminar: ' + error.message, 'error');
+        return;
+    }
+
+    mostrarStatusLista('✅ Artículo eliminado correctamente.', 'success');
+    cargarListaArticulos();
+});
 
 // --------------------------------------------------
 // UTILIDADES
@@ -380,6 +622,13 @@ function mostrarStatus(mensaje, tipo) {
     el.className   = `status-message ${tipo}`;
     el.classList.remove('hidden');
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function mostrarStatusLista(mensaje, tipo) {
+    const el = document.getElementById('status-message-lista');
+    el.textContent = mensaje;
+    el.className   = `status-message ${tipo}`;
+    el.classList.remove('hidden');
 }
 
 function marcarError(idCampo, mensaje) {

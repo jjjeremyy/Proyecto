@@ -561,3 +561,190 @@ small {
 .ql-snow .ql-toolbar button.ql-active .ql-fill {
     fill: var(--color-primary) !important;
 }
+
+/* ==========================================
+   TABLA DE ARTÍCULOS
+========================================== */
+.articles-table-wrapper {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.articles-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+}
+
+.articles-table thead {
+    background: var(--color-bg);
+}
+
+.articles-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    border-bottom: 2px solid var(--color-border);
+    white-space: nowrap;
+}
+
+.articles-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+    vertical-align: middle;
+}
+
+.articles-table tbody tr {
+    transition: background 0.15s;
+}
+
+.articles-table tbody tr:hover {
+    background: #f5f8ff;
+}
+
+.articles-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.article-title-cell {
+    font-weight: 600;
+    color: var(--color-primary);
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Badges de estado */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.badge--published {
+    background: #d1fae5;
+    color: var(--color-success);
+}
+
+.badge--draft {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* Botones de acción */
+.actions-cell {
+    display: flex;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.2s;
+    font-family: Arial, sans-serif;
+    white-space: nowrap;
+}
+
+.btn-action--edit {
+    background: #e0eaff;
+    color: var(--color-primary);
+    border-color: #bfcff8;
+}
+
+.btn-action--edit:hover {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+}
+
+.btn-action--delete {
+    background: #fee2e2;
+    color: var(--color-error);
+    border-color: #fca5a5;
+}
+
+.btn-action--delete:hover {
+    background: var(--color-error);
+    color: #fff;
+    border-color: var(--color-error);
+}
+
+/* Botón danger (modal) */
+.btn-danger {
+    background-color: var(--color-error);
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: Arial, sans-serif;
+}
+
+.btn-danger:hover {
+    background-color: #c81e1e;
+}
+
+/* Modal pequeño */
+.modal-content--small {
+    max-width: 440px;
+}
+
+.modal-header--danger {
+    background-color: var(--color-error);
+}
+
+/* Mensaje vacío */
+.articles-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+}
+
+.articles-date {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* ==========================================
+   RESPONSIVE — TABLA DE ARTÍCULOS
+========================================== */
+@media (max-width: 768px) {
+    .articles-table th:nth-child(2),
+    .articles-table td:nth-child(2),
+    .articles-table th:nth-child(4),
+    .articles-table td:nth-child(4) {
+        display: none;
+    }
+
+    .article-title-cell {
+        max-width: 160px;
+    }
+}
