@@ -24,6 +24,7 @@ const quill = new Quill('#quill-editor', {
     theme: 'snow',
     placeholder: 'Escribe el contenido del artículo aquí...',
     modules: {
+        clipboard: { matchVisual: false },
         toolbar: [
             [{ header: [2, 3, 4, false] }],
             ['bold', 'italic', 'underline', 'strike'],
@@ -38,6 +39,32 @@ const quill = new Quill('#quill-editor', {
     }
 });
 
+// --------------------------------------------------
+// 1b. INTERCEPTAR PEGADO DE TABLAS
+//     Quill 1.x elimina <table> al pegar; inyectamos
+//     el HTML directamente en el DOM del editor.
+// --------------------------------------------------
+quill.root.addEventListener('paste', (e) => {
+    const html = e.clipboardData?.getData('text/html') || '';
+    if (!html.includes('<table') && !html.includes('<TABLE')) return;
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    // Limpiar el HTML: extraer solo las tablas y texto circundante
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+
+    // Eliminar meta/style tags que vienen de Word/Excel
+    temp.querySelectorAll('meta, style, link, script, xml').forEach(el => el.remove());
+
+    const cleanHTML = temp.innerHTML;
+
+    // Insertar en la posición del cursor
+    const range = quill.getSelection() || { index: quill.getLength() - 1 };
+    quill.clipboard.dangerouslyPasteHTML(range.index, cleanHTML + '<p><br></p>');
+});
+
 function getContenido() {
     return quill.root.innerHTML;
 }
@@ -50,8 +77,8 @@ function limpiarContenido() {
 // 2. INSERTAR TABLA COMO HTML NATIVO
 // --------------------------------------------------
 document.getElementById('btn-insert-table').addEventListener('click', () => {
-    const cols      = parseInt(document.getElementById('table-cols').value, 10);
-    const rows      = parseInt(document.getElementById('table-rows').value, 10);
+    const cols = parseInt(document.getElementById('table-cols').value, 10);
+    const rows = parseInt(document.getElementById('table-rows').value, 10);
     const conHeader = document.getElementById('table-header').checked;
 
     let html = '<table><tbody>';
@@ -120,8 +147,8 @@ cargarCategorias();
 // 4. GENERADOR AUTOMÁTICO DE slug
 // --------------------------------------------------
 const inputTitulo = document.getElementById('titulo');
-const inputSlug   = document.getElementById('slug');
-let slugManual    = false;
+const inputSlug = document.getElementById('slug');
+let slugManual = false;
 
 inputTitulo.addEventListener('input', () => {
     if (!slugManual) {
@@ -148,13 +175,13 @@ function generarSlug(texto) {
 // --------------------------------------------------
 // 5. GESTIÓN DE IMAGEN DE PORTADA
 // --------------------------------------------------
-const imgPreviewBox   = document.getElementById('img-preview-box');
-const imgPreview      = document.getElementById('img-preview');
-const fileInput       = document.getElementById('imagen_archivo');
-const fileDropArea    = document.getElementById('file-drop-area');
+const imgPreviewBox = document.getElementById('img-preview-box');
+const imgPreview = document.getElementById('img-preview');
+const fileInput = document.getElementById('imagen_archivo');
+const fileDropArea = document.getElementById('file-drop-area');
 const fileNameDisplay = document.getElementById('file-name-display');
-const inputImagenUrl  = document.getElementById('imagen_portada');
-const btnRemoveImg    = document.getElementById('btn-remove-img');
+const inputImagenUrl = document.getElementById('imagen_portada');
+const btnRemoveImg = document.getElementById('btn-remove-img');
 
 let archivoImagenSeleccionado = null;
 let imagenUrlFinal = null;
@@ -256,13 +283,13 @@ async function subirImagenAStorage(file) {
 // 6. MODAL DE PREVISUALIZACIÓN
 // --------------------------------------------------
 document.getElementById('btn-preview').addEventListener('click', () => {
-    const titulo      = document.getElementById('titulo').value;
+    const titulo = document.getElementById('titulo').value;
     const descripcion = document.getElementById('descripcion').value;
-    const contenido   = getContenido();
-    const imagen      = imgPreview.src && !imgPreviewBox.classList.contains('hidden') ? imgPreview.src : '';
-    const catSelect   = document.getElementById('categoria_id');
-    const categoria   = catSelect.options[catSelect.selectedIndex]?.text || '';
-    const fecha       = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+    const contenido = getContenido();
+    const imagen = imgPreview.src && !imgPreviewBox.classList.contains('hidden') ? imgPreview.src : '';
+    const catSelect = document.getElementById('categoria_id');
+    const categoria = catSelect.options[catSelect.selectedIndex]?.text || '';
+    const fecha = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 
     document.getElementById('preview-body').innerHTML = `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
@@ -293,19 +320,19 @@ document.getElementById('btn-submit').addEventListener('click', publicarArticulo
 async function publicarArticulo() {
     limpiarErrores();
 
-    const titulo         = document.getElementById('titulo').value.trim();
-    const slug           = document.getElementById('slug').value.trim();
-    const descripcion    = document.getElementById('descripcion').value.trim();
-    const contenido      = getContenido();
-    const categoria_id   = document.getElementById('categoria_id').value;
-    const estado         = document.getElementById('estado').value === 'true';
+    const titulo = document.getElementById('titulo').value.trim();
+    const slug = document.getElementById('slug').value.trim();
+    const descripcion = document.getElementById('descripcion').value.trim();
+    const contenido = getContenido();
+    const categoria_id = document.getElementById('categoria_id').value;
+    const estado = document.getElementById('estado').value === 'true';
 
     const contenidoVacio = !contenido || contenido === '<p><br></p>' || contenido === '<p></p>';
 
     let valido = true;
-    if (!titulo)        { marcarError('titulo',       'El título es obligatorio.');  valido = false; }
-    if (!slug)          { marcarError('slug',          'La URL es obligatoria.');     valido = false; }
-    if (!categoria_id)  { marcarError('categoria_id', 'Selecciona una categoría.');  valido = false; }
+    if (!titulo) { marcarError('titulo', 'El título es obligatorio.'); valido = false; }
+    if (!slug) { marcarError('slug', 'La URL es obligatoria.'); valido = false; }
+    if (!categoria_id) { marcarError('categoria_id', 'Selecciona una categoría.'); valido = false; }
     if (contenidoVacio) { mostrarStatus('El contenido no puede estar vacío.', 'error'); valido = false; }
     if (!valido) return;
 
@@ -346,10 +373,10 @@ async function publicarArticulo() {
     const datosArticulo = {
         titulo,
         slug,
-        descripcion:       descripcion || null,
+        descripcion: descripcion || null,
         contenido,
-        categoria_id:      parseInt(categoria_id),
-        imagen_portada:    imagen_portada || null,
+        categoria_id: parseInt(categoria_id),
+        imagen_portada: imagen_portada || null,
         estado
     };
 
@@ -393,7 +420,7 @@ async function publicarArticulo() {
 // 8. NAVEGACIÓN ENTRE SECCIONES
 // --------------------------------------------------
 const navLinks = document.querySelectorAll('.admin-nav-link[data-section]');
-const seccionEditor    = document.getElementById('seccion-editor');
+const seccionEditor = document.getElementById('seccion-editor');
 const seccionArticulos = document.getElementById('seccion-articulos');
 
 navLinks.forEach(link => {
@@ -619,7 +646,7 @@ document.getElementById('btn-delete-confirm').addEventListener('click', async ()
 function mostrarStatus(mensaje, tipo) {
     const el = document.getElementById('status-message');
     el.textContent = mensaje;
-    el.className   = `status-message ${tipo}`;
+    el.className = `status-message ${tipo}`;
     el.classList.remove('hidden');
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -627,7 +654,7 @@ function mostrarStatus(mensaje, tipo) {
 function mostrarStatusLista(mensaje, tipo) {
     const el = document.getElementById('status-message-lista');
     el.textContent = mensaje;
-    el.className   = `status-message ${tipo}`;
+    el.className = `status-message ${tipo}`;
     el.classList.remove('hidden');
 }
 
@@ -638,8 +665,8 @@ function marcarError(idCampo, mensaje) {
         if (!campo.parentNode.querySelector('.field-error-msg')) {
             const small = document.createElement('small');
             small.textContent = mensaje;
-            small.style.color  = '#e02424';
-            small.className    = 'field-error-msg';
+            small.style.color = '#e02424';
+            small.className = 'field-error-msg';
             campo.parentNode.appendChild(small);
         }
     }
