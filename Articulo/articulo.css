@@ -218,7 +218,6 @@
     margin: 0 0 20px 0;
     font-style: italic;
 }
-/*
 .article-meta-bottom {
     display: flex;
     justify-content: space-between;
@@ -227,22 +226,25 @@
     gap: 12px;
 }
 
- .btn-share {
+.btn-share {
     background-color: var(--color-primary);
     color: #fff;
     border: none;
-    padding: 8px 18px;
-    border-radius: 5px;
-    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    font-family: Arial, sans-serif;
-    transition: background-color 0.2s;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(4, 56, 115, 0.15);
 }
 
 .btn-share:hover {
     background-color: var(--color-button-hover);
+    box-shadow: 0 6px 16px rgba(4, 56, 115, 0.25);
+    transform: translateY(-1px);
 }
-*/ 
 /* ==========================================
    IMAGEN DESTACADA
 ========================================== */

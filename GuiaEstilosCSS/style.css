@@ -28,7 +28,7 @@ body {
    HEADER
    ══════════════════════════════════════════════ */
 
-header {
+body > header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -49,7 +49,7 @@ header {
 }
 
 /* Barra de progreso de scroll (decorativa, eje X) */
-header::after {
+body > header::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -292,7 +292,7 @@ footer > p {
    ══════════════════════════════════════════════ */
 
 @media (max-width: 860px) {
-    header { padding: 0 20px; }
+    body > header { padding: 0 20px; }
 
     .nav-links { gap: 2px; }
     .nav-links a { font-size: 13px; padding: 6px 10px; }
