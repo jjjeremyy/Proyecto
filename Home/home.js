@@ -2,29 +2,41 @@
 // HOME.JS — SistemaBase
 // Carga artículos recientes desde Supabase
 // e implementa el buscador en tiempo real.
+// Optimización: los datos del buscador se
+// cargan SOLO cuando el usuario empieza a escribir.
 // =============================================
-import { supabase } from '../Supabase/supabase.js';
+import { obtenerArticulosRecientes, obtenerArticulosBuscador } from '../Supabase/supabase.js';
 
 // --------------------------------------------------
-// 1. ARTÍCULOS RECIENTES (reemplaza "Temas Recientes")
+// 1. ARTÍCULOS RECIENTES — usa caché (1 hora)
 // --------------------------------------------------
 async function cargarArticulosRecientes() {
     const lista = document.getElementById('recent-articles-list');
     if (!lista) return;
 
-    lista.innerHTML = `
-        <div class="home-loading">
-            <div class="home-spinner"></div>
-        </div>`;
+    // Skeleton mientras carga
+    lista.innerHTML = Array.from({ length: 4 }, () => `
+        <div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(4,56,115,0.08);">
+            <div style="height:160px;background:linear-gradient(90deg,#eef2f8 25%,#e2e8f4 50%,#eef2f8 75%);background-size:200% 100%;animation:sk-home 1.4s infinite;"></div>
+            <div style="padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+                <div style="height:14px;width:75%;border-radius:5px;background:linear-gradient(90deg,#eef2f8 25%,#e2e8f4 50%,#eef2f8 75%);background-size:200% 100%;animation:sk-home 1.4s infinite;"></div>
+                <div style="height:12px;width:55%;border-radius:5px;background:linear-gradient(90deg,#eef2f8 25%,#e2e8f4 50%,#eef2f8 75%);background-size:200% 100%;animation:sk-home 1.4s infinite;"></div>
+            </div>
+        </div>
+    `).join('');
 
-    const { data, error } = await supabase
-        .from('articulos')
-        .select('titulo, slug, imagen_portada, descripcion, fecha_publicacion, categorias(nombre)')
-        .eq('estado', true)
-        .order('fecha_publicacion', { ascending: false })
-        .limit(4);
+    // Inyectar keyframes una sola vez
+    if (!document.getElementById('sk-home-style')) {
+        const s = document.createElement('style');
+        s.id = 'sk-home-style';
+        s.textContent = `@keyframes sk-home { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`;
+        document.head.appendChild(s);
+    }
 
-    if (error || !data || data.length === 0) {
+    // Llamada con caché — no va a Supabase si hay datos frescos en localStorage
+    const data = await obtenerArticulosRecientes(4);
+
+    if (!data || data.length === 0) {
         lista.innerHTML = '<p class="home-no-results">No hay artículos publicados todavía.</p>';
         return;
     }
@@ -32,9 +44,9 @@ async function cargarArticulosRecientes() {
     lista.innerHTML = data.map(art => `
         <a href="/Articulo/articulo.html?slug=${art.slug}" class="recent-card">
             <div class="recent-card-img-wrap">
-                <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}" 
-                    alt="${art.titulo}" 
-                    loading="lazy">
+                <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}"
+                     alt="${art.titulo}"
+                     loading="lazy">
                 <span class="recent-card-cat">${art.categorias?.nombre || ''}</span>
             </div>
             <div class="recent-card-body">
@@ -47,31 +59,48 @@ async function cargarArticulosRecientes() {
 }
 
 // --------------------------------------------------
-// 2. BUSCADOR EN TIEMPO REAL
+// 2. BUSCADOR — carga datos SOLO al primer keystroke
+//    (lazy loading: no consulta Supabase hasta que el
+//     usuario empieza a escribir)
 // --------------------------------------------------
-let todosLosArticulos = [];
-
-async function inicializarBuscador() {
-    const input     = document.getElementById('search-input');
+function inicializarBuscador() {
+    const input    = document.getElementById('search-input');
     const resultados = document.getElementById('search-results');
     if (!input || !resultados) return;
 
-    // Precargar todos los artículos publicados para buscar en cliente
-    const { data, error } = await supabase
-        .from('articulos')
-        .select('titulo, slug, descripcion, imagen_portada, categorias(nombre)')
-        .eq('estado', true)
-        .order('fecha_publicacion', { ascending: false });
+    let todosLosArticulos = [];
+    let cargado = false;
+    let cargando = false;
 
-    if (!error && data) todosLosArticulos = data;
+    async function cargarDatosBuscador() {
+        if (cargado || cargando) return;
+        cargando = true;
 
-    input.addEventListener('input', () => {
+        // Usar caché — solo llama a Supabase si no hay datos frescos
+        const data = await obtenerArticulosBuscador();
+        if (data) {
+            todosLosArticulos = data;
+            cargado = true;
+        }
+        cargando = false;
+    }
+
+    // Precargar en cuanto el usuario hace foco en el buscador
+    // (antes de que escriba, para que la búsqueda sea instantánea)
+    input.addEventListener('focus', cargarDatosBuscador, { once: true });
+
+    input.addEventListener('input', async () => {
         const query = input.value.trim().toLowerCase();
 
         if (query.length < 2) {
             resultados.classList.add('hidden');
             resultados.innerHTML = '';
             return;
+        }
+
+        // Si aún no están cargados (raro, pero posible si escribe muy rápido)
+        if (!cargado) {
+            await cargarDatosBuscador();
         }
 
         const filtrados = todosLosArticulos.filter(art =>
@@ -81,7 +110,7 @@ async function inicializarBuscador() {
         );
 
         if (filtrados.length === 0) {
-            resultados.innerHTML = '<p class="search-no-results">Sin resultados para "<strong>' + escapeHtml(input.value) + '</strong>"</p>';
+            resultados.innerHTML = `<p class="search-no-results">Sin resultados para "<strong>${escapeHtml(input.value)}</strong>"</p>`;
         } else {
             resultados.innerHTML = filtrados.slice(0, 6).map(art => `
                 <a href="/Articulo/articulo.html?slug=${art.slug}" class="search-result-item">
@@ -137,7 +166,9 @@ function escapeRegex(str) {
 }
 
 // --------------------------------------------------
-// ARRANQUE
+// ARRANQUE — las dos en paralelo
 // --------------------------------------------------
-cargarArticulosRecientes();
-inicializarBuscador();
+Promise.all([
+    cargarArticulosRecientes(),
+    Promise.resolve(inicializarBuscador()) // síncrono, no bloquea
+]);
