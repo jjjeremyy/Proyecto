@@ -71,6 +71,7 @@ function inicializarBuscador() {
     let todosLosArticulos = [];
     let cargado = false;
     let cargando = false;
+    let debounceId = null;
 
     async function cargarDatosBuscador() {
         if (cargado || cargando) return;
@@ -85,45 +86,47 @@ function inicializarBuscador() {
         cargando = false;
     }
 
-    // Precargar en cuanto el usuario hace foco en el buscador
-    // (antes de que escriba, para que la búsqueda sea instantánea)
-    input.addEventListener('focus', cargarDatosBuscador, { once: true });
-
     input.addEventListener('input', async () => {
-        const query = input.value.trim().toLowerCase();
+        const rawQuery = input.value.trim();
 
-        if (query.length < 2) {
-            resultados.classList.add('hidden');
-            resultados.innerHTML = '';
-            return;
-        }
+        clearTimeout(debounceId);
+        debounceId = setTimeout(async () => {
+            const query = rawQuery.toLowerCase();
 
-        // Si aún no están cargados (raro, pero posible si escribe muy rápido)
-        if (!cargado) {
-            await cargarDatosBuscador();
-        }
+            if (query.length < 2) {
+                resultados.classList.add('hidden');
+                resultados.innerHTML = '';
+                return;
+            }
 
-        const filtrados = todosLosArticulos.filter(art =>
-            art.titulo.toLowerCase().includes(query) ||
-            (art.descripcion || '').toLowerCase().includes(query) ||
-            (art.categorias?.nombre || '').toLowerCase().includes(query)
-        );
+            if (!cargado) {
+                resultados.innerHTML = '<p class="search-no-results">Buscando artículos...</p>';
+                resultados.classList.remove('hidden');
+                await cargarDatosBuscador();
+            }
 
-        if (filtrados.length === 0) {
-            resultados.innerHTML = `<p class="search-no-results">Sin resultados para "<strong>${escapeHtml(input.value)}</strong>"</p>`;
-        } else {
-            resultados.innerHTML = filtrados.slice(0, 6).map(art => `
-                <a href="/Articulo/articulo.html?slug=${art.slug}" class="search-result-item">
-                    <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}" alt="${art.titulo}">
-                    <div>
-                        <span class="search-result-cat">${art.categorias?.nombre || ''}</span>
-                        <p>${resaltarTexto(art.titulo, query)}</p>
-                    </div>
-                </a>
-            `).join('');
-        }
+            const filtrados = todosLosArticulos.filter(art =>
+                art.titulo.toLowerCase().includes(query) ||
+                (art.descripcion || '').toLowerCase().includes(query) ||
+                (art.categorias?.nombre || '').toLowerCase().includes(query)
+            );
 
-        resultados.classList.remove('hidden');
+            if (filtrados.length === 0) {
+                resultados.innerHTML = `<p class="search-no-results">Sin resultados para "<strong>${escapeHtml(rawQuery)}</strong>"</p>`;
+            } else {
+                resultados.innerHTML = filtrados.slice(0, 6).map(art => `
+                    <a href="/Articulo/articulo.html?slug=${art.slug}" class="search-result-item">
+                        <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}" alt="${art.titulo}" loading="lazy">
+                        <div>
+                            <span class="search-result-cat">${art.categorias?.nombre || ''}</span>
+                            <p>${resaltarTexto(art.titulo, query)}</p>
+                        </div>
+                    </a>
+                `).join('');
+            }
+
+            resultados.classList.remove('hidden');
+        }, 180);
     });
 
     // Cerrar al hacer clic fuera

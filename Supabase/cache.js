@@ -17,6 +17,7 @@ export const CACHE_TTL = {
 
 // ── Nivel 1: caché en memoria ──────────────────────────
 const memoryCache = new Map();
+const inFlightRequests = new Map();
 
 // ── getCache ───────────────────────────────────────────
 // Busca primero en memoria, luego en localStorage.
@@ -40,7 +41,8 @@ export function getCache(key, ttl = CACHE_TTL.articleList) {
     if (!raw) return null;
 
     const entry = JSON.parse(raw);
-    if (Date.now() - entry.timestamp < CACHE_TTL) {
+    const effectiveTtl = entry.ttl ?? ttl;
+    if (Date.now() - entry.timestamp < effectiveTtl) {
       // Rehidratar memoria para futuras lecturas rápidas
       memoryCache.set(fullKey, entry);
       return entry.data;
@@ -61,7 +63,8 @@ export function setCache(key, data, ttl = CACHE_TTL.articleList) {
   const fullKey = CACHE_PREFIX + key;
   const entry = {
     data,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    ttl
   };
 
   // Nivel 1: memoria
@@ -87,12 +90,14 @@ export function clearCache(key) {
   if (key) {
     const fullKey = CACHE_PREFIX + key;
     memoryCache.delete(fullKey);
+    inFlightRequests.delete(fullKey);
     localStorage.removeItem(fullKey);
     return;
   }
 
   // Borrar todo el caché prefijado
   memoryCache.clear();
+  inFlightRequests.clear();
 
   const keysToRemove = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -118,6 +123,8 @@ export function clearCache(key) {
 //
 // Devuelve: los datos (desde caché o desde Supabase)
 export async function fetchConCache(cacheKey, fetchFn, forceRefresh = false, ttl = CACHE_TTL.articleList) {
+  const fullKey = CACHE_PREFIX + cacheKey;
+
   // 1. Revisar caché (si no se fuerza refresco)
   if (!forceRefresh) {
     const cached = getCache(cacheKey, ttl);
@@ -125,15 +132,30 @@ export async function fetchConCache(cacheKey, fetchFn, forceRefresh = false, ttl
       console.log(`[Cache] HIT — "${cacheKey}"`);
       return cached;
     }
+
+    if (inFlightRequests.has(fullKey)) {
+      console.log(`[Cache] WAIT — "${cacheKey}"`);
+      return inFlightRequests.get(fullKey);
+    }
   }
 
   // 2. Ejecutar la petición real
   console.log(`[Cache] MISS — "${cacheKey}" → consultando Supabase`);
-  const data = await fetchFn();
+  const requestPromise = (async () => {
+    const data = await fetchFn();
 
-  // 3. Guardar en caché (solo si hay datos válidos)
-  if (data !== null) setCache(cacheKey, data, ttl);
+    // 3. Guardar en caché (solo si hay datos válidos)
+    if (data !== null) setCache(cacheKey, data, ttl);
 
-  // 4. Devolver los datos
-  return data;
+    // 4. Devolver los datos
+    return data;
+  })();
+
+  inFlightRequests.set(fullKey, requestPromise);
+
+  try {
+    return await requestPromise;
+  } finally {
+    inFlightRequests.delete(fullKey);
+  }
 }

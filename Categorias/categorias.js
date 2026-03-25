@@ -1,4 +1,7 @@
-import { supabase } from '../Supabase/supabase.js';
+import {
+    obtenerArticulosPorCategoria,
+    obtenerIdCategoria
+} from '../Supabase/supabase.js';
 
 const botones           = document.querySelectorAll('.category-button');
 const seccionResultados = document.getElementById('articles-result');
@@ -52,14 +55,9 @@ async function cargarArticulos(slug, nombre) {
     }
 
     // 2. Obtener artículos de esa categoría
-    const { data, error } = await supabase
-        .from('articulos')
-        .select('titulo, slug, imagen_portada, descripcion')
-        .eq('estado', true)
-        .eq('categoria_id', categoriaId)
-        .order('fecha_publicacion', { ascending: false });
+    const data = await obtenerArticulosPorCategoria(categoriaId);
 
-    if (error) {
+    if (!data) {
         listaArticulos.innerHTML = '<p class="no-articles">Error al cargar los artículos.</p>';
         return;
     }
@@ -90,18 +88,3 @@ async function cargarArticulos(slug, nombre) {
     `).join('');
 }
 
-// Obtiene el ID de la categoría buscando por su slug
-async function obtenerIdCategoria(slug) {
-    const { data, error } = await supabase
-        .from('categorias')
-        .select('id')
-        .eq('slug', slug)
-        .maybeSingle();
-
-    if (error) {
-        console.error('Error buscando categoría:', error);
-        return null;
-    }
-
-    return data?.id ?? null;
-}
