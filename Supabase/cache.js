@@ -9,7 +9,11 @@
 const CACHE_PREFIX = 'sb_cache_';
 
 // Tiempo de vida del caché: 1 hora en milisegundos
-export const CACHE_TTL = 60 * 60 * 1000;
+export const CACHE_TTL = {
+  articleList: 60 * 60 * 1000,      // 1 hora (antes era fijo)
+  articleDetail: 24 * 60 * 60 * 1000, // 24 horas
+  sitemap: 7 * 24 * 60 * 60 * 1000,  // 1 semana
+};
 
 // ── Nivel 1: caché en memoria ──────────────────────────
 const memoryCache = new Map();

@@ -32,7 +32,9 @@ async function cargarArticulosRecientes() {
     lista.innerHTML = data.map(art => `
         <a href="/Articulo/articulo.html?slug=${art.slug}" class="recent-card">
             <div class="recent-card-img-wrap">
-                <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}" alt="${art.titulo}">
+                <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}" 
+                    alt="${art.titulo}" 
+                    loading="lazy">
                 <span class="recent-card-cat">${art.categorias?.nombre || ''}</span>
             </div>
             <div class="recent-card-body">

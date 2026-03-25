@@ -77,7 +77,9 @@ async function cargarArticulos(slug, nombre) {
     listaArticulos.innerHTML = data.map(articulo => `
         <div class="article-card" onclick="window.location.href='/Articulo/articulo.html?slug=${articulo.slug}'">
             <div class="article-card-image-wrapper">
-                <img src="${articulo.imagen_portada || '/IMG/IMGprueba.png'}" alt="${articulo.titulo}" loading="lazy">
+                <img src="${articulo.imagen_portada || '/IMG/IMGprueba.png'}" 
+                    alt="${articulo.titulo}" 
+                    loading="lazy">
             </div>
             <div class="article-card-body">
                 <h3>${articulo.titulo}</h3>
