@@ -126,7 +126,9 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
 
     grid.innerHTML = data.map(art => `
         <a href="/articulo/?slug=${art.slug}" class="related-card">
-            <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}" alt="${art.titulo}">
+            <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}" 
+                alt="${art.titulo}" 
+                loading="lazy">
             <div class="related-card-info">
                 <span class="related-category">${art.categorias?.nombre || ''}</span>
                 <h4>${art.titulo}</h4>

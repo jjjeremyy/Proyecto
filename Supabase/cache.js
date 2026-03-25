@@ -21,13 +21,13 @@ const memoryCache = new Map();
 // ── getCache ───────────────────────────────────────────
 // Busca primero en memoria, luego en localStorage.
 // Devuelve los datos si existen y no han expirado, o null.
-export function getCache(key) {
+export function getCache(key, ttl = CACHE_TTL.articleList) {
   const fullKey = CACHE_PREFIX + key;
 
   // 1. Intentar memoria (más rápido)
   if (memoryCache.has(fullKey)) {
     const entry = memoryCache.get(fullKey);
-    if (Date.now() - entry.timestamp < CACHE_TTL) {
+    if (Date.now() - entry.timestamp < ttl) {
       return entry.data;
     }
     // Expirado → limpiar
@@ -57,7 +57,7 @@ export function getCache(key) {
 
 // ── setCache ───────────────────────────────────────────
 // Guarda en ambos niveles con timestamp actual.
-export function setCache(key, data) {
+export function setCache(key, data, ttl = CACHE_TTL.articleList) {
   const fullKey = CACHE_PREFIX + key;
   const entry = {
     data,
@@ -117,10 +117,10 @@ export function clearCache(key) {
 //   forceRefresh — si true, ignora el caché y fuerza petición
 //
 // Devuelve: los datos (desde caché o desde Supabase)
-export async function fetchConCache(cacheKey, fetchFn, forceRefresh = false) {
+export async function fetchConCache(cacheKey, fetchFn, forceRefresh = false, ttl = CACHE_TTL.articleList) {
   // 1. Revisar caché (si no se fuerza refresco)
   if (!forceRefresh) {
-    const cached = getCache(cacheKey);
+    const cached = getCache(cacheKey, ttl);
     if (cached !== null) {
       console.log(`[Cache] HIT — "${cacheKey}"`);
       return cached;
@@ -132,9 +132,7 @@ export async function fetchConCache(cacheKey, fetchFn, forceRefresh = false) {
   const data = await fetchFn();
 
   // 3. Guardar en caché (solo si hay datos válidos)
-  if (data !== null && data !== undefined) {
-    setCache(cacheKey, data);
-  }
+  if (data !== null) setCache(cacheKey, data, ttl);
 
   // 4. Devolver los datos
   return data;

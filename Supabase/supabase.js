@@ -49,20 +49,7 @@ export async function obtenerArticulos(page = 0, pageSize = PAGE_SIZE_DEFAULT, f
 export async function obtenerArticulosRecientes(limit = 4, forceRefresh = false) {
   const cacheKey = `articulos_recientes_${limit}`;
 
-  return fetchConCache(cacheKey, async () => {
-    const { data, error } = await supabase
-      .from('articulos')
-      .select('titulo, slug, imagen_portada, descripcion, fecha_publicacion, categorias(nombre)')
-      .eq('estado', true)
-      .order('fecha_publicacion', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('Error obteniendo artículos recientes:', error);
-      return null;
-    }
-    return data;
-  }, forceRefresh);
+  return fetchConCache(cacheKey, fetchFn, forceRefresh, CACHE_TTL.articleList);
 }
 
 // ── Artículos para buscador ────────────────────────────
@@ -90,30 +77,7 @@ export async function obtenerArticulosBuscador(forceRefresh = false) {
 export async function obtenerArticuloPorSlug(slug, forceRefresh = false) {
   const cacheKey = `articulo_${slug}`;
 
-  return fetchConCache(cacheKey, async () => {
-    const { data, error } = await supabase
-      .from('articulos')
-      .select(`
-        id,
-        titulo,
-        slug,
-        descripcion,
-        contenido,
-        imagen_portada,
-        fecha_publicacion,
-        estado,
-        categoria_id,
-        categorias ( id, nombre )
-      `)
-      .eq('slug', slug)
-      .maybeSingle();
-
-    if (error) {
-      console.error('Error obteniendo artículo:', error);
-      return null;
-    }
-    return data;
-  }, forceRefresh);
+  return fetchConCache(cacheKey, fetchFn, forceRefresh, CACHE_TTL.articleDetail);
 }
 
 // ── Artículos relacionados ─────────────────────────────
