@@ -10,297 +10,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./Cookies/cookies-banner.css">
-    <style>
-        /* ==========================================
-           PÁGINA DE POLÍTICAS — estilos propios
-        ========================================== */
-        body {
-            font-family: 'Source Sans 3', Arial, sans-serif;
-            background-color: #f5f7fc;
-            color: #1e2a40;
-        }
-
-        /* Hero de cabecera */
-        .policy-hero {
-            background-color: #043873;
-            padding: 56px 24px 48px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .policy-hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at 70% 50%, rgba(33, 101, 179, 0.4) 0%, transparent 65%);
-            pointer-events: none;
-        }
-
-        .policy-hero h1 {
-            font-family: 'Lora', Georgia, serif;
-            font-size: clamp(1.8rem, 4vw, 2.6rem);
-            font-weight: 700;
-            color: #fff;
-            margin: 0 0 10px 0;
-            position: relative;
-        }
-
-        .policy-hero p {
-            font-size: 1rem;
-            color: rgba(255,255,255,0.7);
-            margin: 0;
-            position: relative;
-        }
-
-        /* Contenedor principal */
-        .policy-container {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 48px 24px 72px;
-        }
-
-        /* Índice de navegación */
-        .policy-toc {
-            background-color: #edf3ff;
-            border-left: 4px solid #043873;
-            border-radius: 0 8px 8px 0;
-            padding: 20px 24px;
-            margin-bottom: 48px;
-        }
-
-        .policy-toc h2 {
-            font-family: 'Lora', Georgia, serif;
-            font-size: 1rem;
-            font-weight: 700;
-            color: #043873;
-            margin: 0 0 12px 0;
-        }
-
-        .policy-toc ol {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        .policy-toc li {
-            margin-bottom: 6px;
-        }
-
-        .policy-toc a {
-            font-size: 0.9rem;
-            color: #043873;
-            text-decoration: none;
-            transition: color 0.15s;
-        }
-
-        .policy-toc a:hover {
-            color: #2165b3;
-            text-decoration: underline;
-        }
-
-        /* Secciones */
-        .policy-section {
-            margin-bottom: 52px;
-            scroll-margin-top: 24px;
-        }
-
-        .policy-section h2 {
-            font-family: 'Lora', Georgia, serif;
-            font-size: 1.45rem;
-            font-weight: 700;
-            color: #043873;
-            margin: 0 0 14px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #d0daf0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .policy-section h2 .section-num {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            background-color: #043873;
-            color: #fff;
-            border-radius: 50%;
-            font-size: 0.8rem;
-            font-weight: 700;
-            flex-shrink: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        .policy-section h3 {
-            font-family: 'Lora', Georgia, serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1a2a4a;
-            margin: 28px 0 10px 0;
-        }
-
-        .policy-section p {
-            line-height: 1.8;
-            margin: 0 0 16px 0;
-            color: #2a3a5a;
-        }
-
-        .policy-section ul,
-        .policy-section ol {
-            padding-left: 22px;
-            margin: 0 0 18px 0;
-        }
-
-        .policy-section li {
-            line-height: 1.75;
-            margin-bottom: 7px;
-            color: #2a3a5a;
-        }
-
-        /* Tabla de cookies */
-        .cookies-table-wrapper {
-            overflow-x: auto;
-            margin: 16px 0 24px 0;
-            border-radius: 8px;
-            border: 1px solid #d0daf0;
-        }
-
-        .cookies-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.88rem;
-            font-family: Arial, sans-serif;
-        }
-
-        .cookies-table th {
-            background-color: #043873;
-            color: #fff;
-            padding: 11px 14px;
-            text-align: left;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .cookies-table td {
-            padding: 10px 14px;
-            border-bottom: 1px solid #d8e2f4;
-            color: #2a3a5a;
-            vertical-align: top;
-        }
-
-        .cookies-table tr:nth-child(even) td {
-            background-color: #f4f7ff;
-        }
-
-        .cookies-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Caja de aviso */
-        .policy-notice {
-            background-color: #fff8e1;
-            border-left: 4px solid #f59e0b;
-            border-radius: 0 6px 6px 0;
-            padding: 14px 18px;
-            margin: 20px 0;
-            font-size: 0.92rem;
-            color: #78350f;
-        }
-
-        .policy-notice strong {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        /* Fecha de actualización */
-        .policy-updated {
-            font-size: 0.82rem;
-            color: #8a9ab5;
-            font-family: Arial, sans-serif;
-            margin-bottom: 40px;
-            padding: 10px 14px;
-            background-color: #fff;
-            border: 1px solid #e2e8f4;
-            border-radius: 6px;
-            display: inline-block;
-        }
-
-        /* Botón volver al inicio de la página */
-        .back-to-top {
-            display: inline-block;
-            margin-top: 8px;
-            font-size: 13px;
-            color: #043873;
-            text-decoration: none;
-            font-family: Arial, sans-serif;
-            transition: color 0.15s;
-        }
-
-        .back-to-top:hover {
-            color: #2165b3;
-            text-decoration: underline;
-        }
-
-        /* Separador */
-        .policy-divider {
-            border: none;
-            border-top: 1px solid #e2e8f4;
-            margin: 0 0 48px 0;
-        }
-
-        /* Enlace de contacto */
-        .policy-contact-box {
-            background-color: #043873;
-            color: #fff;
-            border-radius: 10px;
-            padding: 28px 32px;
-            text-align: center;
-            margin-top: 48px;
-        }
-
-        .policy-contact-box h3 {
-            font-family: 'Lora', Georgia, serif;
-            font-size: 1.2rem;
-            margin: 0 0 10px 0;
-            color: #fff;
-        }
-
-        .policy-contact-box p {
-            font-size: 0.95rem;
-            color: rgba(255,255,255,0.75);
-            margin: 0 0 16px 0;
-        }
-
-        .policy-contact-box a {
-            display: inline-block;
-            background-color: #fff;
-            color: #043873;
-            padding: 10px 26px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            font-family: Arial, sans-serif;
-            transition: background-color 0.2s, color 0.2s;
-        }
-
-        .policy-contact-box a:hover {
-            background-color: #d0daf0;
-        }
-    </style>
+    <link rel="stylesheet" href="politicas.css">
 </head>
 <body>
 
     <header>
         <section class="logo-container">
-            <img src="/IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo">
-            <a href="/index.html" class="home">SistemaBase</a>
+            <img src="./IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo">
+            <a href="./index.html" class="home">SistemaBase</a>
         </section>
         <section class="nav-links">
-            <a href="/Categorias/categorias.html">Categorías</a>
-            <a href="/Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
-            <a href="/Contacto/contacto.html">Contacto</a>
+            <a href="./Categorias/categorias.html">Categorías</a>
+            <a href="./Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
+            <a href="./Contacto/contacto.html">Contacto</a>
         </section>
     </header>
 
@@ -363,7 +85,7 @@
 
             <h3>2.2 Datos que nos proporcionas voluntariamente</h3>
             <p>
-                A través del formulario de <a href="/Contacto/contacto.html">contacto</a> puedes enviarnos
+                A través del formulario de <a href="./Contacto/contacto.html">contacto</a> puedes enviarnos
                 tu nombre, dirección de correo electrónico y el mensaje que desees hacernos llegar.
                 Estos datos se usan exclusivamente para responder tu consulta.
             </p>
@@ -588,7 +310,7 @@
         <div class="policy-contact-box">
             <h3>¿Tienes alguna pregunta?</h3>
             <p>Escríbenos y te responderemos lo antes posible.</p>
-            <a href="/Contacto/contacto.html">Ir al formulario de contacto</a>
+            <a href="./Contacto/contacto.html">Ir al formulario de contacto</a>
         </div>
 
         <br>
@@ -601,7 +323,7 @@
  
         <!-- Logo + tagline -->
         <div class="footer-logo">
-            <img src="/IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
+            <img src="./IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
             <div>
                 <p class="footer-brand-name">SistemaBase</p>
                 <p class="footer-tagline">Información sobre computación de la mejor manera posible.</p>
@@ -611,11 +333,11 @@
         <!-- Navegación -->
         <section class="footer-links">
             <h4>Navegación</h4>
-            <a href="/index.html">Inicio</a>
-            <a href="/Categorias/categorias.html">Categorías</a>
-            <a href="/Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
-            <a href="/Contacto/contacto.html">Contacto</a>
-            <a href="/Politicas/politicas.html">Privacidad y Cookies</a>
+            <a href="./index.html">Inicio</a>
+            <a href="./Categorias/categorias.html">Categorías</a>
+            <a href="./Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
+            <a href="./Contacto/contacto.html">Contacto</a>
+            <a href="./Politicas/politicas.html">Privacidad y Cookies</a>
         </section>
  
         <!-- Contacto -->
@@ -633,7 +355,7 @@
         // En la propia página de políticas no mostramos el banner
         // para no ser redundante, pero sí cargamos el script por coherencia
     </script>
-    <script src="/Cookies/cookies-banner.js"></script>
+    <script src="./Cookies/cookies-banner.js"></script>
 
 </body>
 </html>
