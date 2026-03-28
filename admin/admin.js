@@ -210,7 +210,7 @@ fileDropArea.addEventListener('drop', (e) => {
     e.preventDefault();
     fileDropArea.classList.remove('dragging');
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/*')) {
+    if (file && file.type.startsWith('image/')) {
         procesarArchivoImagen(file);
     }
 });
