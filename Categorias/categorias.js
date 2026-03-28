@@ -1,3 +1,7 @@
+// =============================================
+// CATEGORIAS.JS — SistemaBase
+// CORRECCIÓN GITHUB PAGES: rutas relativas
+// =============================================
 import { supabase } from '../Supabase/supabase.js';
 
 const botones           = document.querySelectorAll('.category-button');
@@ -6,7 +10,6 @@ const tituloCategoria   = document.getElementById('category-title');
 const contadorArticulos = document.getElementById('articles-count');
 const listaArticulos    = document.getElementById('articles-list');
 
-// Esqueletos de carga
 function renderSkeletons(n = 6) {
     return Array.from({ length: n }, () => `
         <div class="skeleton-card">
@@ -20,13 +23,11 @@ function renderSkeletons(n = 6) {
     `).join('');
 }
 
-// Marcar botón activo
 function setActiveButton(boton) {
     botones.forEach(b => b.classList.remove('active'));
     boton.classList.add('active');
 }
 
-// Escucha el click en cada botón
 botones.forEach(boton => {
     boton.addEventListener('click', () => {
         const slug   = boton.dataset.slug;
@@ -43,7 +44,6 @@ async function cargarArticulos(slug, nombre) {
     listaArticulos.innerHTML = renderSkeletons();
     seccionResultados.scrollIntoView({ behavior: 'smooth' });
 
-    // 1. Obtener el ID de la categoría por su slug
     const categoriaId = await obtenerIdCategoria(slug);
 
     if (!categoriaId) {
@@ -51,7 +51,6 @@ async function cargarArticulos(slug, nombre) {
         return;
     }
 
-    // 2. Obtener artículos de esa categoría
     const { data, error } = await supabase
         .from('articulos')
         .select('titulo, slug, imagen_portada, descripcion')
@@ -70,15 +69,14 @@ async function cargarArticulos(slug, nombre) {
         return;
     }
 
-    // Contador
     contadorArticulos.textContent = `${data.length} artículo${data.length !== 1 ? 's' : ''}`;
 
-    // 3. Renderizar tarjetas
+    // Ruta relativa: estamos en Categorias/, enlazamos a ../Articulo/
     listaArticulos.innerHTML = data.map(articulo => `
-        <div class="article-card" onclick="window.location.href='/Articulo/articulo.html?slug=${articulo.slug}'">
+        <div class="article-card" onclick="window.location.href='../Articulo/articulo.html?slug=${articulo.slug}'">
             <div class="article-card-image-wrapper">
-                <img src="${articulo.imagen_portada || '/IMG/IMGprueba.png'}" 
-                    alt="${articulo.titulo}" 
+                <img src="${articulo.imagen_portada || '../IMG/IMGprueba.png'}"
+                    alt="${articulo.titulo}"
                     loading="lazy">
             </div>
             <div class="article-card-body">
@@ -90,7 +88,6 @@ async function cargarArticulos(slug, nombre) {
     `).join('');
 }
 
-// Obtiene el ID de la categoría buscando por su slug
 async function obtenerIdCategoria(slug) {
     const { data, error } = await supabase
         .from('categorias')

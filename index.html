@@ -2,26 +2,26 @@
 <html lang="es">
 <head>     
     <meta charset="UTF-8">
+    <base href="../../"><!-- AJUSTA ESTO: si tu repo se llama "sistemabase" pon: /sistemabase/ — si está en raíz pon: / -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SistemaBase | Inicio</title>
-    <link rel="stylesheet" href="./GuiaEstilosCSS/style.css">
-    <link rel="stylesheet" href="./Home/home.css">
-    <link rel="stylesheet" href="./Cookies/cookies-banner.css">
+    <link rel="stylesheet" href="GuiaEstilosCSS/style.css">
+    <link rel="stylesheet" href="Home/home.css">
+    <link rel="stylesheet" href="Cookies/cookies-banner.css">
 </head>
 <body>  
     <header>
         <section class="logo-container">
-            <img src="./IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo">
-            <a href="./index.html" class="home">SistemaBase</a>
+            <img src="IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo">
+            <a href="index.html" class="home">SistemaBase</a>
         </section>
         <section class="nav-links">
-            <a href="./Categorias/categorias.html">Categorías</a>
-            <a href="./Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
-            <a href="./Contacto/contacto.html">Contacto</a>
+            <a href="Categorias/categorias.html">Categorías</a>
+            <a href="SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
+            <a href="Contacto/contacto.html">Contacto</a>
         </section>
     </header> 
 
-    <!-- HERO -->
     <section class="welcome-section">
         <div> 
             <h1>Si no lo sabes, SistemaBase lo sabe</h1>
@@ -29,9 +29,6 @@
         </div>
     </section>
 
-    <!-- ==========================================
-         BUSCADOR DE ARTÍCULOS
-    =========================================== -->
     <section class="search-section">
         <div class="search-inner">
             <p class="search-label">¿Qué quieres aprender hoy?</p>
@@ -47,62 +44,51 @@
                     placeholder="Busca artículos: hardware, redes, IA..."
                     autocomplete="off"
                 >
-                <!-- Resultados desplegables -->
                 <div id="search-results" class="search-results hidden"></div>
             </div>
         </div>
     </section>
 
-    <!-- ==========================================
-         ARTÍCULOS RECIENTES (dinámico desde Supabase)
-    =========================================== -->
     <section class="recent-topics">
         <div class="title-recent-topics">
             <h2>Artículos Recientes</h2>
         </div>
-        <!-- home.js rellena este contenedor -->
         <div id="recent-articles-list" class="recent-articles-grid"></div>
     </section>
+
     <footer>
         <section class="footer-info">
-    
-            <!-- Logo + tagline -->
             <div class="footer-logo">
-                <img src="./IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
+                <img src="IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
                 <div>
                     <p class="footer-brand-name">SistemaBase</p>
                     <p class="footer-tagline">Información sobre computación de la mejor manera posible.</p>
                 </div>
             </div>
-    
-            <!-- Navegación -->
             <section class="footer-links">
                 <h4>Navegación</h4>
-                <a href="./index.html">Inicio</a>
-                <a href="./Categorias/categorias.html">Categorías</a>
-                <a href="./Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
-                <a href="./Contacto/contacto.html">Contacto</a>
-                <a href="./Politicas/politicas.html">Privacidad y Cookies</a>
+                <a href="index.html">Inicio</a>
+                <a href="Categorias/categorias.html">Categorías</a>
+                <a href="SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
+                <a href="Contacto/contacto.html">Contacto</a>
+                <a href="Politicas/politicas.html">Privacidad y Cookies</a>
             </section>
-    
-            <!-- Contacto -->
             <section class="contact-info">
                 <h3>Contacto</h3>
                 <p>sistemabase00@gmail.com</p>
             </section>
-    
         </section>
         <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
     </footer>
 
     <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
-    <div class="cookie-banner-inner">
-        <span class="cookie-icon" aria-hidden="true">🍪</span>
-        <div class="cookie-text">
-            <strong>Este sitio usa cookies</strong>
-            <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
-               <a href="./Politicas/politicas.html">Política de Cookies y Privacidad</a>.
-            </p>
+        <div class="cookie-banner-inner">
+            <span class="cookie-icon" aria-hidden="true">🍪</span>
+            <div class="cookie-text">
+                <strong>Este sitio usa cookies</strong>
+                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
+                   <a href="Politicas/politicas.html">Política de Cookies y Privacidad</a>.
+                </p>
             </div>
             <div class="cookie-actions">
                 <button id="btn-cookie-accept" class="btn-cookie-accept">Aceptar todas</button>
@@ -110,8 +96,7 @@
             </div>
         </div>
     </div>
-    <script src="./Cookies/cookies-banner.js"></script>
-    <!-- Cambiado a module para poder importar supabase -->
-    <script type="module" src="./Home/home.js"></script>
+    <script src="Cookies/cookies-banner.js"></script>
+    <script type="module" src="Home/home.js"></script>
 </body>
 </html>

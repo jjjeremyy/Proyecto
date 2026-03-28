@@ -1,11 +1,6 @@
 // =============================================
-// ARTICULO.JS — SistemaBase (OPTIMIZADO)
-// Mejoras aplicadas:
-//   1. Caché via obtenerArticuloPorSlug() y obtenerRelacionados()
-//   2. Artículo principal + relacionados en PARALELO (Promise.all)
-//   3. Skeleton loader visible mientras carga
-//   4. Artículo se muestra TAN PRONTO llega, sin esperar relacionados
-//   5. Imagen de portada con fetchpriority="high" para mejor LCP
+// ARTICULO.JS — SistemaBase
+// CORRECCIÓN GITHUB PAGES: rutas relativas
 // =============================================
 import {
     obtenerArticuloPorSlug,
@@ -13,9 +8,6 @@ import {
     CACHE_TTL
 } from '../Supabase/supabase.js';
 
-// --------------------------------------------------
-// 1. LEER EL SLUG DE LA URL
-// --------------------------------------------------
 const params = new URLSearchParams(window.location.search);
 const slug   = params.get('slug');
 
@@ -27,10 +19,9 @@ if (!slug) {
 }
 
 // --------------------------------------------------
-// 2. SKELETON LOADER — visible mientras llega el artículo
+// SKELETON LOADER
 // --------------------------------------------------
 function mostrarSkeleton() {
-    // Ocultar spinner antiguo, mostrar skeleton en su lugar
     const loadingEl = document.getElementById('article-loading');
     if (loadingEl) {
         loadingEl.innerHTML = `
@@ -40,14 +31,11 @@ function mostrarSkeleton() {
                 padding: 30px 20px;
                 font-family: Arial, sans-serif;
             ">
-                <!-- Skeleton cabecera -->
                 <div style="height:14px;width:30%;border-radius:6px;margin-bottom:20px;${sk()}"></div>
                 <div style="height:36px;width:85%;border-radius:8px;margin-bottom:12px;${sk()}"></div>
                 <div style="height:36px;width:65%;border-radius:8px;margin-bottom:20px;${sk()}"></div>
                 <div style="height:18px;width:50%;border-radius:6px;margin-bottom:32px;${sk()}"></div>
-                <!-- Skeleton imagen portada -->
                 <div style="height:320px;width:100%;border-radius:10px;margin-bottom:32px;${sk()}"></div>
-                <!-- Skeleton párrafos -->
                 <div style="height:14px;width:100%;border-radius:5px;margin-bottom:10px;${sk()}"></div>
                 <div style="height:14px;width:96%;border-radius:5px;margin-bottom:10px;${sk()}"></div>
                 <div style="height:14px;width:88%;border-radius:5px;margin-bottom:10px;${sk()}"></div>
@@ -69,7 +57,6 @@ function sk() {
             display:block;`;
 }
 
-// Inyectar keyframes del shimmer una sola vez
 if (!document.getElementById('sb-shimmer-style')) {
     const style = document.createElement('style');
     style.id = 'sb-shimmer-style';
@@ -81,13 +68,11 @@ if (!document.getElementById('sb-shimmer-style')) {
 }
 
 // --------------------------------------------------
-// 3. CARGAR ARTÍCULO — usa caché de supabase.js
+// CARGAR ARTÍCULO
 // --------------------------------------------------
 async function cargarArticulo(slug) {
-    // Usar la función con caché (24h para artículos individuales)
     const articulo = await obtenerArticuloPorSlug(slug);
 
-    // Ocultar skeleton
     const loadingEl = document.getElementById('article-loading');
     if (loadingEl) loadingEl.classList.add('hidden');
 
@@ -96,15 +81,12 @@ async function cargarArticulo(slug) {
         return;
     }
 
-    // Rellenar y mostrar el artículo YA — sin esperar relacionados
     rellenarArticulo(articulo);
-
-    // Cargar relacionados en segundo plano (no bloquea la visualización)
     cargarRelacionados(articulo.categoria_id, articulo.id);
 }
 
 // --------------------------------------------------
-// 4. RELLENAR LA PLANTILLA
+// RELLENAR PLANTILLA
 // --------------------------------------------------
 function rellenarArticulo(a) {
     const categoria = a.categorias?.nombre || '';
@@ -113,7 +95,8 @@ function rellenarArticulo(a) {
     setMeta('description', a.descripcion || a.titulo);
 
     setText('breadcrumb-categoria-text', categoria);
-    setAttr('breadcrumb-categoria-link', 'href', `/Categorias/categorias.html`);
+    // Ruta relativa desde Articulo/ hacia Categorias/
+    setAttr('breadcrumb-categoria-link', 'href', `../Categorias/categorias.html`);
     setText('breadcrumb-titulo-text', truncar(a.titulo, 45));
 
     setText('article-category-badge', categoria.toUpperCase());
@@ -121,14 +104,13 @@ function rellenarArticulo(a) {
     setText('article-title',    a.titulo);
     setText('article-subtitle', a.descripcion || '');
 
-    // Imagen de portada — fetchpriority="high" mejora el LCP
     if (a.imagen_portada) {
         const img = document.getElementById('article-featured-img');
         if (img) {
             img.src = a.imagen_portada;
             img.alt = a.titulo;
-            img.setAttribute('fetchpriority', 'high'); // ← clave para LCP rápido
-            img.removeAttribute('loading');            // no lazy en la imagen principal
+            img.setAttribute('fetchpriority', 'high');
+            img.removeAttribute('loading');
         }
     } else {
         const fig = document.getElementById('article-featured-figure');
@@ -143,10 +125,9 @@ function rellenarArticulo(a) {
 }
 
 // --------------------------------------------------
-// 5. RELACIONADOS — en segundo plano con caché (1h)
+// RELACIONADOS
 // --------------------------------------------------
 async function cargarRelacionados(categoriaId, articuloActualId) {
-    // Mostrar skeleton de relacionados mientras carga
     const grid = document.getElementById('related-grid');
     if (grid) {
         grid.innerHTML = Array.from({ length: 3 }, () => `
@@ -161,7 +142,6 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
         `).join('');
     }
 
-    // Usar función con caché de supabase.js
     const data = await obtenerRelacionados(categoriaId, articuloActualId);
 
     if (!data || data.length === 0) {
@@ -172,9 +152,10 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
 
     if (!grid) return;
 
+    // Ruta relativa: estamos en Articulo/, el enlace apunta a articulo.html en la misma carpeta
     grid.innerHTML = data.map(art => `
-        <a href="/Articulo/articulo.html?slug=${art.slug}" class="related-card">
-            <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}"
+        <a href="articulo.html?slug=${art.slug}" class="related-card">
+            <img src="${art.imagen_portada || '../IMG/IMGprueba.png'}"
                  alt="${art.titulo}"
                  loading="lazy"
                  width="400" height="130">
@@ -187,14 +168,14 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
 }
 
 // --------------------------------------------------
-// 6. BOTÓN COMPARTIR
+// BOTÓN COMPARTIR
 // --------------------------------------------------
 function configurarCompartir(titulo, slug) {
     const btn = document.getElementById('btn-share');
     if (!btn) return;
 
     btn.addEventListener('click', async () => {
-        const url = `${window.location.origin}/Articulo/articulo.html?slug=${slug}`;
+        const url = `${window.location.origin}${window.location.pathname}?slug=${slug}`;
         if (navigator.share) {
             try { await navigator.share({ title: titulo, url }); } catch (_) {}
         } else {

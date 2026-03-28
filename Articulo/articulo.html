@@ -9,9 +9,10 @@
     <!-- Google AdSense — sustituye ca-pub-XXXXXXXXXXXXXXXXX por tu ID real -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 
-    <link rel="stylesheet" href="./GuiaEstilosCSS/style.css">
-    <link rel="stylesheet" href="./Articulo/articulo.css">
-    <link rel="stylesheet" href="./Cookies/cookies-banner.css">
+    <!-- Rutas relativas desde Articulo/ → subir un nivel con ../ -->
+    <link rel="stylesheet" href="../GuiaEstilosCSS/style.css">
+    <link rel="stylesheet" href="articulo.css">
+    <link rel="stylesheet" href="../Cookies/cookies-banner.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
@@ -20,13 +21,13 @@
 
    <header>
         <section class="logo-container">
-            <img src="./IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo">
-            <a href="./index.html" class="home">SistemaBase</a>
+            <img src="../IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo">
+            <a href="../index.html" class="home">SistemaBase</a>
         </section>
         <section class="nav-links">
-            <a href="./Categorias/categorias.html">Categorías</a>
-            <a href="./Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
-            <a href="./Contacto/contacto.html">Contacto</a>
+            <a href="../Categorias/categorias.html">Categorías</a>
+            <a href="../SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
+            <a href="../Contacto/contacto.html">Contacto</a>
         </section>
     </header> 
 
@@ -52,10 +53,10 @@
     <div id="article-error" class="article-error-state hidden">
         <h2>😕 Artículo no encontrado</h2>
         <p id="article-error-msg"></p>
-        <a href="./index.html" class="btn-back">← Volver al inicio</a>
+        <a href="../index.html" class="btn-back">← Volver al inicio</a>
     </div>
 
-    <!-- CONTENIDO (oculto hasta que articulo.js lo rellene) -->
+    <!-- CONTENIDO -->
     <main id="article-main" class="article-layout hidden">
 
         <!-- SIDEBAR IZQUIERDO -->
@@ -87,9 +88,9 @@
 
             <!-- BREADCRUMB -->
             <nav class="breadcrumb">
-                <a href="./index.html">Inicio</a>
+                <a href="../index.html">Inicio</a>
                 <span>›</span>
-                <a id="breadcrumb-categoria-link" href="./Categorias/categorias.html">
+                <a id="breadcrumb-categoria-link" href="../Categorias/categorias.html">
                     <span id="breadcrumb-categoria-text"></span>
                 </a>
                 <span>›</span>
@@ -116,7 +117,7 @@
                 <img id="article-featured-img" src="" alt="" class="featured-img">
             </figure>
 
-            <!-- ANUNCIO IN-CONTENT SUPERIOR (336x280) -->
+            <!-- ANUNCIO IN-CONTENT SUPERIOR -->
             <div class="ad-container ad-in-content">
                 <p class="ad-label">Publicidad</p>
                 <ins class="adsbygoogle"
@@ -128,10 +129,10 @@
                 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
 
-            <!-- CUERPO DEL ARTÍCULO — rellenado por articulo.js -->
+            <!-- CUERPO DEL ARTÍCULO -->
             <div id="article-body-content" class="article-body"></div>
 
-            <!-- ANUNCIO POST-ARTÍCULO (300x250) -->
+            <!-- ANUNCIO POST-ARTÍCULO -->
             <div class="ad-container ad-post-article">
                 <p class="ad-label">Publicidad</p>
                 <ins class="adsbygoogle"
@@ -177,7 +178,7 @@
 
     </main>
 
-    <!-- ANUNCIO PIE DE PÁGINA (728x90) -->
+    <!-- ANUNCIO PIE DE PÁGINA -->
     <div class="ad-container ad-footer-banner">
         <p class="ad-label">Publicidad</p>
         <ins class="adsbygoogle"
@@ -191,43 +192,37 @@
 
     <footer>
         <section class="footer-info">
-    
-            <!-- Logo + tagline -->
             <div class="footer-logo">
-                <img src="./IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
+                <img src="../IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
                 <div>
                     <p class="footer-brand-name">SistemaBase</p>
                     <p class="footer-tagline">Información sobre computación de la mejor manera posible.</p>
                 </div>
             </div>
-    
-            <!-- Navegación -->
             <section class="footer-links">
                 <h4>Navegación</h4>
-                <a href="./index.html">Inicio</a>
-                <a href="./Categorias/categorias.html">Categorías</a>
-                <a href="./Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
-                <a href="./Contacto/contacto.html">Contacto</a>
-                <a href="./Politicas/politicas.html">Privacidad y Cookies</a>
+                <a href="../index.html">Inicio</a>
+                <a href="../Categorias/categorias.html">Categorías</a>
+                <a href="../SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
+                <a href="../Contacto/contacto.html">Contacto</a>
+                <a href="../Politicas/politicas.html">Privacidad y Cookies</a>
             </section>
-    
-            <!-- Contacto -->
             <section class="contact-info">
                 <h3>Contacto</h3>
                 <p>sistemabase00@gmail.com</p>
             </section>
-    
         </section>
         <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
     </footer>
+
     <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
-    <div class="cookie-banner-inner">
-        <span class="cookie-icon" aria-hidden="true">🍪</span>
-        <div class="cookie-text">
-            <strong>Este sitio usa cookies</strong>
-            <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
-               <a href="./Politicas/politicas.html">Política de Cookies y Privacidad</a>.
-            </p>
+        <div class="cookie-banner-inner">
+            <span class="cookie-icon" aria-hidden="true">🍪</span>
+            <div class="cookie-text">
+                <strong>Este sitio usa cookies</strong>
+                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
+                   <a href="../Politicas/politicas.html">Política de Cookies y Privacidad</a>.
+                </p>
             </div>
             <div class="cookie-actions">
                 <button id="btn-cookie-accept" class="btn-cookie-accept">Aceptar todas</button>
@@ -235,10 +230,8 @@
             </div>
         </div>
     </div>
-    <script src="./Cookies/cookies-banner.js"></script>
-
-    <!-- articulo.js: lee ?slug= y carga el artículo desde Supabase -->
-    <script type="module" src="./Articulo/articulo.js"></script>
+    <script src="../Cookies/cookies-banner.js"></script>
+    <script type="module" src="articulo.js"></script>
 
 </body>
 </html>

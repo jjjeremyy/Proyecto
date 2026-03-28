@@ -1,20 +1,16 @@
 // =============================================
 // HOME.JS — SistemaBase
-// Carga artículos recientes desde Supabase
-// e implementa el buscador en tiempo real.
-// Optimización: los datos del buscador se
-// cargan SOLO cuando el usuario empieza a escribir.
+// CORRECCIÓN GITHUB PAGES: rutas relativas
 // =============================================
 import { obtenerArticulosRecientes, obtenerArticulosBuscador } from '../Supabase/supabase.js';
 
 // --------------------------------------------------
-// 1. ARTÍCULOS RECIENTES — usa caché (1 hora)
+// 1. ARTÍCULOS RECIENTES
 // --------------------------------------------------
 async function cargarArticulosRecientes() {
     const lista = document.getElementById('recent-articles-list');
     if (!lista) return;
 
-    // Skeleton mientras carga
     lista.innerHTML = Array.from({ length: 4 }, () => `
         <div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(4,56,115,0.08);">
             <div style="height:160px;background:linear-gradient(90deg,#eef2f8 25%,#e2e8f4 50%,#eef2f8 75%);background-size:200% 100%;animation:sk-home 1.4s infinite;"></div>
@@ -25,7 +21,6 @@ async function cargarArticulosRecientes() {
         </div>
     `).join('');
 
-    // Inyectar keyframes una sola vez
     if (!document.getElementById('sk-home-style')) {
         const s = document.createElement('style');
         s.id = 'sk-home-style';
@@ -33,7 +28,6 @@ async function cargarArticulosRecientes() {
         document.head.appendChild(s);
     }
 
-    // Llamada con caché — no va a Supabase si hay datos frescos en localStorage
     const data = await obtenerArticulosRecientes(4);
 
     if (!data || data.length === 0) {
@@ -42,9 +36,9 @@ async function cargarArticulosRecientes() {
     }
 
     lista.innerHTML = data.map(art => `
-        <a href="/Articulo/articulo.html?slug=${art.slug}" class="recent-card">
+        <a href="Articulo/articulo.html?slug=${art.slug}" class="recent-card">
             <div class="recent-card-img-wrap">
-                <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}"
+                <img src="${art.imagen_portada || 'IMG/IMGprueba.png'}"
                      alt="${art.titulo}"
                      loading="lazy">
                 <span class="recent-card-cat">${art.categorias?.nombre || ''}</span>
@@ -59,34 +53,25 @@ async function cargarArticulosRecientes() {
 }
 
 // --------------------------------------------------
-// 2. BUSCADOR — carga datos SOLO al primer keystroke
-//    (lazy loading: no consulta Supabase hasta que el
-//     usuario empieza a escribir)
+// 2. BUSCADOR
 // --------------------------------------------------
 function inicializarBuscador() {
-    const input    = document.getElementById('search-input');
+    const input      = document.getElementById('search-input');
     const resultados = document.getElementById('search-results');
     if (!input || !resultados) return;
 
     let todosLosArticulos = [];
-    let cargado = false;
+    let cargado  = false;
     let cargando = false;
 
     async function cargarDatosBuscador() {
         if (cargado || cargando) return;
         cargando = true;
-
-        // Usar caché — solo llama a Supabase si no hay datos frescos
         const data = await obtenerArticulosBuscador();
-        if (data) {
-            todosLosArticulos = data;
-            cargado = true;
-        }
+        if (data) { todosLosArticulos = data; cargado = true; }
         cargando = false;
     }
 
-    // Precargar en cuanto el usuario hace foco en el buscador
-    // (antes de que escriba, para que la búsqueda sea instantánea)
     input.addEventListener('focus', cargarDatosBuscador, { once: true });
 
     input.addEventListener('input', async () => {
@@ -98,10 +83,7 @@ function inicializarBuscador() {
             return;
         }
 
-        // Si aún no están cargados (raro, pero posible si escribe muy rápido)
-        if (!cargado) {
-            await cargarDatosBuscador();
-        }
+        if (!cargado) await cargarDatosBuscador();
 
         const filtrados = todosLosArticulos.filter(art =>
             art.titulo.toLowerCase().includes(query) ||
@@ -113,8 +95,8 @@ function inicializarBuscador() {
             resultados.innerHTML = `<p class="search-no-results">Sin resultados para "<strong>${escapeHtml(input.value)}</strong>"</p>`;
         } else {
             resultados.innerHTML = filtrados.slice(0, 6).map(art => `
-                <a href="/Articulo/articulo.html?slug=${art.slug}" class="search-result-item">
-                    <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}" alt="${art.titulo}">
+                <a href="Articulo/articulo.html?slug=${art.slug}" class="search-result-item">
+                    <img src="${art.imagen_portada || 'IMG/IMGprueba.png'}" alt="${art.titulo}">
                     <div>
                         <span class="search-result-cat">${art.categorias?.nombre || ''}</span>
                         <p>${resaltarTexto(art.titulo, query)}</p>
@@ -126,18 +108,16 @@ function inicializarBuscador() {
         resultados.classList.remove('hidden');
     });
 
-    // Cerrar al hacer clic fuera
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-wrapper')) {
             resultados.classList.add('hidden');
         }
     });
 
-    // Navegar con Enter
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             const query = encodeURIComponent(input.value.trim());
-            if (query) window.location.href = `/Categorias/categorias.html?q=${query}`;
+            if (query) window.location.href = `Categorias/categorias.html?q=${query}`;
         }
     });
 }
@@ -165,10 +145,7 @@ function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// --------------------------------------------------
-// ARRANQUE — las dos en paralelo
-// --------------------------------------------------
 Promise.all([
     cargarArticulosRecientes(),
-    Promise.resolve(inicializarBuscador()) // síncrono, no bloquea
+    Promise.resolve(inicializarBuscador())
 ]);
