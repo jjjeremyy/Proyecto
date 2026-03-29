@@ -230,3 +230,33 @@ function formatearFecha(fecha) {
 function truncar(texto, max) {
     return texto && texto.length > max ? texto.substring(0, max) + '…' : texto;
 }
+
+// Barra de progreso de lectura
+const bar = document.createElement('div');
+bar.id = 'reading-progress';
+document.body.prepend(bar);
+
+window.addEventListener('scroll', () => {
+  const doc = document.documentElement;
+  const scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight);
+  bar.style.width = `${Math.min(scrolled * 100, 100)}%`;
+}, { passive: true });
+
+// articulo.js — añadir al final
+const btnTop = document.createElement('button');
+btnTop.id = 'btn-top';
+btnTop.textContent = '↑';
+btnTop.setAttribute('aria-label', 'Volver al inicio');
+btnTop.style.cssText = `
+  position:fixed; bottom:24px; right:24px; width:44px; height:44px;
+  background:var(--color-primary); color:#fff; border:none; border-radius:50%;
+  font-size:20px; cursor:pointer; opacity:0; transition:opacity 0.3s;
+  z-index:500; box-shadow:0 4px 16px rgba(4,56,115,0.3);
+`;
+document.body.appendChild(btnTop);
+btnTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+window.addEventListener('scroll', () => {
+  btnTop.style.opacity = window.scrollY > 400 ? '1' : '0';
+  btnTop.style.pointerEvents = window.scrollY > 400 ? 'auto' : 'none';
+}, { passive: true });

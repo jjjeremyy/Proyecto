@@ -102,3 +102,18 @@ async function obtenerIdCategoria(slug) {
 
     return data?.id ?? null;
 }
+// Añadir a home.js y categorias.js
+function añadirPrefetch(slug) {
+  const link = document.createElement('link');
+  link.rel = 'prefetch';
+  link.href = `/Articulo/articulo.html?slug=${slug}`;
+  document.head.appendChild(link);
+}
+
+// En los event listeners de las tarjetas
+document.querySelectorAll('.recent-card, .article-card').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    const href = card.getAttribute('href') || card.dataset.href;
+    if (href) añadirPrefetch(new URL(href, location.href).searchParams.get('slug'));
+  }, { once: true }); // once: true → solo la primera vez
+});
