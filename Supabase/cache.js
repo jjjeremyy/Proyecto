@@ -21,39 +21,7 @@ const memoryCache = new Map();
 // ── getCache ───────────────────────────────────────────
 // Busca primero en memoria, luego en localStorage.
 // Devuelve los datos si existen y no han expirado, o null.
-export function getCache(key, ttl = CACHE_TTL.articleList) {
-  const fullKey = CACHE_PREFIX + key;
 
-  // 1. Intentar memoria (más rápido)
-  if (memoryCache.has(fullKey)) {
-    const entry = memoryCache.get(fullKey);
-    if (Date.now() - entry.timestamp < ttl) {
-      return entry.data;
-    }
-    // Expirado → limpiar
-    memoryCache.delete(fullKey);
-  }
-
-  // 2. Intentar localStorage
-  try {
-    const raw = localStorage.getItem(fullKey);
-    if (!raw) return null;
-
-    const entry = JSON.parse(raw);
-    if (Date.now() - entry.timestamp < CACHE_TTL) {
-      // Rehidratar memoria para futuras lecturas rápidas
-      memoryCache.set(fullKey, entry);
-      return entry.data;
-    }
-
-    // Expirado → limpiar
-    localStorage.removeItem(fullKey);
-  } catch (e) {
-    console.warn('[Cache] Error leyendo localStorage:', e);
-  }
-
-  return null;
-}
 
 // ── setCache ───────────────────────────────────────────
 // Guarda en ambos niveles con timestamp actual.

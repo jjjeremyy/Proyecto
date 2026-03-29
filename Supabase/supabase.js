@@ -53,18 +53,17 @@ export async function obtenerArticulosRecientes(limit = 4, forceRefresh = false)
 
 // ── Artículos para buscador ────────────────────────────
 export async function obtenerArticulosBuscador(forceRefresh = false) {
-    const cacheKey = 'articulos_buscador';
-
-    return fetchConCache(cacheKey, async () => {
-        const { data, error } = await supabase
-            .from('articulos')
-            .select('titulo, slug, descripcion, imagen_portada, categorias(nombre)')
-            .eq('estado', true)
-            .order('fecha_publicacion', { ascending: false });
-
-        if (error) { console.error('Error obteniendo artículos para buscador:', error); return null; }
-        return data;
-    }, forceRefresh, CACHE_TTL.articleList);
+  const cacheKey = 'articulos_buscador';
+  return fetchConCache(cacheKey, async () => {
+    const { data, error } = await supabase
+      .from('articulos')
+      .select('titulo, slug, descripcion, imagen_portada, categorias(nombre)')
+      .eq('estado', true)
+      .order('fecha_publicacion', { ascending: false })
+      .limit(200); // límite explícito — antes era ilimitado
+    if (error) { console.error(error); return null; }
+    return data;
+  }, forceRefresh, CACHE_TTL.articleList);
 }
 
 // ── Artículo individual por slug ───────────────────────
@@ -204,4 +203,15 @@ export async function eliminarArticulo(id) {
     if (error) throw error;
     clearCache();
     return data;
+}
+
+export async function buscarArticulos(query) {
+  const { data, error } = await supabase
+    .from('articulos')
+    .select('titulo, slug, descripcion, imagen_portada, categorias(nombre)')
+    .eq('estado', true)
+    .textSearch('fts', query, { type: 'websearch', config: 'spanish' })
+    .limit(8);
+  if (error) { console.error(error); return []; }
+  return data;
 }

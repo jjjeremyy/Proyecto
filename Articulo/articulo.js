@@ -89,39 +89,94 @@ async function cargarArticulo(slug) {
 // RELLENAR PLANTILLA
 // --------------------------------------------------
 function rellenarArticulo(a) {
-    const categoria = a.categorias?.nombre || '';
+   function rellenarArticulo(a) {
+  const categoria = a.categorias?.nombre || '';
+  const url = window.location.href;
 
-    document.title = `SistemaBase | ${a.titulo}`;
-    setMeta('description', a.descripcion || a.titulo);
+  document.title = `${a.titulo} | SistemaBase`;
+  setMeta('description', a.descripcion || a.titulo);
 
-    setText('breadcrumb-categoria-text', categoria);
-    // Ruta relativa desde Articulo/ hacia Categorias/
-    setAttr('breadcrumb-categoria-link', 'href', `../Categorias/categorias.html`);
-    setText('breadcrumb-titulo-text', truncar(a.titulo, 45));
+  // Open Graph (Facebook, WhatsApp, LinkedIn)
+  setOGMeta('og:title',       a.titulo);
+  setOGMeta('og:description', a.descripcion || '');
+  setOGMeta('og:image',       a.imagen_portada || '');
+  setOGMeta('og:url',         url);
+  setOGMeta('og:type',        'article');
+  setOGMeta('og:site_name',   'SistemaBase');
+  setOGMeta('article:published_time', a.fecha_publicacion);
+  setOGMeta('article:section', categoria);
 
-    setText('article-category-badge', categoria.toUpperCase());
-    setText('article-date', formatearFecha(a.fecha_publicacion));
-    setText('article-title',    a.titulo);
-    setText('article-subtitle', a.descripcion || '');
+  // Twitter Cards
+  setTwitterMeta('twitter:card',        'summary_large_image');
+  setTwitterMeta('twitter:title',       a.titulo);
+  setTwitterMeta('twitter:description', a.descripcion || '');
+  setTwitterMeta('twitter:image',       a.imagen_portada || '');
 
-    if (a.imagen_portada) {
-        const img = document.getElementById('article-featured-img');
-        if (img) {
-            img.src = a.imagen_portada;
-            img.alt = a.titulo;
-            img.setAttribute('fetchpriority', 'high');
-            img.removeAttribute('loading');
-        }
-    } else {
-        const fig = document.getElementById('article-featured-figure');
-        if (fig) fig.style.display = 'none';
-    }
+  // JSON-LD Structured Data (muy importante para Google)
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": a.titulo,
+    "description": a.descripcion,
+    "image": a.imagen_portada,
+    "datePublished": a.fecha_publicacion,
+    "author": { "@type": "Organization", "name": "SistemaBase" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "SistemaBase",
+      "logo": { "@type": "ImageObject", "url": "https://tusitio.com/IMG/LogoSistemaBaseBlanco.png" }
+    },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": url }
+  };
 
-    const bodyEl = document.getElementById('article-body-content');
-    if (bodyEl) bodyEl.innerHTML = a.contenido || '';
+  let scriptTag = document.getElementById('json-ld');
+  if (!scriptTag) {
+    scriptTag = document.createElement('script');
+    scriptTag.id = 'json-ld';
+    scriptTag.type = 'application/ld+json';
+    document.head.appendChild(scriptTag);
+  }
+  scriptTag.textContent = JSON.stringify(schema);
 
-    document.getElementById('article-main').classList.remove('hidden');
-    configurarCompartir(a.titulo, a.slug);
+  // Canonical URL
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.rel = 'canonical';
+    document.head.appendChild(canonical);
+  }
+  canonical.href = url;
+}
+
+function setOGMeta(property, content) {
+  let tag = document.querySelector(`meta[property="${property}"]`);
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute('property', property);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+}
+
+function setTwitterMeta(name, content) {
+  let tag = document.querySelector(`meta[name="${name}"]`);
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute('name', name);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+}
+```
+
+### `robots.txt` — crea en la raíz del proyecto
+```
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /Login/
+
+Sitemap: https://tusitio.com/sitemap.xml
 }
 
 // --------------------------------------------------
@@ -230,3 +285,33 @@ function formatearFecha(fecha) {
 function truncar(texto, max) {
     return texto && texto.length > max ? texto.substring(0, max) + '…' : texto;
 }
+
+// Barra de progreso de lectura
+const bar = document.createElement('div');
+bar.id = 'reading-progress';
+document.body.prepend(bar);
+
+window.addEventListener('scroll', () => {
+  const doc = document.documentElement;
+  const scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight);
+  bar.style.width = `${Math.min(scrolled * 100, 100)}%`;
+}, { passive: true });
+
+// articulo.js — añadir al final
+const btnTop = document.createElement('button');
+btnTop.id = 'btn-top';
+btnTop.textContent = '↑';
+btnTop.setAttribute('aria-label', 'Volver al inicio');
+btnTop.style.cssText = `
+  position:fixed; bottom:24px; right:24px; width:44px; height:44px;
+  background:var(--color-primary); color:#fff; border:none; border-radius:50%;
+  font-size:20px; cursor:pointer; opacity:0; transition:opacity 0.3s;
+  z-index:500; box-shadow:0 4px 16px rgba(4,56,115,0.3);
+`;
+document.body.appendChild(btnTop);
+btnTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+window.addEventListener('scroll', () => {
+  btnTop.style.opacity = window.scrollY > 400 ? '1' : '0';
+  btnTop.style.pointerEvents = window.scrollY > 400 ? 'auto' : 'none';
+}, { passive: true });

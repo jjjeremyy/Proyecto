@@ -4,12 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SistemaBase | Contacto</title>
-    <link rel="stylesheet" href="../GuiaEstilosCSS/style.css">
-    <link rel="stylesheet" href="/Contacto/contacto.css">
-    <link rel="stylesheet" href="../Cookies/cookies-banner.css">
+    <link  rel="preload" rel="stylesheet" href="../GuiaEstilosCSS/style.css" as="style">
+    <link rel="preload" rel="stylesheet" href="/Contacto/contacto.css" as="style">
+    <link rel="preload" rel="stylesheet" href="../Cookies/cookies-banner.css" as="style">
 
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <!-- Preconexiones críticas -->
+    <link rel="preconnect" href="https://xylvokwwiiirjlcjrafb.supabase.co">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <!-- Fonts con display=swap para evitar FOIT -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&family=DM+Sans:wght@400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+    </noscript>
 </head>
 <body>  
     <header>
@@ -133,5 +145,13 @@
     </div>
     <script src="../Cookies/cookies-banner.js"></script>
     <script src="/Contacto/contacto.js"></script>
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .catch(err => console.warn('SW:', err));
+        });
+    }
+    </script>
 </body>
 </html>
