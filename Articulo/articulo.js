@@ -231,6 +231,7 @@ function truncar(texto, max) {
     return texto && texto.length > max ? texto.substring(0, max) + '…' : texto;
 }
 
+<<<<<<< HEAD
 // Barra de progreso de lectura
 const bar = document.createElement('div');
 bar.id = 'reading-progress';
@@ -260,3 +261,6 @@ window.addEventListener('scroll', () => {
   btnTop.style.opacity = window.scrollY > 400 ? '1' : '0';
   btnTop.style.pointerEvents = window.scrollY > 400 ? 'auto' : 'none';
 }, { passive: true });
+=======
+bodyEl.innerHTML = DOMPurify.sanitize(a.contenido || '');  
+>>>>>>> main

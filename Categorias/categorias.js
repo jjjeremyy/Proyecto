@@ -2,7 +2,7 @@
 // CATEGORIAS.JS — SistemaBase
 // CORRECCIÓN GITHUB PAGES: rutas relativas
 // =============================================
-import { supabase } from '../Supabase/supabase.js';
+import { supabase, obtenerIdCategoria } from '../Supabase/supabase.js';
 
 const botones           = document.querySelectorAll('.category-button');
 const seccionResultados = document.getElementById('articles-result');
@@ -73,20 +73,23 @@ async function cargarArticulos(slug, nombre) {
 
     // Ruta relativa: estamos en Categorias/, enlazamos a ../Articulo/
     listaArticulos.innerHTML = data.map(articulo => `
-        <div class="article-card" onclick="window.location.href='../Articulo/articulo.html?slug=${articulo.slug}'">
-            <div class="article-card-image-wrapper">
-                <img src="${articulo.imagen_portada || '../IMG/IMGprueba.png'}"
-                    alt="${articulo.titulo}"
-                    loading="lazy">
-            </div>
-            <div class="article-card-body">
-                <h3>${articulo.titulo}</h3>
-                <p>${articulo.descripcion || ''}</p>
-                <span class="article-card-link">Leer artículo →</span>
-            </div>
+    <a href="../Articulo/articulo.html?slug=${articulo.slug}" class="article-card">
+        <div class="article-card-image-wrapper">
+            <img src="${articulo.imagen_portada || '../IMG/IMGprueba.png'}"
+                 alt="${articulo.titulo}"
+                 loading="lazy"
+                 width="400" height="170"
+                 decoding="async">
         </div>
-    `).join('');
+        <div class="article-card-body">
+            <h3>${articulo.titulo}</h3>
+            <p>${articulo.descripcion || ''}</p>
+            <span class="article-card-link" aria-hidden="true">Leer artículo →</span>
+        </div>
+    </a>
+`).join('');
 }
+<<<<<<< HEAD
 
 async function obtenerIdCategoria(slug) {
     const { data, error } = await supabase
@@ -117,3 +120,5 @@ document.querySelectorAll('.recent-card, .article-card').forEach(card => {
     if (href) añadirPrefetch(new URL(href, location.href).searchParams.get('slug'));
   }, { once: true }); // once: true → solo la primera vez
 });
+=======
+>>>>>>> main

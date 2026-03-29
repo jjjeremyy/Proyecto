@@ -1,6 +1,7 @@
 // =============================================
 // HOME.JS — SistemaBase
-// CORRECCIÓN GITHUB PAGES: rutas relativas
+// CORRECCIÓN DE RUTAS: index.html está en la raíz,
+// por lo que las rutas NO llevan ../
 // =============================================
 import { obtenerArticulosRecientes, obtenerArticulosBuscador } from '../Supabase/supabase.js';
 
@@ -11,6 +12,7 @@ async function cargarArticulosRecientes() {
     const lista = document.getElementById('recent-articles-list');
     if (!lista) return;
 
+    // Skeleton loader mientras carga
     lista.innerHTML = Array.from({ length: 4 }, () => `
         <div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(4,56,115,0.08);">
             <div style="height:160px;background:linear-gradient(90deg,#eef2f8 25%,#e2e8f4 50%,#eef2f8 75%);background-size:200% 100%;animation:sk-home 1.4s infinite;"></div>
@@ -35,12 +37,15 @@ async function cargarArticulosRecientes() {
         return;
     }
 
+    // ✅ CORRECCIÓN CLAVE: rutas sin ../ porque index.html está en la raíz
     lista.innerHTML = data.map(art => `
         <a href="Articulo/articulo.html?slug=${art.slug}" class="recent-card">
             <div class="recent-card-img-wrap">
                 <img src="${art.imagen_portada || 'IMG/IMGprueba.png'}"
                      alt="${art.titulo}"
-                     loading="lazy">
+                     loading="lazy"
+                     width="400" height="160"
+                     decoding="async">
                 <span class="recent-card-cat">${art.categorias?.nombre || ''}</span>
             </div>
             <div class="recent-card-body">
@@ -94,9 +99,12 @@ function inicializarBuscador() {
         if (filtrados.length === 0) {
             resultados.innerHTML = `<p class="search-no-results">Sin resultados para "<strong>${escapeHtml(input.value)}</strong>"</p>`;
         } else {
+            // ✅ CORRECCIÓN: rutas sin ../ en los resultados del buscador
             resultados.innerHTML = filtrados.slice(0, 6).map(art => `
                 <a href="Articulo/articulo.html?slug=${art.slug}" class="search-result-item">
-                    <img src="${art.imagen_portada || 'IMG/IMGprueba.png'}" alt="${art.titulo}">
+                    <img src="${art.imagen_portada || 'IMG/IMGprueba.png'}"
+                         alt="${art.titulo}"
+                         width="46" height="46">
                     <div>
                         <span class="search-result-cat">${art.categorias?.nombre || ''}</span>
                         <p>${resaltarTexto(art.titulo, query)}</p>

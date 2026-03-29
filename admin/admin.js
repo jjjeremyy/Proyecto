@@ -7,8 +7,13 @@ import { supabase } from '../Supabase/supabase.js';
 // --------------------------------------------------
 // 0. PROTECCIÓN: redirige si no hay sesión activa
 // --------------------------------------------------
-const { data: { session } } = await supabase.auth.getSession();
-if (!session) {
+try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) {
+        window.location.href = '../Login/login.html';
+    }
+} catch (e) {
+    console.error('Error verificando sesión:', e);
     window.location.href = '../Login/login.html';
 }
 
@@ -503,10 +508,9 @@ async function cargarListaArticulos() {
         `;
         tbody.appendChild(tr);
     });
-
-    // Delegar eventos de editar y eliminar
-    tbody.addEventListener('click', handleArticleAction);
 }
+ 
+document.getElementById('articles-tbody').addEventListener('click', handleArticleAction);
 
 function handleArticleAction(e) {
     const btn = e.target.closest('.btn-action');
