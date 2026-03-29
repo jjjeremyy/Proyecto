@@ -86,7 +86,7 @@ function inicializarBuscador() {
         if (!cargado) await cargarDatosBuscador();
 
         const filtrados = todosLosArticulos.filter(art =>
-            art.titulo.toLowerCase().includes(query) ||
+        art.titulo.toLowerCase().includes(query) ||
             (art.descripcion || '').toLowerCase().includes(query) ||
             (art.categorias?.nombre || '').toLowerCase().includes(query)
         );

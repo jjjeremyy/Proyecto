@@ -230,3 +230,5 @@ function formatearFecha(fecha) {
 function truncar(texto, max) {
     return texto && texto.length > max ? texto.substring(0, max) + '…' : texto;
 }
+
+bodyEl.innerHTML = DOMPurify.sanitize(a.contenido || '');  

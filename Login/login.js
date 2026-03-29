@@ -8,9 +8,14 @@ import { supabase } from '../Supabase/supabase.js';
 // 0. SI YA HAY SESIÓN ACTIVA, IR DIRECTO AL ADMIN
 //    (evita mostrar el login a quien ya está logado)
 // --------------------------------------------------
-const { data: { session } } = await supabase.auth.getSession();
-if (session) {
-    window.location.href = '../admin/admin.html';
+try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) {
+        window.location.href = '../Login/login.html';
+    }
+} catch (e) {
+    console.error('Error verificando sesión:', e);
+    window.location.href = '../Login/login.html';
 }
 
 // --------------------------------------------------
