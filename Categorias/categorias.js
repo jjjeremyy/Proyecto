@@ -89,36 +89,3 @@ async function cargarArticulos(slug, nombre) {
     </a>
 `).join('');
 }
-<<<<<<< HEAD
-
-async function obtenerIdCategoria(slug) {
-    const { data, error } = await supabase
-        .from('categorias')
-        .select('id')
-        .eq('slug', slug)
-        .maybeSingle();
-
-    if (error) {
-        console.error('Error buscando categoría:', error);
-        return null;
-    }
-
-    return data?.id ?? null;
-}
-// Añadir a home.js y categorias.js
-function añadirPrefetch(slug) {
-  const link = document.createElement('link');
-  link.rel = 'prefetch';
-  link.href = `/Articulo/articulo.html?slug=${slug}`;
-  document.head.appendChild(link);
-}
-
-// En los event listeners de las tarjetas
-document.querySelectorAll('.recent-card, .article-card').forEach(card => {
-  card.addEventListener('mouseenter', () => {
-    const href = card.getAttribute('href') || card.dataset.href;
-    if (href) añadirPrefetch(new URL(href, location.href).searchParams.get('slug'));
-  }, { once: true }); // once: true → solo la primera vez
-});
-=======
->>>>>>> main
