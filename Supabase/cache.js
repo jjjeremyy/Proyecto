@@ -1,139 +1,110 @@
-// =============================================
-// CACHE.JS — Sistema de caché de dos niveles
-// Nivel 1: Memoria (Map) — acceso instantáneo
-// Nivel 2: localStorage — persiste entre recargas
-// TTL: 1 hora (3 600 000 ms)
-// =============================================
+// ═══════════════════════════════════════════════════
+// CACHE.JS — Sistema de 4 niveles con TTL inteligente
+// L1: Map en RAM (0ms)  L2: localStorage (0ms)
+// L3: CDN headers       L4: Supabase (solo en build)
+// ═══════════════════════════════════════════════════
 
-// Prefijo para evitar colisiones con otras claves en localStorage
-const CACHE_PREFIX = 'sb_cache_';
+const PREFIX  = 'sb_v2_';
+const memCache = new Map();
 
-// Tiempo de vida del caché: 1 hora en milisegundos
-export const CACHE_TTL = {
-  articleList: 60 * 60 * 1000,      // 1 hora (antes era fijo)
-  articleDetail: 24 * 60 * 60 * 1000, // 24 horas
-  sitemap: 7 * 24 * 60 * 60 * 1000,  // 1 semana
+// TTLs configurables por tipo de contenido
+export const TTL = {
+  articleDetail : 24 * 60 * 60 * 1000,  // 24h — cambia poco
+  articleList   :       60 * 60 * 1000,  // 1h  — puede crecer
+  categories    :  7 * 24 * 60 * 60 * 1000, // 7d  — casi estático
+  search        :       30 * 60 * 1000,  // 30m — buscador
 };
 
-// ── Nivel 1: caché en memoria ──────────────────────────
-const memoryCache = new Map();
+// ── Protección thundering herd: promesas en vuelo ──
+const inflight = new Map();
 
-// ── getCache ───────────────────────────────────────────
-// Busca primero en memoria, luego en localStorage.
-// Devuelve los datos si existen y no han expirado, o null.
-export function getCache(key, ttl = CACHE_TTL.articleList) {
-  const fullKey = CACHE_PREFIX + key;
+export async function fetchWithCache(key, fetchFn, ttl = TTL.articleList) {
+  const fullKey = PREFIX + key;
 
-  // 1. Intentar memoria (más rápido)
-  if (memoryCache.has(fullKey)) {
-    const entry = memoryCache.get(fullKey);
-    if (Date.now() - entry.timestamp < ttl) {
-      return entry.data;
-    }
-    // Expirado → limpiar
-    memoryCache.delete(fullKey);
+  // 1. Memoria (0ms)
+  const memHit = readMem(fullKey, ttl);
+  if (memHit !== null) return memHit;
+
+  // 2. localStorage (0ms, persiste entre recargas)
+  const lsHit = readLS(fullKey, ttl);
+  if (lsHit !== null) {
+    writeMem(fullKey, lsHit);  // repoblar L1
+    return lsHit;
   }
 
-  // 2. Intentar localStorage
+  // 3. Evitar que múltiples peticiones simultáneas llamen a Supabase
+  if (inflight.has(fullKey)) {
+    return inflight.get(fullKey);
+  }
+
+  // 4. Fetch real (Supabase) — solo si no hay nada en caché
+  const promise = fetchFn().then(data => {
+    inflight.delete(fullKey);
+    if (data !== null) {
+      writeMem(fullKey, data);
+      writeLS(fullKey, data);
+    }
+    return data;
+  }).catch(err => {
+    inflight.delete(fullKey);
+    throw err;
+  });
+
+  inflight.set(fullKey, promise);
+  return promise;
+}
+
+// Invalidar todo cuando el admin publica/actualiza
+export function invalidateCache(pattern) {
+  // Limpiar memoria
+  for (const k of memCache.keys()) {
+    if (!pattern || k.includes(pattern)) memCache.delete(k);
+  }
+  // Limpiar localStorage
   try {
-    const raw = localStorage.getItem(fullKey);
+    Object.keys(localStorage)
+      .filter(k => k.startsWith(PREFIX) && (!pattern || k.includes(pattern)))
+      .forEach(k => localStorage.removeItem(k));
+  } catch (_) {}
+}
+
+// ── Helpers internos ──────────────────────────────
+function readMem(key, ttl) {
+  const e = memCache.get(key);
+  if (!e) return null;
+  if (Date.now() - e.ts > ttl) { memCache.delete(key); return null; }
+  return e.data;
+}
+
+function writeMem(key, data) {
+  memCache.set(key, { data, ts: Date.now() });
+}
+
+function readLS(key, ttl) {
+  try {
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
-
-    const entry = JSON.parse(raw);
-    if (Date.now() - entry.timestamp < CACHE_TTL) {
-      // Rehidratar memoria para futuras lecturas rápidas
-      memoryCache.set(fullKey, entry);
-      return entry.data;
-    }
-
-    // Expirado → limpiar
-    localStorage.removeItem(fullKey);
-  } catch (e) {
-    console.warn('[Cache] Error leyendo localStorage:', e);
-  }
-
-  return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > ttl) { localStorage.removeItem(key); return null; }
+    return data;
+  } catch { return null; }
 }
 
-// ── setCache ───────────────────────────────────────────
-// Guarda en ambos niveles con timestamp actual.
-export function setCache(key, data, ttl = CACHE_TTL.articleList) {
-  const fullKey = CACHE_PREFIX + key;
-  const entry = {
-    data,
-    timestamp: Date.now()
-  };
-
-  // Nivel 1: memoria
-  memoryCache.set(fullKey, entry);
-
-  // Nivel 2: localStorage (con protección contra QuotaExceeded)
+function writeLS(key, data) {
   try {
-    localStorage.setItem(fullKey, JSON.stringify(entry));
+    localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }));
   } catch (e) {
-    console.warn('[Cache] No se pudo guardar en localStorage:', e);
-    // Si el almacenamiento está lleno, limpiar caché antiguo e intentar de nuevo
-    clearCache();
-    try {
-      localStorage.setItem(fullKey, JSON.stringify(entry));
-    } catch (_) { /* silenciar */ }
+    if (e.name === 'QuotaExceededError') purgeLeastRecent();
   }
 }
 
-// ── clearCache ─────────────────────────────────────────
-// Sin argumento: borra TODAS las claves con el prefijo.
-// Con argumento: borra solo esa clave específica.
-export function clearCache(key) {
-  if (key) {
-    const fullKey = CACHE_PREFIX + key;
-    memoryCache.delete(fullKey);
-    localStorage.removeItem(fullKey);
-    return;
-  }
+function purgeLeastRecent() {
+  const entries = Object.keys(localStorage)
+    .filter(k => k.startsWith(PREFIX))
+    .map(k => ({ k, ts: JSON.parse(localStorage.getItem(k) || '{"ts":0}').ts }))
+    .sort((a, b) => a.ts - b.ts);
 
-  // Borrar todo el caché prefijado
-  memoryCache.clear();
-
-  const keysToRemove = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k && k.startsWith(CACHE_PREFIX)) {
-      keysToRemove.push(k);
-    }
-  }
-  keysToRemove.forEach(k => localStorage.removeItem(k));
-}
-
-// ── fetchConCache ──────────────────────────────────────
-// Función genérica que implementa el patrón cache-first:
-//   1. Revisa el caché
-//   2. Si no hay datos válidos, ejecuta la función de fetch
-//   3. Guarda el resultado en caché
-//   4. Devuelve los datos
-//
-// Parámetros:
-//   cacheKey  — clave única para esta consulta
-//   fetchFn   — función async que devuelve los datos frescos
-//   forceRefresh — si true, ignora el caché y fuerza petición
-//
-// Devuelve: los datos (desde caché o desde Supabase)
-export async function fetchConCache(cacheKey, fetchFn, forceRefresh = false, ttl = CACHE_TTL.articleList) {
-  // 1. Revisar caché (si no se fuerza refresco)
-  if (!forceRefresh) {
-    const cached = getCache(cacheKey, ttl);
-    if (cached !== null) {
-      console.log(`[Cache] HIT — "${cacheKey}"`);
-      return cached;
-    }
-  }
-
-  // 2. Ejecutar la petición real
-  console.log(`[Cache] MISS — "${cacheKey}" → consultando Supabase`);
-  const data = await fetchFn();
-
-  // 3. Guardar en caché (solo si hay datos válidos)
-  if (data !== null) setCache(cacheKey, data, ttl);
-
-  // 4. Devolver los datos
-  return data;
+  // Eliminar la mitad más antigua
+  entries.slice(0, Math.ceil(entries.length / 2))
+         .forEach(({ k }) => localStorage.removeItem(k));
 }

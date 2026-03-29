@@ -1,237 +1,41 @@
-<!DOCTYPE html>
-<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SistemaBase | Artículo</title>
-    <meta name="description" content="">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Google AdSense — sustituye ca-pub-XXXXXXXXXXXXXXXXX por tu ID real -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+  <!-- CSS crítico inline (evita render-blocking) -->
+  <style>
+    /* Solo los estilos del above-the-fold: header, título, spinner */
+    body{margin:0;font-family:system-ui,sans-serif;background:#f5f3ee}
+    .article-title{font-size:clamp(1.7rem,3.5vw,2.4rem);font-weight:700}
+    /* ... mínimos estilos críticos ... */
+  </style>
 
-    <!-- Rutas relativas desde Articulo/ → subir un nivel con ../ -->
-    <link rel="stylesheet" href="../GuiaEstilosCSS/style.css">
-    <link rel="stylesheet" href="articulo.css">
-    <link rel="stylesheet" href="../Cookies/cookies-banner.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- CSS no-crítico: carga diferida -->
+  <link rel="preload" href="../GuiaEstilosCSS/style.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="../GuiaEstilosCSS/style.css"></noscript>
+
+  <!-- Fonts: solo los pesos realmente usados -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=Source+Sans+3:wght@400;600&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'">
+
+  <!-- Preload de la imagen de portada (solo si es above-the-fold) -->
+  <link id="preload-img" rel="preload" as="image"
+        href="" <!-- Se inyecta via JS con el slug del artículo -->
+        imagesrcset="foto-400.webp 400w, foto-800.webp 800w">
+
+  <!-- JS del artículo: defer = no bloquea el parser -->
+  <script type="module" src="articulo.js" defer></script>
+
+  <!-- NO cargar AdSense aquí — cargarlo solo tras consentimiento cookies -->
+  <!-- <script async src="pagead2.googlesyndication..."></script> ← MOVER a JS -->
+
+  <!-- SEO + Open Graph -->
+  <meta name="description" content="" id="meta-desc">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="" id="og-img">
+  <link rel="canonical" href="" id="canonical">
 </head>
-<body>
-
-   <header>
-        <section class="logo-container">
-            <img src="../IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo">
-            <a href="../index.html" class="home">SistemaBase</a>
-        </section>
-        <section class="nav-links">
-            <a href="../Categorias/categorias.html">Categorías</a>
-            <a href="../SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
-            <a href="../Contacto/contacto.html">Contacto</a>
-        </section>
-    </header> 
-
-    <!-- ANUNCIO SUPERIOR (728x90) -->
-    <div class="ad-container ad-leaderboard">
-        <p class="ad-label">Publicidad</p>
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-             data-ad-slot="XXXXXXXXXX"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
-    <!-- ESTADO: CARGANDO -->
-    <div id="article-loading" class="article-loading-state">
-        <div class="loading-spinner"></div>
-        <p>Cargando artículo...</p>
-    </div>
-
-    <!-- ESTADO: ERROR -->
-    <div id="article-error" class="article-error-state hidden">
-        <h2>😕 Artículo no encontrado</h2>
-        <p id="article-error-msg"></p>
-        <a href="../index.html" class="btn-back">← Volver al inicio</a>
-    </div>
-
-    <!-- CONTENIDO -->
-    <main id="article-main" class="article-layout hidden">
-
-        <!-- SIDEBAR IZQUIERDO -->
-        <aside class="sidebar sidebar-left">
-            <div class="ad-container ad-sidebar sticky-ad">
-                <p class="ad-label">Publicidad</p>
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-            <div class="ad-container ad-sidebar" style="margin-top:30px;">
-                <p class="ad-label">Publicidad</p>
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-        </aside>
-
-        <!-- ARTÍCULO -->
-        <article class="article-content">
-
-            <!-- BREADCRUMB -->
-            <nav class="breadcrumb">
-                <a href="../index.html">Inicio</a>
-                <span>›</span>
-                <a id="breadcrumb-categoria-link" href="../Categorias/categorias.html">
-                    <span id="breadcrumb-categoria-text"></span>
-                </a>
-                <span>›</span>
-                <span id="breadcrumb-titulo-text"></span>
-            </nav>
-
-            <!-- CABECERA -->
-            <header class="article-header">
-                <div class="article-meta-top">
-                    <span id="article-category-badge" class="article-category"></span>
-                    <span id="article-date" class="article-date"></span>
-                </div>
-                <h1 id="article-title" class="article-title"></h1>
-                <p  id="article-subtitle" class="article-subtitle"></p>
-                <div class="article-meta-bottom">
-                    <div class="article-actions">
-                        <button id="btn-share" class="btn-share">Compartir</button>
-                    </div>
-                </div>
-            </header>
-
-            <!-- IMAGEN DE PORTADA -->
-            <figure id="article-featured-figure" class="article-featured-image">
-                <img id="article-featured-img" src="" alt="" class="featured-img">
-            </figure>
-
-            <!-- ANUNCIO IN-CONTENT SUPERIOR -->
-            <div class="ad-container ad-in-content">
-                <p class="ad-label">Publicidad</p>
-                <ins class="adsbygoogle"
-                     style="display:block; text-align:center;"
-                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-
-            <!-- CUERPO DEL ARTÍCULO -->
-            <div id="article-body-content" class="article-body"></div>
-
-            <!-- ANUNCIO POST-ARTÍCULO -->
-            <div class="ad-container ad-post-article">
-                <p class="ad-label">Publicidad</p>
-                <ins class="adsbygoogle"
-                     style="display:block; text-align:center;"
-                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-
-            <!-- ARTÍCULOS RELACIONADOS -->
-            <section id="related-section" class="related-articles">
-                <h3>Artículos Relacionados</h3>
-                <div id="related-grid" class="related-grid"></div>
-            </section>
-
-        </article>
-
-        <!-- SIDEBAR DERECHO -->
-        <aside class="sidebar sidebar-right">
-            <div class="ad-container ad-sidebar sticky-ad">
-                <p class="ad-label">Publicidad</p>
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-            <div class="ad-container ad-sidebar" style="margin-top:30px;">
-                <p class="ad-label">Publicidad</p>
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-        </aside>
-
-    </main>
-
-    <!-- ANUNCIO PIE DE PÁGINA -->
-    <div class="ad-container ad-footer-banner">
-        <p class="ad-label">Publicidad</p>
-        <ins class="adsbygoogle"
-             style="display:block; text-align:center;"
-             data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-             data-ad-slot="XXXXXXXXXX"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
-    <footer>
-        <section class="footer-info">
-            <div class="footer-logo">
-                <img src="../IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
-                <div>
-                    <p class="footer-brand-name">SistemaBase</p>
-                    <p class="footer-tagline">Información sobre computación de la mejor manera posible.</p>
-                </div>
-            </div>
-            <section class="footer-links">
-                <h4>Navegación</h4>
-                <a href="../index.html">Inicio</a>
-                <a href="../Categorias/categorias.html">Categorías</a>
-                <a href="../SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
-                <a href="../Contacto/contacto.html">Contacto</a>
-                <a href="../Politicas/politicas.html">Privacidad y Cookies</a>
-            </section>
-            <section class="contact-info">
-                <h3>Contacto</h3>
-                <p>sistemabase00@gmail.com</p>
-            </section>
-        </section>
-        <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
-    </footer>
-
-    <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
-        <div class="cookie-banner-inner">
-            <span class="cookie-icon" aria-hidden="true">🍪</span>
-            <div class="cookie-text">
-                <strong>Este sitio usa cookies</strong>
-                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
-                   <a href="../Politicas/politicas.html">Política de Cookies y Privacidad</a>.
-                </p>
-            </div>
-            <div class="cookie-actions">
-                <button id="btn-cookie-accept" class="btn-cookie-accept">Aceptar todas</button>
-                <button id="btn-cookie-reject" class="btn-cookie-reject">Solo esenciales</button>
-            </div>
-        </div>
-    </div>
-    <script src="../Cookies/cookies-banner.js"></script>
-    <script type="module" src="articulo.js"></script>
-
-</body>
-</html>
