@@ -4,8 +4,7 @@
 // =============================================
 import {
     obtenerArticuloPorSlug,
-    obtenerRelacionados,
-    CACHE_TTL
+    obtenerRelacionados
 } from '../Supabase/supabase.js';
 
 const params = new URLSearchParams(window.location.search);
@@ -14,6 +13,14 @@ const slug   = params.get('slug');
 if (!slug) {
     mostrarError('No se ha especificado ningún artículo.');
 } else {
+    const canonicalLink = document.getElementById('article-canonical');
+    if (canonicalLink) {
+        const u = new URL(window.location.href);
+        u.hash = '';
+        u.search = '';
+        u.searchParams.set('slug', slug);
+        canonicalLink.href = u.href;
+    }
     mostrarSkeleton();
     cargarArticulo(slug);
 }
@@ -103,6 +110,27 @@ function rellenarArticulo(a) {
     setText('article-date', formatearFecha(a.fecha_publicacion));
     setText('article-title',    a.titulo);
     setText('article-subtitle', a.descripcion || '');
+
+    const pageUrl = new URL(window.location.href);
+    pageUrl.hash = '';
+    pageUrl.search = '';
+    pageUrl.searchParams.set('slug', a.slug);
+    const absoluteUrl = pageUrl.href;
+    const defaultOgImage = new URL('../IMG/LogoSistemaBaseBlanco.png', window.location.href).href;
+    const ogImage = a.imagen_portada || defaultOgImage;
+
+    setMetaProperty('og:title', a.titulo);
+    setMetaProperty('og:description', a.descripcion || a.titulo);
+    setMetaProperty('og:url', absoluteUrl);
+    setMetaProperty('og:image', ogImage);
+    setMetaName('twitter:title', a.titulo);
+    setMetaName('twitter:description', a.descripcion || a.titulo);
+    setMetaName('twitter:image', ogImage);
+
+    const canonicalLink = document.getElementById('article-canonical');
+    if (canonicalLink) canonicalLink.href = absoluteUrl;
+
+    inyectarJsonLdArticulo(a, absoluteUrl, defaultOgImage);
 
     if (a.imagen_portada) {
         const img = document.getElementById('article-featured-img');
@@ -218,6 +246,55 @@ function setMeta(name, content) {
         document.head.appendChild(tag);
     }
     tag.setAttribute('content', content);
+}
+
+function setMetaProperty(property, content) {
+    let el = document.querySelector(`meta[property="${property}"]`);
+    if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('property', property);
+        document.head.appendChild(el);
+    }
+    el.setAttribute('content', content);
+}
+
+function setMetaName(name, content) {
+    let el = document.querySelector(`meta[name="${name}"]`);
+    if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('name', name);
+        document.head.appendChild(el);
+    }
+    el.setAttribute('content', content);
+}
+
+function inyectarJsonLdArticulo(a, absoluteUrl, logoUrl) {
+    const prev = document.getElementById('article-jsonld');
+    if (prev) prev.remove();
+    const script = document.createElement('script');
+    script.id = 'article-jsonld';
+    script.type = 'application/ld+json';
+    const article = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: a.titulo,
+        description: a.descripcion || a.titulo,
+        author: { '@type': 'Organization', name: 'SistemaBase' },
+        publisher: {
+            '@type': 'Organization',
+            name: 'SistemaBase',
+            logo: { '@type': 'ImageObject', url: logoUrl }
+        },
+        mainEntityOfPage: { '@type': 'WebPage', '@id': absoluteUrl }
+    };
+    if (a.fecha_publicacion) {
+        article.datePublished = `${a.fecha_publicacion}T12:00:00`;
+    }
+    if (a.imagen_portada) {
+        article.image = [a.imagen_portada];
+    }
+    script.textContent = JSON.stringify(article);
+    document.head.appendChild(script);
 }
 
 function formatearFecha(fecha) {

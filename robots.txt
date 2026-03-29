@@ -1,0 +1,8 @@
+# SistemaBase — ajusta la URL del Sitemap si tu dominio o subcarpeta de despliegue cambia
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /Login/
+
+Sitemap: https://sistemabase.es/sitemap.xml
