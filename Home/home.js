@@ -37,21 +37,22 @@ async function cargarArticulosRecientes() {
         return;
     }
 
+    const fallbackImg = 'IMG/IMGprueba.png';
     // ✅ CORRECCIÓN CLAVE: rutas sin ../ porque index.html está en la raíz
     lista.innerHTML = data.map(art => `
-        <a href="Articulo/articulo.html?slug=${art.slug}" class="recent-card">
+        <a href="Articulo/articulo.html?slug=${encodeURIComponent(art.slug)}" class="recent-card">
             <div class="recent-card-img-wrap">
-                <img src="${art.imagen_portada || 'IMG/IMGprueba.png'}"
-                     alt="${art.titulo}"
+                <img src="${escapeAttr(safeImgSrc(art.imagen_portada, fallbackImg))}"
+                     alt="${escapeAttr(art.titulo)}"
                      loading="lazy"
                      width="400" height="160"
                      decoding="async">
-                <span class="recent-card-cat">${art.categorias?.nombre || ''}</span>
+                <span class="recent-card-cat">${escapeHtml(art.categorias?.nombre || '')}</span>
             </div>
             <div class="recent-card-body">
-                <h3>${art.titulo}</h3>
-                <p>${art.descripcion || ''}</p>
-                <span class="recent-card-date">${formatearFecha(art.fecha_publicacion)}</span>
+                <h3>${escapeHtml(art.titulo)}</h3>
+                <p>${escapeHtml(art.descripcion || '')}</p>
+                <span class="recent-card-date">${escapeHtml(formatearFecha(art.fecha_publicacion))}</span>
             </div>
         </a>
     `).join('');
@@ -100,13 +101,14 @@ function inicializarBuscador() {
             resultados.innerHTML = `<p class="search-no-results">Sin resultados para "<strong>${escapeHtml(input.value)}</strong>"</p>`;
         } else {
             // ✅ CORRECCIÓN: rutas sin ../ en los resultados del buscador
+            const fb = 'IMG/IMGprueba.png';
             resultados.innerHTML = filtrados.slice(0, 6).map(art => `
-                <a href="Articulo/articulo.html?slug=${art.slug}" class="search-result-item">
-                    <img src="${art.imagen_portada || 'IMG/IMGprueba.png'}"
-                         alt="${art.titulo}"
+                <a href="Articulo/articulo.html?slug=${encodeURIComponent(art.slug)}" class="search-result-item">
+                    <img src="${escapeAttr(safeImgSrc(art.imagen_portada, fb))}"
+                         alt="${escapeAttr(art.titulo)}"
                          width="46" height="46">
                     <div>
-                        <span class="search-result-cat">${art.categorias?.nombre || ''}</span>
+                        <span class="search-result-cat">${escapeHtml(art.categorias?.nombre || '')}</span>
                         <p>${resaltarTexto(art.titulo, query)}</p>
                     </div>
                 </a>
@@ -141,32 +143,33 @@ function formatearFecha(fecha) {
 }
 
 function resaltarTexto(texto, query) {
+    if (!query) return escapeHtml(texto);
+    const safe = escapeHtml(texto);
     const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
-    return texto.replace(regex, '<mark>$1</mark>');
+    return safe.replace(regex, '<mark>$1</mark>');
 }
 
 function escapeHtml(str) {
-    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    if (str == null) return '';
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function escapeAttr(str) {
+    return escapeHtml(str);
+}
+
+function safeImgSrc(url, fallback) {
+    const u = (url || '').trim();
+    if (!u) return fallback;
+    if (/^https?:\/\//i.test(u)) return u;
+    if (u.startsWith('../') || u.startsWith('./') || u.startsWith('IMG/') || u.startsWith('/')) return u;
+    return fallback;
 }
 
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-// Añadir a home.js y categorias.js
-function añadirPrefetch(slug) {
-  const link = document.createElement('link');
-  link.rel = 'prefetch';
-  link.href = `/Articulo/articulo.html?slug=${slug}`;
-  document.head.appendChild(link);
-}
 
-// En los event listeners de las tarjetas
-document.querySelectorAll('.recent-card, .article-card').forEach(card => {
-  card.addEventListener('mouseenter', () => {
-    const href = card.getAttribute('href') || card.dataset.href;
-    if (href) añadirPrefetch(new URL(href, location.href).searchParams.get('slug'));
-  }, { once: true }); // once: true → solo la primera vez
-});
 Promise.all([
     cargarArticulosRecientes(),
     Promise.resolve(inicializarBuscador())

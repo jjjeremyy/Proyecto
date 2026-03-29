@@ -2,6 +2,7 @@
 // ARTICULO.JS — SistemaBase
 // CORRECCIÓN GITHUB PAGES: rutas relativas
 // =============================================
+import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.2.4/+esm';
 import {
     obtenerArticuloPorSlug,
     obtenerRelacionados
@@ -146,7 +147,11 @@ function rellenarArticulo(a) {
     }
 
     const bodyEl = document.getElementById('article-body-content');
-    if (bodyEl) bodyEl.innerHTML = a.contenido || '';
+    if (bodyEl) {
+        bodyEl.innerHTML = DOMPurify.sanitize(a.contenido || '', {
+            USE_PROFILES: { html: true }
+        });
+    }
 
     document.getElementById('article-main').classList.remove('hidden');
     configurarCompartir(a.titulo, a.slug);
@@ -182,14 +187,14 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
 
     // Ruta relativa: estamos en Articulo/, el enlace apunta a articulo.html en la misma carpeta
     grid.innerHTML = data.map(art => `
-        <a href="articulo.html?slug=${art.slug}" class="related-card">
-            <img src="${art.imagen_portada || '../IMG/IMGprueba.png'}"
-                 alt="${art.titulo}"
+        <a href="articulo.html?slug=${encodeURIComponent(art.slug)}" class="related-card">
+            <img src="${escapeAttr(safeImgSrc(art.imagen_portada, '../IMG/IMGprueba.png'))}"
+                 alt="${escapeAttr(art.titulo)}"
                  loading="lazy"
                  width="400" height="130">
             <div class="related-card-info">
-                <span class="related-category">${art.categorias?.nombre || ''}</span>
-                <h4>${art.titulo}</h4>
+                <span class="related-category">${escapeHtml(art.categorias?.nombre || '')}</span>
+                <h4>${escapeHtml(art.titulo)}</h4>
             </div>
         </a>
     `).join('');
@@ -228,6 +233,24 @@ function mostrarError(mensaje) {
 // --------------------------------------------------
 // UTILIDADES
 // --------------------------------------------------
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str).replace(/[&<>"']/g, m =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+
+function escapeAttr(str) {
+    return escapeHtml(str);
+}
+
+function safeImgSrc(url, fallback) {
+    const u = (url || '').trim();
+    if (!u) return fallback;
+    if (/^https?:\/\//i.test(u)) return u;
+    if (u.startsWith('../') || u.startsWith('./') || u.startsWith('IMG/') || u.startsWith('/')) return u;
+    return fallback;
+}
+
 function setText(id, texto) {
     const el = document.getElementById(id);
     if (el) el.textContent = texto;

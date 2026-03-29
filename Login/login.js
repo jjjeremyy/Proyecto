@@ -10,12 +10,11 @@ import { supabase } from '../Supabase/supabase.js';
 // --------------------------------------------------
 try {
     const { data: { session }, error } = await supabase.auth.getSession();
-    if (error || !session) {
-        window.location.href = '../Login/login.html';
+    if (!error && session) {
+        window.location.href = '../admin/admin.html';
     }
 } catch (e) {
     console.error('Error verificando sesión:', e);
-    window.location.href = '../Login/login.html';
 }
 
 // --------------------------------------------------
@@ -24,11 +23,13 @@ try {
 const passwordInput  = document.getElementById('password');
 const togglePassword = document.getElementById('toggle-password');
 
-togglePassword.addEventListener('click', () => {
-    const esPassword = passwordInput.type === 'password';
-    passwordInput.type   = esPassword ? 'text' : 'password';
-    togglePassword.textContent = esPassword ? '🙈' : '👁';
-});
+if (togglePassword && passwordInput) {
+    togglePassword.addEventListener('click', () => {
+        const esPassword = passwordInput.type === 'password';
+        passwordInput.type   = esPassword ? 'text' : 'password';
+        togglePassword.textContent = esPassword ? '🙈' : '👁';
+    });
+}
 
 // --------------------------------------------------
 // 2. SUBMIT DEL FORMULARIO
@@ -40,23 +41,27 @@ const btnLoader = document.getElementById('btn-loader');
 const errorBox  = document.getElementById('login-error');
 const errorMsg  = document.getElementById('login-error-msg');
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await iniciarSesion();
-});
+if (form) {
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await iniciarSesion();
+    });
+}
 
 async function iniciarSesion() {
-    const email    = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
+    const email    = document.getElementById('email')?.value.trim() ?? '';
+    const password = document.getElementById('password')?.value ?? '';
 
     // Ocultar error previo
-    errorBox.classList.add('hidden');
+    if (errorBox) errorBox.classList.add('hidden');
 
     // Validación básica en cliente
     if (!email || !password) {
         mostrarError('Por favor rellena el email y la contraseña.');
         return;
     }
+
+    if (!btnLogin) return;
 
     // Estado de carga
     setBtnCargando(true);
@@ -79,14 +84,15 @@ async function iniciarSesion() {
 // UTILIDADES
 // --------------------------------------------------
 function setBtnCargando(cargando) {
+    if (!btnLogin) return;
     btnLogin.disabled = cargando;
-    btnText.classList.toggle('hidden', cargando);
-    btnLoader.classList.toggle('hidden', !cargando);
+    if (btnText) btnText.classList.toggle('hidden', cargando);
+    if (btnLoader) btnLoader.classList.toggle('hidden', !cargando);
 }
 
 function mostrarError(mensaje) {
-    errorMsg.textContent = mensaje;
-    errorBox.classList.remove('hidden');
+    if (errorMsg) errorMsg.textContent = mensaje;
+    if (errorBox) errorBox.classList.remove('hidden');
 }
 
 function traducirError(mensajeIngles) {

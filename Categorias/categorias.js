@@ -10,6 +10,24 @@ const tituloCategoria   = document.getElementById('category-title');
 const contadorArticulos = document.getElementById('articles-count');
 const listaArticulos    = document.getElementById('articles-list');
 
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str).replace(/[&<>"']/g, m =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+
+function escapeAttr(str) {
+    return escapeHtml(str);
+}
+
+function safeImgSrc(url, fallback) {
+    const u = (url || '').trim();
+    if (!u) return fallback;
+    if (/^https?:\/\//i.test(u)) return u;
+    if (u.startsWith('../') || u.startsWith('./') || u.startsWith('IMG/') || u.startsWith('/')) return u;
+    return fallback;
+}
+
 function renderSkeletons(n = 6) {
     return Array.from({ length: n }, () => `
         <div class="skeleton-card">
@@ -72,18 +90,19 @@ async function cargarArticulos(slug, nombre) {
     contadorArticulos.textContent = `${data.length} artículo${data.length !== 1 ? 's' : ''}`;
 
     // Ruta relativa: estamos en Categorias/, enlazamos a ../Articulo/
+    const fb = '../IMG/IMGprueba.png';
     listaArticulos.innerHTML = data.map(articulo => `
-    <a href="../Articulo/articulo.html?slug=${articulo.slug}" class="article-card">
+    <a href="../Articulo/articulo.html?slug=${encodeURIComponent(articulo.slug)}" class="article-card">
         <div class="article-card-image-wrapper">
-            <img src="${articulo.imagen_portada || '../IMG/IMGprueba.png'}"
-                 alt="${articulo.titulo}"
+            <img src="${escapeAttr(safeImgSrc(articulo.imagen_portada, fb))}"
+                 alt="${escapeAttr(articulo.titulo)}"
                  loading="lazy"
                  width="400" height="170"
                  decoding="async">
         </div>
         <div class="article-card-body">
-            <h3>${articulo.titulo}</h3>
-            <p>${articulo.descripcion || ''}</p>
+            <h3>${escapeHtml(articulo.titulo)}</h3>
+            <p>${escapeHtml(articulo.descripcion || '')}</p>
             <span class="article-card-link" aria-hidden="true">Leer artículo →</span>
         </div>
     </a>
