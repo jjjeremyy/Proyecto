@@ -13,7 +13,7 @@ async function cargarArticulosRecientes() {
     const lista = document.getElementById('recent-articles-list');
     if (!lista) return;
 
-    // Skeleton loader mientras carga
+    // Skeleton loader
     lista.innerHTML = Array.from({ length: 4 }, () => `
         <div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(4,56,115,0.08);">
             <div style="height:160px;background:linear-gradient(90deg,#eef2f8 25%,#e2e8f4 50%,#eef2f8 75%);background-size:200% 100%;animation:sk-home 1.4s infinite;"></div>
@@ -31,7 +31,14 @@ async function cargarArticulosRecientes() {
         document.head.appendChild(s);
     }
 
-    const data = await obtenerArticulosRecientes(4);
+    let data;
+    try {
+        data = await obtenerArticulosRecientes(4);
+    } catch (err) {
+        console.error('[SistemaBase] Error al cargar artículos recientes:', err);
+        lista.innerHTML = `<p class="home-no-results">Error al cargar artículos. Revisa la consola para más detalles.</p>`;
+        return;
+    }
 
     if (!data || data.length === 0) {
         lista.innerHTML = '<p class="home-no-results">No hay artículos publicados todavía.</p>';
@@ -56,7 +63,6 @@ async function cargarArticulosRecientes() {
         </a>
     `).join('');
 
-    // FIX: añadir prefetch DESPUÉS de que las tarjetas existen en el DOM
     añadirPrefetchListeners();
 }
 
