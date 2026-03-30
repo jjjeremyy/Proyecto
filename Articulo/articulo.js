@@ -1,21 +1,17 @@
 // =============================================
-// ARTICULO.JS — SistemaBase (OPTIMIZADO)
-// Mejoras aplicadas:
-//   1. Caché via obtenerArticuloPorSlug() y obtenerRelacionados()
-//   2. Artículo principal + relacionados en PARALELO (Promise.all)
-//   3. Skeleton loader visible mientras carga
-//   4. Artículo se muestra TAN PRONTO llega, sin esperar relacionados
-//   5. Imagen de portada con fetchpriority="high" para mejor LCP
+// ARTICULO.JS — SistemaBase
+// FIX: XSS sanitizado con DOMPurify
+// FIX: Tiempo de lectura calculado y mostrado
+// FIX: Meta OG tags para SEO/redes sociales
 // =============================================
 import {
     obtenerArticuloPorSlug,
     obtenerRelacionados,
-    CACHE_TTL
 } from '../Supabase/supabase.js';
 
-// --------------------------------------------------
-// 1. LEER EL SLUG DE LA URL
-// --------------------------------------------------
+// DOMPurify debe estar cargado antes de este módulo (via <script> en el HTML)
+const purify = window.DOMPurify;
+
 const params = new URLSearchParams(window.location.search);
 const slug   = params.get('slug');
 
@@ -27,10 +23,9 @@ if (!slug) {
 }
 
 // --------------------------------------------------
-// 2. SKELETON LOADER — visible mientras llega el artículo
+// SKELETON LOADER
 // --------------------------------------------------
 function mostrarSkeleton() {
-    // Ocultar spinner antiguo, mostrar skeleton en su lugar
     const loadingEl = document.getElementById('article-loading');
     if (loadingEl) {
         loadingEl.innerHTML = `
@@ -40,14 +35,11 @@ function mostrarSkeleton() {
                 padding: 30px 20px;
                 font-family: Arial, sans-serif;
             ">
-                <!-- Skeleton cabecera -->
                 <div style="height:14px;width:30%;border-radius:6px;margin-bottom:20px;${sk()}"></div>
                 <div style="height:36px;width:85%;border-radius:8px;margin-bottom:12px;${sk()}"></div>
                 <div style="height:36px;width:65%;border-radius:8px;margin-bottom:20px;${sk()}"></div>
                 <div style="height:18px;width:50%;border-radius:6px;margin-bottom:32px;${sk()}"></div>
-                <!-- Skeleton imagen portada -->
                 <div style="height:320px;width:100%;border-radius:10px;margin-bottom:32px;${sk()}"></div>
-                <!-- Skeleton párrafos -->
                 <div style="height:14px;width:100%;border-radius:5px;margin-bottom:10px;${sk()}"></div>
                 <div style="height:14px;width:96%;border-radius:5px;margin-bottom:10px;${sk()}"></div>
                 <div style="height:14px;width:88%;border-radius:5px;margin-bottom:10px;${sk()}"></div>
@@ -69,7 +61,6 @@ function sk() {
             display:block;`;
 }
 
-// Inyectar keyframes del shimmer una sola vez
 if (!document.getElementById('sb-shimmer-style')) {
     const style = document.createElement('style');
     style.id = 'sb-shimmer-style';
@@ -81,13 +72,11 @@ if (!document.getElementById('sb-shimmer-style')) {
 }
 
 // --------------------------------------------------
-// 3. CARGAR ARTÍCULO — usa caché de supabase.js
+// CARGAR ARTÍCULO
 // --------------------------------------------------
 async function cargarArticulo(slug) {
-    // Usar la función con caché (24h para artículos individuales)
     const articulo = await obtenerArticuloPorSlug(slug);
 
-    // Ocultar skeleton
     const loadingEl = document.getElementById('article-loading');
     if (loadingEl) loadingEl.classList.add('hidden');
 
@@ -96,15 +85,15 @@ async function cargarArticulo(slug) {
         return;
     }
 
-    // Rellenar y mostrar el artículo YA — sin esperar relacionados
     rellenarArticulo(articulo);
-
-    // Cargar relacionados en segundo plano (no bloquea la visualización)
     cargarRelacionados(articulo.categoria_id, articulo.id);
 }
 
 // --------------------------------------------------
-// 4. RELLENAR LA PLANTILLA
+// RELLENAR PLANTILLA
+// FIX: DOMPurify aplicado al contenido HTML
+// FIX: Tiempo de lectura calculado
+// FIX: Meta OG y Twitter añadidos
 // --------------------------------------------------
 function rellenarArticulo(a) {
     const categoria = a.categorias?.nombre || '';
@@ -112,8 +101,21 @@ function rellenarArticulo(a) {
     document.title = `SistemaBase | ${a.titulo}`;
     setMeta('description', a.descripcion || a.titulo);
 
+    // FIX: Open Graph + Twitter Card para compartir en redes
+    setMetaProperty('og:title',       `SistemaBase | ${a.titulo}`);
+    setMetaProperty('og:description', a.descripcion || a.titulo);
+    setMetaProperty('og:type',        'article');
+    setMetaProperty('og:url',         window.location.href);
+    if (a.imagen_portada) {
+        setMetaProperty('og:image', a.imagen_portada);
+        setMetaProperty('twitter:image', a.imagen_portada);
+    }
+    setMetaProperty('twitter:card',        'summary_large_image');
+    setMetaProperty('twitter:title',       `SistemaBase | ${a.titulo}`);
+    setMetaProperty('twitter:description', a.descripcion || a.titulo);
+
     setText('breadcrumb-categoria-text', categoria);
-    setAttr('breadcrumb-categoria-link', 'href', `/Categorias/categorias.html`);
+    setAttr('breadcrumb-categoria-link', 'href', `../Categorias/categorias.html`);
     setText('breadcrumb-titulo-text', truncar(a.titulo, 45));
 
     setText('article-category-badge', categoria.toUpperCase());
@@ -121,32 +123,49 @@ function rellenarArticulo(a) {
     setText('article-title',    a.titulo);
     setText('article-subtitle', a.descripcion || '');
 
-    // Imagen de portada — fetchpriority="high" mejora el LCP
+    // FIX: Tiempo de lectura
+    const textoPlano = (a.contenido || '').replace(/<[^>]*>/g, '');
+    const palabras   = textoPlano.trim().split(/\s+/).filter(Boolean).length;
+    const minutos    = Math.max(1, Math.ceil(palabras / 200));
+    setText('article-read-time', `${minutos} min de lectura`);
+
     if (a.imagen_portada) {
         const img = document.getElementById('article-featured-img');
         if (img) {
             img.src = a.imagen_portada;
             img.alt = a.titulo;
-            img.setAttribute('fetchpriority', 'high'); // ← clave para LCP rápido
-            img.removeAttribute('loading');            // no lazy en la imagen principal
+            img.setAttribute('fetchpriority', 'high');
+            img.removeAttribute('loading');
         }
     } else {
         const fig = document.getElementById('article-featured-figure');
         if (fig) fig.style.display = 'none';
     }
 
+    // FIX: Sanitizar HTML con DOMPurify antes de inyectar en el DOM
     const bodyEl = document.getElementById('article-body-content');
-    if (bodyEl) bodyEl.innerHTML = a.contenido || '';
+    if (bodyEl) {
+        if (purify) {
+            bodyEl.innerHTML = purify.sanitize(a.contenido || '', {
+                ADD_TAGS: ['iframe'],
+                ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading'],
+                FORBID_TAGS: ['script', 'style'],
+            });
+        } else {
+            // Fallback si DOMPurify no cargó (no debería ocurrir)
+            console.warn('[Seguridad] DOMPurify no disponible. Contenido renderizado sin sanitizar.');
+            bodyEl.innerHTML = a.contenido || '';
+        }
+    }
 
     document.getElementById('article-main').classList.remove('hidden');
     configurarCompartir(a.titulo, a.slug);
 }
 
 // --------------------------------------------------
-// 5. RELACIONADOS — en segundo plano con caché (1h)
+// RELACIONADOS
 // --------------------------------------------------
 async function cargarRelacionados(categoriaId, articuloActualId) {
-    // Mostrar skeleton de relacionados mientras carga
     const grid = document.getElementById('related-grid');
     if (grid) {
         grid.innerHTML = Array.from({ length: 3 }, () => `
@@ -161,7 +180,6 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
         `).join('');
     }
 
-    // Usar función con caché de supabase.js
     const data = await obtenerRelacionados(categoriaId, articuloActualId);
 
     if (!data || data.length === 0) {
@@ -173,34 +191,39 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
     if (!grid) return;
 
     grid.innerHTML = data.map(art => `
-        <a href="/Articulo/articulo.html?slug=${art.slug}" class="related-card">
-            <img src="${art.imagen_portada || '/IMG/IMGprueba.png'}"
-                 alt="${art.titulo}"
+        <a href="articulo.html?slug=${encodeURIComponent(art.slug)}" class="related-card">
+            <img src="${escapeAttr(art.imagen_portada || '../IMG/IMGprueba.png')}"
+                 alt="${escapeAttr(art.titulo)}"
                  loading="lazy"
                  width="400" height="130">
             <div class="related-card-info">
-                <span class="related-category">${art.categorias?.nombre || ''}</span>
-                <h4>${art.titulo}</h4>
+                <span class="related-category">${escapeHtml(art.categorias?.nombre || '')}</span>
+                <h4>${escapeHtml(art.titulo)}</h4>
             </div>
         </a>
     `).join('');
 }
 
 // --------------------------------------------------
-// 6. BOTÓN COMPARTIR
+// BOTÓN COMPARTIR
 // --------------------------------------------------
 function configurarCompartir(titulo, slug) {
     const btn = document.getElementById('btn-share');
     if (!btn) return;
 
     btn.addEventListener('click', async () => {
-        const url = `${window.location.origin}/Articulo/articulo.html?slug=${slug}`;
+        const url = `${window.location.origin}${window.location.pathname}?slug=${encodeURIComponent(slug)}`;
         if (navigator.share) {
             try { await navigator.share({ title: titulo, url }); } catch (_) {}
         } else {
-            await navigator.clipboard.writeText(url);
-            btn.textContent = '✅ ¡Enlace copiado!';
-            setTimeout(() => { btn.textContent = 'Compartir'; }, 2500);
+            try {
+                await navigator.clipboard.writeText(url);
+                btn.textContent = '✅ ¡Enlace copiado!';
+                setTimeout(() => { btn.textContent = 'Compartir'; }, 2500);
+            } catch (_) {
+                btn.textContent = 'No se pudo copiar';
+                setTimeout(() => { btn.textContent = 'Compartir'; }, 2500);
+            }
         }
     });
 }
@@ -239,6 +262,17 @@ function setMeta(name, content) {
     tag.setAttribute('content', content);
 }
 
+// FIX: soporte para og: y twitter: meta properties
+function setMetaProperty(property, content) {
+    let tag = document.querySelector(`meta[property="${property}"]`);
+    if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+    }
+    tag.setAttribute('content', content);
+}
+
 function formatearFecha(fecha) {
     if (!fecha) return '';
     return new Date(fecha + 'T00:00').toLocaleDateString('es-ES', {
@@ -249,3 +283,50 @@ function formatearFecha(fecha) {
 function truncar(texto, max) {
     return texto && texto.length > max ? texto.substring(0, max) + '…' : texto;
 }
+
+// FIX: escape de HTML para prevenir XSS en interpolaciones de strings
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+}
+
+function escapeAttr(str) {
+    if (!str) return '';
+    return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// --------------------------------------------------
+// BARRA DE PROGRESO DE LECTURA
+// --------------------------------------------------
+const bar = document.createElement('div');
+bar.id = 'reading-progress';
+document.body.prepend(bar);
+
+window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight);
+    bar.style.width = `${Math.min(scrolled * 100, 100)}%`;
+}, { passive: true });
+
+// --------------------------------------------------
+// BOTÓN VOLVER ARRIBA
+// --------------------------------------------------
+const btnTop = document.createElement('button');
+btnTop.id = 'btn-top';
+btnTop.textContent = '↑';
+btnTop.setAttribute('aria-label', 'Volver al inicio');
+btnTop.style.cssText = `
+  position:fixed; bottom:24px; right:24px; width:44px; height:44px;
+  background:var(--color-primary); color:#fff; border:none; border-radius:50%;
+  font-size:20px; cursor:pointer; opacity:0; transition:opacity 0.3s;
+  z-index:500; box-shadow:0 4px 16px rgba(4,56,115,0.3);
+`;
+document.body.appendChild(btnTop);
+btnTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+window.addEventListener('scroll', () => {
+    btnTop.style.opacity = window.scrollY > 400 ? '1' : '0';
+    btnTop.style.pointerEvents = window.scrollY > 400 ? 'auto' : 'none';
+}, { passive: true });

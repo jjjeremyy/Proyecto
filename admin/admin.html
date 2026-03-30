@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SistemaBase | Admin</title>
+<<<<<<< HEAD
     <link rel="stylesheet" href="./admin/admin.css">
     <link rel="stylesheet" href="./admin/admin_imagen_extra.css"> 
+=======
+    <link rel="stylesheet" href="../admin/admin.css">
+    <link rel="stylesheet" href="../admin/admin_imagen_extra.css"> 
+>>>>>>> main
 
     <!-- Quill.js — editor WYSIWYG 100% gratuito, sin registro ni API key -->
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
@@ -18,13 +23,13 @@
         <!-- SIDEBAR -->
         <aside class="admin-sidebar">
             <div class="admin-brand">
-                <img src="/IMG/LogoSistemaBaseBlanco.png" alt="Logo" class="admin-logo">
+                <img src="../IMG/LogoSistemaBaseBlanco.png" alt="Logo" class="admin-logo">
                 <span>SistemaBase</span>
             </div>
             <nav class="admin-nav">
                 <a href="#" class="admin-nav-link active" data-section="seccion-editor" id="nav-nuevo">✏️ Nuevo artículo</a>
                 <a href="#" class="admin-nav-link" data-section="seccion-articulos" id="nav-articulos">📄 Mis artículos</a>
-                <a href="/index.html" class="admin-nav-link">🌐 Ver web</a>
+                <a href="../index.html" class="admin-nav-link">🌐 Ver web</a>
             </nav>
         </aside>
 
@@ -44,7 +49,7 @@
             </div>
 
             <!-- MENSAJE DE ESTADO -->
-            <div id="status-message" class="status-message hidden"></div>
+            <div id="status-message" class="status-message hidden" role="alert" aria-live="polite"></div>
 
             <form id="formulario-articulo" novalidate>
                 <div class="admin-grid">
@@ -53,17 +58,17 @@
                     <div class="admin-col-main">
 
                         <div class="field-group">
-                            <label for="titulo">Título <span class="required">*</span></label>
-                            <input type="text" id="titulo" placeholder="Escribe el título aquí..." required>
+                            <label for="titulo">Título <span class="required" aria-label="obligatorio">*</span></label>
+                            <input type="text" id="titulo" placeholder="Escribe el título aquí..." required autocomplete="off">
                         </div>
 
                         <div class="field-group">
                             <label for="descripcion">Descripción breve</label>
-                            <input type="text" id="descripcion" placeholder="Resumen corto del artículo...">
+                            <input type="text" id="descripcion" placeholder="Resumen corto del artículo..." autocomplete="off">
                         </div>
 
                         <div class="field-group">
-                            <label>Contenido <span class="required">*</span></label>
+                            <label>Contenido <span class="required" aria-label="obligatorio">*</span></label>
 
                             <!-- Barra de inserción de tabla -->
                             <div class="table-actions" id="table-actions">
@@ -105,7 +110,7 @@
                             </div>
 
                             <!-- Quill se monta aquí -->
-                            <div id="quill-editor"></div>
+                            <div id="quill-editor" aria-label="Editor de contenido del artículo"></div>
                             <!-- Campo oculto donde guardamos el HTML generado por Quill -->
                             <input type="hidden" id="contenido">
                         </div>
@@ -127,17 +132,17 @@
                             </div>
 
                             <div class="field-group">
-                                <label for="categoria_id">Categoría <span class="required">*</span></label>
+                                <label for="categoria_id">Categoría <span class="required" aria-label="obligatorio">*</span></label>
                                 <select id="categoria_id" required>
                                     <option value="">Selecciona categoría...</option>
                                 </select>
                             </div>
 
                             <div class="field-group">
-                                <label for="slug">URL del artículo <span class="required">*</span></label>
+                                <label for="slug">URL del artículo <span class="required" aria-label="obligatorio">*</span></label>
                                 <div class="slug-wrapper">
                                     <span class="slug-prefix">/articulo/?slug=</span>
-                                    <input type="text" id="slug" placeholder="url-del-articulo" required>
+                                    <input type="text" id="slug" placeholder="url-del-articulo" required autocomplete="off">
                                 </div>
                                 <small>Se genera automáticamente desde el título.</small>
                             </div>
@@ -155,10 +160,17 @@
                                 <div class="field-group">
                                     <label for="imagen_archivo">Selecciona imagen</label>
                                     <div class="file-drop-area" id="file-drop-area">
+<<<<<<< HEAD
                                         <input type="file" id="imagen_archivo" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="file-input">
+=======
+                                        <input type="file" id="imagen_archivo"  
+                                            accept="image/webp,image/jpeg,image/png,image/gif,image/svg+xml,.webp,.jpg,.jpeg,.png,.gif,.svg"
+                                            class="file-input"
+                                            aria-label="Seleccionar imagen de portada">
+>>>>>>> main
                                         <div class="file-drop-label">
-                                            <span class="file-drop-icon">🖼</span>
-                                            <span class="file-drop-text">Arrastra una imagen aquí<br><small>o haz clic para seleccionar</small></span>
+                                            <span class="file-drop-icon" aria-hidden="true">🖼</span>
+                                            <span class="file-drop-text">Arrastra una imagen aquí<br><small>o haz clic para seleccionar (máx. 5 MB)</small></span>
                                         </div>
                                     </div>
                                     <small id="file-name-display"></small>
@@ -173,7 +185,7 @@
                             </div>
 
                             <div id="img-preview-box" class="img-preview-box hidden">
-                                <img id="img-preview" src="" alt="Vista previa">
+                                <img id="img-preview" src="" alt="Vista previa de imagen de portada">
                                 <button type="button" id="btn-remove-img" class="btn-remove-img">✕ Quitar imagen</button>
                             </div>
                         </div>
@@ -193,17 +205,17 @@
                     </div>
                 </div>
 
-                <div id="status-message-lista" class="status-message hidden"></div>
+                <div id="status-message-lista" class="status-message hidden" role="alert" aria-live="polite"></div>
 
                 <div class="articles-table-wrapper">
                     <table class="articles-table">
                         <thead>
                             <tr>
-                                <th>Título</th>
-                                <th>Categoría</th>
-                                <th>Estado</th>
-                                <th>Fecha</th>
-                                <th>Acciones</th>
+                                <th scope="col">Título</th>
+                                <th scope="col">Categoría</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="articles-tbody">
@@ -218,24 +230,24 @@
     </div>
 
     <!-- MODAL DE PREVISUALIZACIÓN -->
-    <div id="preview-modal" class="modal hidden">
+    <div id="preview-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title">
         <div class="modal-overlay" id="modal-overlay"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Vista previa</h2>
-                <button id="close-preview" class="modal-close">✕</button>
+                <h2 id="preview-modal-title">Vista previa</h2>
+                <button id="close-preview" class="modal-close" aria-label="Cerrar vista previa">✕</button>
             </div>
             <div class="modal-body" id="preview-body"></div>
         </div>
     </div>
 
     <!-- MODAL DE CONFIRMACIÓN DE BORRADO -->
-    <div id="delete-modal" class="modal hidden">
+    <div id="delete-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
         <div class="modal-overlay" id="delete-modal-overlay"></div>
         <div class="modal-content modal-content--small">
             <div class="modal-header modal-header--danger">
-                <h2>🗑 Confirmar eliminación</h2>
-                <button id="delete-modal-close" class="modal-close">✕</button>
+                <h2 id="delete-modal-title">🗑 Confirmar eliminación</h2>
+                <button id="delete-modal-close" class="modal-close" aria-label="Cerrar">✕</button>
             </div>
             <div class="modal-body" style="text-align:center;">
                 <p id="delete-modal-text">¿Estás seguro de que quieres eliminar este artículo?</p>
@@ -248,6 +260,7 @@
         </div>
     </div>
 
-    <script type="module" src="/admin/admin.js"></script>
+    <!-- FIX: ruta del script corregida de /admin.js (absoluta rota) a ./admin.js (relativa correcta) -->
+    <script type="module" src="./admin.js"></script>
 </body>
 </html>

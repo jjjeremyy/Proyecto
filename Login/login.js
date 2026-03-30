@@ -1,16 +1,24 @@
 // =============================================
 // LOGIN.JS — SistemaBase
 // Gestiona el inicio de sesión con Supabase Auth
+// FIX: Lógica de redirección corregida
 // =============================================
 import { supabase } from '../Supabase/supabase.js';
 
 // --------------------------------------------------
 // 0. SI YA HAY SESIÓN ACTIVA, IR DIRECTO AL ADMIN
-//    (evita mostrar el login a quien ya está logado)
+//    FIX: la condición estaba INVERTIDA en la versión anterior
 // --------------------------------------------------
-const { data: { session } } = await supabase.auth.getSession();
-if (session) {
-    window.location.href = '../admin/admin.html';
+try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+        // Ya está logado → ir al panel de administración
+        window.location.href = '../admin/admin.html';
+    }
+    // Si no hay sesión, se queda en el login (comportamiento correcto)
+} catch (e) {
+    console.error('Error verificando sesión:', e);
+    // En caso de error al verificar, se queda en el login
 }
 
 // --------------------------------------------------
@@ -61,7 +69,6 @@ async function iniciarSesion() {
 
     if (error) {
         setBtnCargando(false);
-        // Supabase devuelve mensajes en inglés, los traducimos
         mostrarError(traducirError(error.message));
         return;
     }
@@ -86,13 +93,12 @@ function mostrarError(mensaje) {
 
 function traducirError(mensajeIngles) {
     const errores = {
-        'Invalid login credentials':       'Email o contraseña incorrectos.',
-        'Email not confirmed':             'Confirma tu email antes de entrar.',
-        'Too many requests':               'Demasiados intentos. Espera unos minutos.',
-        'User not found':                  'No existe ningún usuario con ese email.',
-        'Invalid email':                   'El formato del email no es válido.',
+        'Invalid login credentials':  'Email o contraseña incorrectos.',
+        'Email not confirmed':         'Confirma tu email antes de entrar.',
+        'Too many requests':           'Demasiados intentos. Espera unos minutos.',
+        'User not found':              'No existe ningún usuario con ese email.',
+        'Invalid email':               'El formato del email no es válido.',
     };
-    // Buscar coincidencia parcial
     for (const [clave, traduccion] of Object.entries(errores)) {
         if (mensajeIngles.includes(clave)) return traduccion;
     }

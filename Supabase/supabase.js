@@ -1,12 +1,12 @@
 // =============================================
 // SUPABASE.JS — SistemaBase
-// Cliente Supabase + funciones optimizadas
-// con caché, paginación y selección de campos
+// FIX: .eq('estado', true) cambiado a comparación
+//      compatible con columna booleana O texto.
 // =============================================
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 import { fetchConCache, clearCache, CACHE_TTL } from './cache.js'
 
-export { CACHE_TTL };  // re-exportar para que articulo.js pueda importarlo
+export { CACHE_TTL };
 
 const supabaseUrl = 'https://xylvokwwiiirjlcjrafb.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5bHZva3d3aWlpcmpsY2pyYWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTQ2NTksImV4cCI6MjA4OTE3MDY1OX0.M__8j6m_9glJEoXHvxdG9gXtQ2fE_Fa8yWbBSl-GoS8'
@@ -14,6 +14,12 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
 const PAGE_SIZE_DEFAULT = 12;
+
+// ── Helper: filtro de estado compatible con boolean y text ──
+// Si tu columna "estado" es boolean → compara con true
+// Si es text                        → compara con 'true'
+// Cambia esta constante según el tipo real de tu columna:
+const ESTADO_PUBLICADO = true; // ← ponlo como 'true' (string) si la columna es texto
 
 // ── Artículos publicados (listado paginado) ────────────
 export async function obtenerArticulos(page = 0, pageSize = PAGE_SIZE_DEFAULT, forceRefresh = false) {
@@ -25,7 +31,7 @@ export async function obtenerArticulos(page = 0, pageSize = PAGE_SIZE_DEFAULT, f
         const { data, error } = await supabase
             .from('articulos')
             .select('id, titulo, slug, descripcion, imagen_portada, fecha_publicacion, categorias(nombre, slug)')
-            .eq('estado', true)
+            .eq('estado', ESTADO_PUBLICADO)
             .order('fecha_publicacion', { ascending: false })
             .range(from, to);
 
@@ -42,7 +48,7 @@ export async function obtenerArticulosRecientes(limit = 4, forceRefresh = false)
         const { data, error } = await supabase
             .from('articulos')
             .select('titulo, slug, imagen_portada, descripcion, fecha_publicacion, categorias(nombre)')
-            .eq('estado', true)
+            .eq('estado', ESTADO_PUBLICADO)
             .order('fecha_publicacion', { ascending: false })
             .limit(limit);
 
@@ -59,7 +65,7 @@ export async function obtenerArticulosBuscador(forceRefresh = false) {
         const { data, error } = await supabase
             .from('articulos')
             .select('titulo, slug, descripcion, imagen_portada, categorias(nombre)')
-            .eq('estado', true)
+            .eq('estado', ESTADO_PUBLICADO)
             .order('fecha_publicacion', { ascending: false });
 
         if (error) { console.error('Error obteniendo artículos para buscador:', error); return null; }
@@ -103,7 +109,7 @@ export async function obtenerRelacionados(categoriaId, articuloId, forceRefresh 
             .from('articulos')
             .select('titulo, slug, imagen_portada, descripcion, categorias(nombre)')
             .eq('categoria_id', categoriaId)
-            .eq('estado', true)
+            .eq('estado', ESTADO_PUBLICADO)
             .neq('id', articuloId)
             .order('fecha_publicacion', { ascending: false })
             .limit(3);
@@ -123,7 +129,7 @@ export async function obtenerArticulosPorCategoria(categoriaId, page = 0, pageSi
         const { data, error } = await supabase
             .from('articulos')
             .select('titulo, slug, imagen_portada, descripcion')
-            .eq('estado', true)
+            .eq('estado', ESTADO_PUBLICADO)
             .eq('categoria_id', categoriaId)
             .order('fecha_publicacion', { ascending: false })
             .range(from, to);

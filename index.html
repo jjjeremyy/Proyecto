@@ -4,10 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SistemaBase | Inicio</title>
+<<<<<<< HEAD
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="//xylvokwwiiirjlcjrafb.supabase.co">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://xylvokwwiiirjlcjrafb.supabase.co" crossorigin>
+=======
+    <meta name="description" content="Información sobre computación de la mejor manera posible. Artículos sobre hardware, software, redes, IA, programación y más.">
+
+    <!-- FIX: Open Graph para compartir en redes sociales -->
+    <meta property="og:title" content="SistemaBase — Información sobre computación">
+    <meta property="og:description" content="Artículos sobre hardware, software, redes, IA, programación y más.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sistemabase.es/">
+    <meta property="og:site_name" content="SistemaBase">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="SistemaBase — Información sobre computación">
+    <meta property="twitter:description" content="Artículos sobre hardware, software, redes, IA y más.">
+
+>>>>>>> main
     <link rel="stylesheet" href="GuiaEstilosCSS/style.css">
     <link rel="stylesheet" href="Home/home.css">
     <link rel="stylesheet" href="Cookies/cookies-banner.css">
@@ -15,17 +30,24 @@
 <body>  
     <header>
         <section class="logo-container">
+<<<<<<< HEAD
             <img src="IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo">
+=======
+            <img src="IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo" width="34" height="34">
+>>>>>>> main
             <a href="index.html" class="home">SistemaBase</a>
         </section>
         <section class="nav-links">
             <a href="Categorias/categorias.html">Categorías</a>
+<<<<<<< HEAD
             <a href="Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
+=======
+            <a href="SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
+>>>>>>> main
             <a href="Contacto/contacto.html">Contacto</a>
         </section>
     </header> 
 
-    <!-- HERO -->
     <section class="welcome-section">
         <div> 
             <h1>Si no lo sabes, SistemaBase lo sabe</h1>
@@ -33,73 +55,73 @@
         </div>
     </section>
 
-    <!-- ==========================================
-         BUSCADOR DE ARTÍCULOS
-    =========================================== -->
     <section class="search-section">
         <div class="search-inner">
             <p class="search-label">¿Qué quieres aprender hoy?</p>
-            <div class="search-wrapper">
+            <div class="search-wrapper" role="search">
                 <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <input
-                    type="text"
+                    type="search"
                     id="search-input"
                     class="search-input"
                     placeholder="Busca artículos: hardware, redes, IA..."
                     autocomplete="off"
+                    aria-label="Buscar artículos"
+                    aria-controls="search-results"
+                    aria-autocomplete="list"
                 >
-                <!-- Resultados desplegables -->
-                <div id="search-results" class="search-results hidden"></div>
+                <div id="search-results" class="search-results hidden" role="listbox" aria-label="Resultados de búsqueda"></div>
             </div>
         </div>
     </section>
 
-    <!-- ==========================================
-         ARTÍCULOS RECIENTES (dinámico desde Supabase)
-    =========================================== -->
     <section class="recent-topics">
         <div class="title-recent-topics">
             <h2>Artículos Recientes</h2>
         </div>
-        <!-- home.js rellena este contenedor -->
         <div id="recent-articles-list" class="recent-articles-grid"></div>
     </section>
+
     <footer>
         <section class="footer-info">
-    
-            <!-- Logo + tagline -->
             <div class="footer-logo">
+<<<<<<< HEAD
                 <img src="IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img">
+=======
+                <img src="IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img" width="52" height="52">
+>>>>>>> main
                 <div>
                     <p class="footer-brand-name">SistemaBase</p>
                     <p class="footer-tagline">Información sobre computación de la mejor manera posible.</p>
                 </div>
             </div>
-    
-            <!-- Navegación -->
             <section class="footer-links">
                 <h4>Navegación</h4>
                 <a href="index.html">Inicio</a>
                 <a href="Categorias/categorias.html">Categorías</a>
+<<<<<<< HEAD
                 <a href="Sobrenosotros/sobrenosotros.html">Sobre nosotros</a>
+=======
+                <a href="SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
+>>>>>>> main
                 <a href="Contacto/contacto.html">Contacto</a>
                 <a href="Politicas/politicas.html">Privacidad y Cookies</a>
             </section>
-    
-            <!-- Contacto -->
             <section class="contact-info">
                 <h3>Contacto</h3>
                 <p>sistemabase00@gmail.com</p>
             </section>
-    
         </section>
-        <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
+        <!-- FIX: año dinámico en lugar de fijo -->
+        <p>&copy; <span id="footer-year"></span> SistemaBase. Todos los derechos reservados.</p>
     </footer>
 
     <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
+<<<<<<< HEAD
     <div class="cookie-banner-inner">
         <span class="cookie-icon" aria-hidden="true">🍪</span>
         <div class="cookie-text">
@@ -107,6 +129,15 @@
             <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
                <a href="Politicas/politicas.html">Política de Cookies y Privacidad</a>.
             </p>
+=======
+        <div class="cookie-banner-inner">
+            <span class="cookie-icon" aria-hidden="true">🍪</span>
+            <div class="cookie-text">
+                <strong>Este sitio usa cookies</strong>
+                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense).
+                   <a href="Politicas/politicas.html">Política de Cookies y Privacidad</a>.
+                </p>
+>>>>>>> main
             </div>
             <div class="cookie-actions">
                 <button id="btn-cookie-accept" class="btn-cookie-accept">Aceptar todas</button>
@@ -114,8 +145,16 @@
             </div>
         </div>
     </div>
+<<<<<<< HEAD
     <script src="Cookies/cookies-banner.js"></script>
     <!-- Cambiado a module para poder importar supabase -->
     <script type="module" src="Home/home.js"></script>
+=======
+
+    <script src="Cookies/cookies-banner.js"></script>
+    <script type="module" src="Home/home.js"></script>
+    <!-- FIX: año dinámico en el copyright -->
+    <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+>>>>>>> main
 </body>
 </html>

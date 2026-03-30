@@ -41,8 +41,12 @@ export function getCache(key, ttl = CACHE_TTL.articleList) {
     if (!raw) return null;
 
     const entry = JSON.parse(raw);
+<<<<<<< HEAD
     const effectiveTtl = entry.ttl ?? ttl;
     if (Date.now() - entry.timestamp < effectiveTtl) {
+=======
+    if (Date.now() - entry.timestamp < ttl) {  
+>>>>>>> main
       // Rehidratar memoria para futuras lecturas rápidas
       memoryCache.set(fullKey, entry);
       return entry.data;
