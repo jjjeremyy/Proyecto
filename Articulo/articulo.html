@@ -6,16 +6,23 @@
     <title>SistemaBase | Artículo</title>
     <meta name="description" content="">
 
+    <!-- FIX: Meta OG base (se sobreescriben dinámicamente desde articulo.js) -->
+    <meta property="og:site_name" content="SistemaBase">
+    <meta property="og:type" content="article">
+    <meta property="twitter:card" content="summary_large_image">
+
     <!-- Google AdSense — sustituye ca-pub-XXXXXXXXXXXXXXXXX por tu ID real -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 
-    <!-- Rutas relativas desde Articulo/ → subir un nivel con ../ -->
     <link rel="stylesheet" href="../GuiaEstilosCSS/style.css">
     <link rel="stylesheet" href="articulo.css">
     <link rel="stylesheet" href="../Cookies/cookies-banner.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- FIX: DOMPurify cargado ANTES del módulo JS para garantizar disponibilidad -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 </head>
 <body>
 
@@ -87,14 +94,14 @@
         <article class="article-content">
 
             <!-- BREADCRUMB -->
-            <nav class="breadcrumb">
+            <nav class="breadcrumb" aria-label="Ruta de navegación">
                 <a href="../index.html">Inicio</a>
-                <span>›</span>
+                <span aria-hidden="true">›</span>
                 <a id="breadcrumb-categoria-link" href="../Categorias/categorias.html">
                     <span id="breadcrumb-categoria-text"></span>
                 </a>
-                <span>›</span>
-                <span id="breadcrumb-titulo-text"></span>
+                <span aria-hidden="true">›</span>
+                <span id="breadcrumb-titulo-text" aria-current="page"></span>
             </nav>
 
             <!-- CABECERA -->
@@ -102,12 +109,14 @@
                 <div class="article-meta-top">
                     <span id="article-category-badge" class="article-category"></span>
                     <span id="article-date" class="article-date"></span>
+                    <!-- FIX: elemento de tiempo de lectura que ahora sí se rellena -->
+                    <span id="article-read-time" class="article-read-time"></span>
                 </div>
                 <h1 id="article-title" class="article-title"></h1>
                 <p  id="article-subtitle" class="article-subtitle"></p>
                 <div class="article-meta-bottom">
                     <div class="article-actions">
-                        <button id="btn-share" class="btn-share">Compartir</button>
+                        <button id="btn-share" class="btn-share" aria-label="Compartir artículo">Compartir</button>
                     </div>
                 </div>
             </header>
@@ -212,7 +221,7 @@
                 <p>sistemabase00@gmail.com</p>
             </section>
         </section>
-        <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
+        <p>&copy; <span id="footer-year"></span> SistemaBase. Todos los derechos reservados.</p>
     </footer>
 
     <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
@@ -220,7 +229,7 @@
             <span class="cookie-icon" aria-hidden="true">🍪</span>
             <div class="cookie-text">
                 <strong>Este sitio usa cookies</strong>
-                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
+                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense).
                    <a href="../Politicas/politicas.html">Política de Cookies y Privacidad</a>.
                 </p>
             </div>
@@ -230,10 +239,10 @@
             </div>
         </div>
     </div>
+
     <script src="../Cookies/cookies-banner.js"></script>
+    <!-- FIX: DOMPurify se carga en <head> antes del módulo. Este script aquí es redundante, eliminado. -->
     <script type="module" src="articulo.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-
-
+    <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 </body>
 </html>

@@ -1,12 +1,16 @@
 // =============================================
 // ARTICULO.JS — SistemaBase
-// CORRECCIÓN GITHUB PAGES: rutas relativas
+// FIX: XSS sanitizado con DOMPurify
+// FIX: Tiempo de lectura calculado y mostrado
+// FIX: Meta OG tags para SEO/redes sociales
 // =============================================
 import {
     obtenerArticuloPorSlug,
     obtenerRelacionados,
-    CACHE_TTL
 } from '../Supabase/supabase.js';
+
+// DOMPurify debe estar cargado antes de este módulo (via <script> en el HTML)
+const purify = window.DOMPurify;
 
 const params = new URLSearchParams(window.location.search);
 const slug   = params.get('slug');
@@ -87,6 +91,9 @@ async function cargarArticulo(slug) {
 
 // --------------------------------------------------
 // RELLENAR PLANTILLA
+// FIX: DOMPurify aplicado al contenido HTML
+// FIX: Tiempo de lectura calculado
+// FIX: Meta OG y Twitter añadidos
 // --------------------------------------------------
 function rellenarArticulo(a) {
     const categoria = a.categorias?.nombre || '';
@@ -94,8 +101,20 @@ function rellenarArticulo(a) {
     document.title = `SistemaBase | ${a.titulo}`;
     setMeta('description', a.descripcion || a.titulo);
 
+    // FIX: Open Graph + Twitter Card para compartir en redes
+    setMetaProperty('og:title',       `SistemaBase | ${a.titulo}`);
+    setMetaProperty('og:description', a.descripcion || a.titulo);
+    setMetaProperty('og:type',        'article');
+    setMetaProperty('og:url',         window.location.href);
+    if (a.imagen_portada) {
+        setMetaProperty('og:image', a.imagen_portada);
+        setMetaProperty('twitter:image', a.imagen_portada);
+    }
+    setMetaProperty('twitter:card',        'summary_large_image');
+    setMetaProperty('twitter:title',       `SistemaBase | ${a.titulo}`);
+    setMetaProperty('twitter:description', a.descripcion || a.titulo);
+
     setText('breadcrumb-categoria-text', categoria);
-    // Ruta relativa desde Articulo/ hacia Categorias/
     setAttr('breadcrumb-categoria-link', 'href', `../Categorias/categorias.html`);
     setText('breadcrumb-titulo-text', truncar(a.titulo, 45));
 
@@ -103,6 +122,12 @@ function rellenarArticulo(a) {
     setText('article-date', formatearFecha(a.fecha_publicacion));
     setText('article-title',    a.titulo);
     setText('article-subtitle', a.descripcion || '');
+
+    // FIX: Tiempo de lectura
+    const textoPlano = (a.contenido || '').replace(/<[^>]*>/g, '');
+    const palabras   = textoPlano.trim().split(/\s+/).filter(Boolean).length;
+    const minutos    = Math.max(1, Math.ceil(palabras / 200));
+    setText('article-read-time', `${minutos} min de lectura`);
 
     if (a.imagen_portada) {
         const img = document.getElementById('article-featured-img');
@@ -117,8 +142,21 @@ function rellenarArticulo(a) {
         if (fig) fig.style.display = 'none';
     }
 
+    // FIX: Sanitizar HTML con DOMPurify antes de inyectar en el DOM
     const bodyEl = document.getElementById('article-body-content');
-    if (bodyEl) bodyEl.innerHTML = a.contenido || '';
+    if (bodyEl) {
+        if (purify) {
+            bodyEl.innerHTML = purify.sanitize(a.contenido || '', {
+                ADD_TAGS: ['iframe'],
+                ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading'],
+                FORBID_TAGS: ['script', 'style'],
+            });
+        } else {
+            // Fallback si DOMPurify no cargó (no debería ocurrir)
+            console.warn('[Seguridad] DOMPurify no disponible. Contenido renderizado sin sanitizar.');
+            bodyEl.innerHTML = a.contenido || '';
+        }
+    }
 
     document.getElementById('article-main').classList.remove('hidden');
     configurarCompartir(a.titulo, a.slug);
@@ -152,16 +190,15 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
 
     if (!grid) return;
 
-    // Ruta relativa: estamos en Articulo/, el enlace apunta a articulo.html en la misma carpeta
     grid.innerHTML = data.map(art => `
-        <a href="articulo.html?slug=${art.slug}" class="related-card">
-            <img src="${art.imagen_portada || '../IMG/IMGprueba.png'}"
-                 alt="${art.titulo}"
+        <a href="articulo.html?slug=${encodeURIComponent(art.slug)}" class="related-card">
+            <img src="${escapeAttr(art.imagen_portada || '../IMG/IMGprueba.png')}"
+                 alt="${escapeAttr(art.titulo)}"
                  loading="lazy"
                  width="400" height="130">
             <div class="related-card-info">
-                <span class="related-category">${art.categorias?.nombre || ''}</span>
-                <h4>${art.titulo}</h4>
+                <span class="related-category">${escapeHtml(art.categorias?.nombre || '')}</span>
+                <h4>${escapeHtml(art.titulo)}</h4>
             </div>
         </a>
     `).join('');
@@ -175,13 +212,18 @@ function configurarCompartir(titulo, slug) {
     if (!btn) return;
 
     btn.addEventListener('click', async () => {
-        const url = `${window.location.origin}${window.location.pathname}?slug=${slug}`;
+        const url = `${window.location.origin}${window.location.pathname}?slug=${encodeURIComponent(slug)}`;
         if (navigator.share) {
             try { await navigator.share({ title: titulo, url }); } catch (_) {}
         } else {
-            await navigator.clipboard.writeText(url);
-            btn.textContent = '✅ ¡Enlace copiado!';
-            setTimeout(() => { btn.textContent = 'Compartir'; }, 2500);
+            try {
+                await navigator.clipboard.writeText(url);
+                btn.textContent = '✅ ¡Enlace copiado!';
+                setTimeout(() => { btn.textContent = 'Compartir'; }, 2500);
+            } catch (_) {
+                btn.textContent = 'No se pudo copiar';
+                setTimeout(() => { btn.textContent = 'Compartir'; }, 2500);
+            }
         }
     });
 }
@@ -220,6 +262,17 @@ function setMeta(name, content) {
     tag.setAttribute('content', content);
 }
 
+// FIX: soporte para og: y twitter: meta properties
+function setMetaProperty(property, content) {
+    let tag = document.querySelector(`meta[property="${property}"]`);
+    if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+    }
+    tag.setAttribute('content', content);
+}
+
 function formatearFecha(fecha) {
     if (!fecha) return '';
     return new Date(fecha + 'T00:00').toLocaleDateString('es-ES', {
@@ -231,17 +284,35 @@ function truncar(texto, max) {
     return texto && texto.length > max ? texto.substring(0, max) + '…' : texto;
 }
 
-// Barra de progreso de lectura
+// FIX: escape de HTML para prevenir XSS en interpolaciones de strings
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+}
+
+function escapeAttr(str) {
+    if (!str) return '';
+    return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// --------------------------------------------------
+// BARRA DE PROGRESO DE LECTURA
+// --------------------------------------------------
 const bar = document.createElement('div');
 bar.id = 'reading-progress';
 document.body.prepend(bar);
 
 window.addEventListener('scroll', () => {
-  const doc = document.documentElement;
-  const scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight);
-  bar.style.width = `${Math.min(scrolled * 100, 100)}%`;
+    const doc = document.documentElement;
+    const scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight);
+    bar.style.width = `${Math.min(scrolled * 100, 100)}%`;
 }, { passive: true });
 
+// --------------------------------------------------
+// BOTÓN VOLVER ARRIBA
+// --------------------------------------------------
 const btnTop = document.createElement('button');
 btnTop.id = 'btn-top';
 btnTop.textContent = '↑';
@@ -256,6 +327,6 @@ document.body.appendChild(btnTop);
 btnTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
 window.addEventListener('scroll', () => {
-  btnTop.style.opacity = window.scrollY > 400 ? '1' : '0';
-  btnTop.style.pointerEvents = window.scrollY > 400 ? 'auto' : 'none';
+    btnTop.style.opacity = window.scrollY > 400 ? '1' : '0';
+    btnTop.style.pointerEvents = window.scrollY > 400 ? 'auto' : 'none';
 }, { passive: true });

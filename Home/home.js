@@ -1,7 +1,8 @@
 // =============================================
 // HOME.JS — SistemaBase
-// CORRECCIÓN DE RUTAS: index.html está en la raíz,
-// por lo que las rutas NO llevan ../
+// FIX: prefetch movido a DESPUÉS de renderizar las tarjetas
+// FIX: escape de HTML en interpolaciones para prevenir XSS
+// FIX: Promise.all corregido
 // =============================================
 import { obtenerArticulosRecientes, obtenerArticulosBuscador } from '../Supabase/supabase.js';
 
@@ -37,24 +38,26 @@ async function cargarArticulosRecientes() {
         return;
     }
 
-    // ✅ CORRECCIÓN CLAVE: rutas sin ../ porque index.html está en la raíz
     lista.innerHTML = data.map(art => `
-        <a href="Articulo/articulo.html?slug=${art.slug}" class="recent-card">
+        <a href="Articulo/articulo.html?slug=${encodeURIComponent(art.slug)}" class="recent-card">
             <div class="recent-card-img-wrap">
-                <img src="${art.imagen_portada || 'IMG/IMGprueba.png'}"
-                     alt="${art.titulo}"
+                <img src="${escapeAttr(art.imagen_portada || 'IMG/IMGprueba.png')}"
+                     alt="${escapeAttr(art.titulo)}"
                      loading="lazy"
                      width="400" height="160"
                      decoding="async">
-                <span class="recent-card-cat">${art.categorias?.nombre || ''}</span>
+                <span class="recent-card-cat">${escapeHtml(art.categorias?.nombre || '')}</span>
             </div>
             <div class="recent-card-body">
-                <h3>${art.titulo}</h3>
-                <p>${art.descripcion || ''}</p>
+                <h3>${escapeHtml(art.titulo)}</h3>
+                <p>${escapeHtml(art.descripcion || '')}</p>
                 <span class="recent-card-date">${formatearFecha(art.fecha_publicacion)}</span>
             </div>
         </a>
     `).join('');
+
+    // FIX: añadir prefetch DESPUÉS de que las tarjetas existen en el DOM
+    añadirPrefetchListeners();
 }
 
 // --------------------------------------------------
@@ -99,15 +102,14 @@ function inicializarBuscador() {
         if (filtrados.length === 0) {
             resultados.innerHTML = `<p class="search-no-results">Sin resultados para "<strong>${escapeHtml(input.value)}</strong>"</p>`;
         } else {
-            // ✅ CORRECCIÓN: rutas sin ../ en los resultados del buscador
             resultados.innerHTML = filtrados.slice(0, 6).map(art => `
-                <a href="Articulo/articulo.html?slug=${art.slug}" class="search-result-item">
-                    <img src="${art.imagen_portada || 'IMG/IMGprueba.png'}"
-                         alt="${art.titulo}"
+                <a href="Articulo/articulo.html?slug=${encodeURIComponent(art.slug)}" class="search-result-item">
+                    <img src="${escapeAttr(art.imagen_portada || 'IMG/IMGprueba.png')}"
+                         alt="${escapeAttr(art.titulo)}"
                          width="46" height="46">
                     <div>
-                        <span class="search-result-cat">${art.categorias?.nombre || ''}</span>
-                        <p>${resaltarTexto(art.titulo, query)}</p>
+                        <span class="search-result-cat">${escapeHtml(art.categorias?.nombre || '')}</span>
+                        <p>${resaltarTexto(escapeHtml(art.titulo), query)}</p>
                     </div>
                 </a>
             `).join('');
@@ -131,6 +133,27 @@ function inicializarBuscador() {
 }
 
 // --------------------------------------------------
+// FIX: prefetch — se llama DESPUÉS de renderizar las tarjetas
+// --------------------------------------------------
+function añadirPrefetchListeners() {
+    document.querySelectorAll('.recent-card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            const href = card.getAttribute('href');
+            if (!href) return;
+            try {
+                const slug = new URL(href, location.href).searchParams.get('slug');
+                if (slug) {
+                    const link = document.createElement('link');
+                    link.rel = 'prefetch';
+                    link.href = `Articulo/articulo.html?slug=${encodeURIComponent(slug)}`;
+                    document.head.appendChild(link);
+                }
+            } catch (_) {}
+        }, { once: true });
+    });
+}
+
+// --------------------------------------------------
 // UTILIDADES
 // --------------------------------------------------
 function formatearFecha(fecha) {
@@ -140,34 +163,29 @@ function formatearFecha(fecha) {
     });
 }
 
-function resaltarTexto(texto, query) {
+function resaltarTexto(textoEscapado, query) {
     const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
-    return texto.replace(regex, '<mark>$1</mark>');
+    return textoEscapado.replace(regex, '<mark>$1</mark>');
 }
 
 function escapeHtml(str) {
-    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+}
+
+function escapeAttr(str) {
+    if (!str) return '';
+    return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-// Añadir a home.js y categorias.js
-function añadirPrefetch(slug) {
-  const link = document.createElement('link');
-  link.rel = 'prefetch';
-  link.href = `/Articulo/articulo.html?slug=${slug}`;
-  document.head.appendChild(link);
-}
 
-// En los event listeners de las tarjetas
-document.querySelectorAll('.recent-card, .article-card').forEach(card => {
-  card.addEventListener('mouseenter', () => {
-    const href = card.getAttribute('href') || card.dataset.href;
-    if (href) añadirPrefetch(new URL(href, location.href).searchParams.get('slug'));
-  }, { once: true }); // once: true → solo la primera vez
-});
-Promise.all([
-    cargarArticulosRecientes(),
-    Promise.resolve(inicializarBuscador())
-]);
+// --------------------------------------------------
+// INICIO
+// --------------------------------------------------
+await cargarArticulosRecientes();
+inicializarBuscador();

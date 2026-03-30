@@ -1,15 +1,21 @@
 // =============================================
 // ADMIN.JS — SistemaBase
-// Editor WYSIWYG: Quill.js (100% gratuito)
+// FIX: validación de tamaño y tipo de imagen antes de subir
+// FIX: escape de HTML en la tabla de artículos (XSS)
+// FIX: delete modal: textContent en lugar de innerHTML para el título
 // =============================================
 import { supabase } from '../Supabase/supabase.js';
+
+const MAX_IMAGE_SIZE_MB = 5;
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
 
 // --------------------------------------------------
 // 0. PROTECCIÓN: redirige si no hay sesión activa
 // --------------------------------------------------
 try {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error || !session) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
         window.location.href = '../Login/login.html';
     }
 } catch (e) {
@@ -23,7 +29,7 @@ try {
 let articuloEditandoId = null;
 
 // --------------------------------------------------
-// 1. INICIALIZAR QUILL (editor WYSIWYG gratuito)
+// 1. INICIALIZAR QUILL
 // --------------------------------------------------
 const quill = new Quill('#quill-editor', {
     theme: 'snow',
@@ -46,8 +52,6 @@ const quill = new Quill('#quill-editor', {
 
 // --------------------------------------------------
 // 1b. INTERCEPTAR PEGADO DE TABLAS
-//     Quill 1.x elimina <table> al pegar; inyectamos
-//     el HTML directamente en el DOM del editor.
 // --------------------------------------------------
 quill.root.addEventListener('paste', (e) => {
     const html = e.clipboardData?.getData('text/html') || '';
@@ -56,16 +60,11 @@ quill.root.addEventListener('paste', (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
 
-    // Limpiar el HTML: extraer solo las tablas y texto circundante
     const temp = document.createElement('div');
     temp.innerHTML = html;
-
-    // Eliminar meta/style tags que vienen de Word/Excel
     temp.querySelectorAll('meta, style, link, script, xml').forEach(el => el.remove());
-
     const cleanHTML = temp.innerHTML;
 
-    // Insertar en la posición del cursor
     const range = quill.getSelection() || { index: quill.getLength() - 1 };
     quill.clipboard.dangerouslyPasteHTML(range.index, cleanHTML + '<p><br></p>');
 });
@@ -87,19 +86,15 @@ document.getElementById('btn-insert-table').addEventListener('click', () => {
     const conHeader = document.getElementById('table-header').checked;
 
     let html = '<table><tbody>';
-
     for (let r = 0; r < rows; r++) {
         html += '<tr>';
         for (let c = 0; c < cols; c++) {
-            if (r === 0 && conHeader) {
-                html += `<th>Cabecera ${c + 1}</th>`;
-            } else {
-                html += '<td> </td>';
-            }
+            html += r === 0 && conHeader
+                ? `<th>Cabecera ${c + 1}</th>`
+                : '<td> </td>';
         }
         html += '</tr>';
     }
-
     html += '</tbody></table><p><br></p>';
 
     const range = quill.getSelection() || { index: quill.getLength() };
@@ -109,7 +104,7 @@ document.getElementById('btn-insert-table').addEventListener('click', () => {
 });
 
 // --------------------------------------------------
-// 3. CARGAR CATEGORÍAS en el <select>
+// 3. CARGAR CATEGORÍAS
 // --------------------------------------------------
 async function cargarCategorias() {
     const select = document.getElementById('categoria_id');
@@ -119,21 +114,12 @@ async function cargarCategorias() {
         .select('id, nombre')
         .order('nombre');
 
-    if (error) {
-        console.error('Error cargando categorías:', error);
+    if (error || !data || data.length === 0) {
         const opt = document.createElement('option');
         opt.value = '';
-        opt.textContent = '⚠️ Error al cargar categorías';
-        opt.disabled = true;
-        select.appendChild(opt);
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        console.warn('No se encontraron categorías. Verifica RLS en Supabase.');
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = '⚠️ Sin categorías — revisa RLS en Supabase';
+        opt.textContent = error
+            ? '⚠️ Error al cargar categorías'
+            : '⚠️ Sin categorías — revisa RLS en Supabase';
         opt.disabled = true;
         select.appendChild(opt);
         return;
@@ -142,6 +128,7 @@ async function cargarCategorias() {
     data.forEach(cat => {
         const option = document.createElement('option');
         option.value = cat.id;
+        // FIX: textContent en lugar de innerHTML para evitar XSS
         option.textContent = cat.nombre;
         select.appendChild(option);
     });
@@ -149,16 +136,14 @@ async function cargarCategorias() {
 cargarCategorias();
 
 // --------------------------------------------------
-// 4. GENERADOR AUTOMÁTICO DE slug
+// 4. GENERADOR AUTOMÁTICO DE SLUG
 // --------------------------------------------------
 const inputTitulo = document.getElementById('titulo');
-const inputSlug = document.getElementById('slug');
+const inputSlug   = document.getElementById('slug');
 let slugManual = false;
 
 inputTitulo.addEventListener('input', () => {
-    if (!slugManual) {
-        inputSlug.value = generarSlug(inputTitulo.value);
-    }
+    if (!slugManual) inputSlug.value = generarSlug(inputTitulo.value);
 });
 
 inputSlug.addEventListener('input', () => {
@@ -179,19 +164,20 @@ function generarSlug(texto) {
 
 // --------------------------------------------------
 // 5. GESTIÓN DE IMAGEN DE PORTADA
+// FIX: validación de tamaño (5 MB máx) y tipo de archivo
 // --------------------------------------------------
-const imgPreviewBox = document.getElementById('img-preview-box');
-const imgPreview = document.getElementById('img-preview');
-const fileInput = document.getElementById('imagen_archivo');
-const fileDropArea = document.getElementById('file-drop-area');
-const fileNameDisplay = document.getElementById('file-name-display');
-const inputImagenUrl = document.getElementById('imagen_portada');
-const btnRemoveImg = document.getElementById('btn-remove-img');
+const imgPreviewBox    = document.getElementById('img-preview-box');
+const imgPreview       = document.getElementById('img-preview');
+const fileInput        = document.getElementById('imagen_archivo');
+const fileDropArea     = document.getElementById('file-drop-area');
+const fileNameDisplay  = document.getElementById('file-name-display');
+const inputImagenUrl   = document.getElementById('imagen_portada');
+const btnRemoveImg     = document.getElementById('btn-remove-img');
 
 let archivoImagenSeleccionado = null;
 let imagenUrlFinal = null;
 
-// — Pestañas —
+// Pestañas
 document.querySelectorAll('.img-tab').forEach(tab => {
     tab.addEventListener('click', () => {
         document.querySelectorAll('.img-tab').forEach(t => t.classList.remove('active'));
@@ -215,9 +201,7 @@ fileDropArea.addEventListener('drop', (e) => {
     e.preventDefault();
     fileDropArea.classList.remove('dragging');
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-        procesarArchivoImagen(file);
-    }
+    if (file) procesarArchivoImagen(file);
 });
 
 fileInput.addEventListener('change', () => {
@@ -226,6 +210,20 @@ fileInput.addEventListener('change', () => {
 });
 
 function procesarArchivoImagen(file) {
+    // FIX: validación de tipo de archivo
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        mostrarStatus(`❌ Tipo de archivo no permitido. Usa: JPEG, PNG, WebP, GIF o SVG.`, 'error');
+        fileInput.value = '';
+        return;
+    }
+
+    // FIX: validación de tamaño de archivo
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        mostrarStatus(`❌ La imagen supera el límite de ${MAX_IMAGE_SIZE_MB} MB. Comprime la imagen antes de subirla.`, 'error');
+        fileInput.value = '';
+        return;
+    }
+
     archivoImagenSeleccionado = file;
     imagenUrlFinal = null;
     fileNameDisplay.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
@@ -262,7 +260,7 @@ function ocultarPreviewImagen() {
 btnRemoveImg.addEventListener('click', ocultarPreviewImagen);
 
 async function subirImagenAStorage(file) {
-    const extension = file.name.split('.').pop();
+    const extension   = file.name.split('.').pop().toLowerCase();
     const nombreArchivo = `portada-${Date.now()}.${extension}`;
 
     const { error: uploadError } = await supabase.storage
@@ -273,9 +271,7 @@ async function subirImagenAStorage(file) {
             contentType: file.type
         });
 
-    if (uploadError) {
-        throw new Error('Error subiendo imagen: ' + uploadError.message);
-    }
+    if (uploadError) throw new Error('Error subiendo imagen: ' + uploadError.message);
 
     const { data: urlData } = supabase.storage
         .from('portadas')
@@ -288,22 +284,23 @@ async function subirImagenAStorage(file) {
 // 6. MODAL DE PREVISUALIZACIÓN
 // --------------------------------------------------
 document.getElementById('btn-preview').addEventListener('click', () => {
-    const titulo = document.getElementById('titulo').value;
+    const titulo      = document.getElementById('titulo').value;
     const descripcion = document.getElementById('descripcion').value;
-    const contenido = getContenido();
-    const imagen = imgPreview.src && !imgPreviewBox.classList.contains('hidden') ? imgPreview.src : '';
-    const catSelect = document.getElementById('categoria_id');
-    const categoria = catSelect.options[catSelect.selectedIndex]?.text || '';
-    const fecha = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+    const contenido   = getContenido();
+    const imagen      = imgPreview.src && !imgPreviewBox.classList.contains('hidden') ? imgPreview.src : '';
+    const catSelect   = document.getElementById('categoria_id');
+    const categoria   = catSelect.options[catSelect.selectedIndex]?.text || '';
+    const fecha       = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 
+    // FIX: escapeHtml en valores del formulario en el preview
     document.getElementById('preview-body').innerHTML = `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-            <span class="preview-category">${categoria}</span>
+            <span class="preview-category">${escapeHtml(categoria)}</span>
         </div>
-        <div class="preview-meta"><span>📅 ${fecha}</span></div>
-        <h1>${titulo || '(Sin título)'}</h1>
-        <p style="font-style:italic;color:#4a5a78;">${descripcion || ''}</p>
-        ${imagen ? `<img src="${imagen}" alt="Imagen de portada" style="width:100%;border-radius:8px;margin-bottom:20px;">` : ''}
+        <div class="preview-meta"><span>📅 ${escapeHtml(fecha)}</span></div>
+        <h1>${escapeHtml(titulo || '(Sin título)')}</h1>
+        <p style="font-style:italic;color:#4a5a78;">${escapeHtml(descripcion || '')}</p>
+        ${imagen ? `<img src="${escapeAttr(imagen)}" alt="Imagen de portada" style="width:100%;border-radius:8px;margin-bottom:20px;">` : ''}
         <div class="ql-snow"><div class="ql-editor" style="padding:0">${contenido || '<p style="color:#999">(Sin contenido aún)</p>'}</div></div>
     `;
 
@@ -325,29 +322,26 @@ document.getElementById('btn-submit').addEventListener('click', publicarArticulo
 async function publicarArticulo() {
     limpiarErrores();
 
-    const titulo = document.getElementById('titulo').value.trim();
-    const slug = document.getElementById('slug').value.trim();
+    const titulo      = document.getElementById('titulo').value.trim();
+    const slug        = document.getElementById('slug').value.trim();
     const descripcion = document.getElementById('descripcion').value.trim();
-    const contenido = getContenido();
+    const contenido   = getContenido();
     const categoria_id = document.getElementById('categoria_id').value;
-    const estado = document.getElementById('estado').value === 'true';
+    const estado      = document.getElementById('estado').value === 'true';
 
     const contenidoVacio = !contenido || contenido === '<p><br></p>' || contenido === '<p></p>';
 
     let valido = true;
-    if (!titulo) { marcarError('titulo', 'El título es obligatorio.'); valido = false; }
-    if (!slug) { marcarError('slug', 'La URL es obligatoria.'); valido = false; }
-    if (!categoria_id) { marcarError('categoria_id', 'Selecciona una categoría.'); valido = false; }
-    if (contenidoVacio) { mostrarStatus('El contenido no puede estar vacío.', 'error'); valido = false; }
+    if (!titulo)       { marcarError('titulo',      'El título es obligatorio.');        valido = false; }
+    if (!slug)         { marcarError('slug',         'La URL es obligatoria.');           valido = false; }
+    if (!categoria_id) { marcarError('categoria_id', 'Selecciona una categoría.');        valido = false; }
+    if (contenidoVacio){ mostrarStatus('El contenido no puede estar vacío.', 'error');    valido = false; }
     if (!valido) return;
 
-    // --- Verificar slug duplicado (excluir el artículo actual si estamos editando) ---
     mostrarStatus('⏳ Verificando URL...', 'loading');
 
     let query = supabase.from('articulos').select('id').eq('slug', slug);
-    if (articuloEditandoId) {
-        query = query.neq('id', articuloEditandoId);
-    }
+    if (articuloEditandoId) query = query.neq('id', articuloEditandoId);
     const { data: existente } = await query.maybeSingle();
 
     if (existente) {
@@ -356,7 +350,7 @@ async function publicarArticulo() {
         return;
     }
 
-    // --- Imagen ---
+    // Imagen
     let imagen_portada = null;
 
     if (archivoImagenSeleccionado) {
@@ -371,7 +365,6 @@ async function publicarArticulo() {
     } else if (inputImagenUrl.value.trim()) {
         imagen_portada = inputImagenUrl.value.trim();
     } else if (articuloEditandoId && imgPreview.src && !imgPreviewBox.classList.contains('hidden')) {
-        // Mantener la imagen existente si no se ha cambiado
         imagen_portada = imgPreview.src;
     }
 
@@ -385,7 +378,6 @@ async function publicarArticulo() {
         estado
     };
 
-    // --- INSERT o UPDATE ---
     if (articuloEditandoId) {
         mostrarStatus('⏳ Guardando cambios...', 'loading');
         const { error } = await supabase
@@ -393,10 +385,7 @@ async function publicarArticulo() {
             .update(datosArticulo)
             .eq('id', articuloEditandoId);
 
-        if (error) {
-            mostrarStatus('❌ Error al guardar: ' + error.message, 'error');
-            return;
-        }
+        if (error) { mostrarStatus('❌ Error al guardar: ' + error.message, 'error'); return; }
 
         mostrarStatus('✅ ¡Artículo actualizado correctamente!', 'success');
         resetearEditor();
@@ -404,14 +393,9 @@ async function publicarArticulo() {
         datosArticulo.fecha_publicacion = new Date().toISOString().split('T')[0];
 
         mostrarStatus('⏳ Publicando artículo...', 'loading');
-        const { error } = await supabase
-            .from('articulos')
-            .insert([datosArticulo]);
+        const { error } = await supabase.from('articulos').insert([datosArticulo]);
 
-        if (error) {
-            mostrarStatus('❌ Error al publicar: ' + error.message, 'error');
-            return;
-        }
+        if (error) { mostrarStatus('❌ Error al publicar: ' + error.message, 'error'); return; }
 
         mostrarStatus('✅ ¡Artículo publicado! URL: /articulo/?slug=' + slug, 'success');
         document.getElementById('formulario-articulo').reset();
@@ -424,8 +408,8 @@ async function publicarArticulo() {
 // --------------------------------------------------
 // 8. NAVEGACIÓN ENTRE SECCIONES
 // --------------------------------------------------
-const navLinks = document.querySelectorAll('.admin-nav-link[data-section]');
-const seccionEditor = document.getElementById('seccion-editor');
+const navLinks        = document.querySelectorAll('.admin-nav-link[data-section]');
+const seccionEditor   = document.getElementById('seccion-editor');
 const seccionArticulos = document.getElementById('seccion-articulos');
 
 navLinks.forEach(link => {
@@ -433,11 +417,9 @@ navLinks.forEach(link => {
         e.preventDefault();
         const target = link.dataset.section;
 
-        // Actualizar clase active en sidebar
         navLinks.forEach(l => l.classList.remove('active'));
         link.classList.add('active');
 
-        // Mostrar/ocultar secciones
         if (target === 'seccion-articulos') {
             seccionEditor.classList.add('hidden');
             seccionArticulos.classList.remove('hidden');
@@ -449,7 +431,6 @@ navLinks.forEach(link => {
     });
 });
 
-// Botón "Nuevo artículo" desde la lista
 document.getElementById('btn-nuevo-desde-lista').addEventListener('click', () => {
     resetearEditor();
     document.getElementById('nav-nuevo').click();
@@ -457,9 +438,10 @@ document.getElementById('btn-nuevo-desde-lista').addEventListener('click', () =>
 
 // --------------------------------------------------
 // 9. LISTAR ARTÍCULOS
+// FIX: escapeHtml y escapeAttr en la tabla para prevenir XSS
 // --------------------------------------------------
 async function cargarListaArticulos() {
-    const tbody = document.getElementById('articles-tbody');
+    const tbody    = document.getElementById('articles-tbody');
     const emptyMsg = document.getElementById('articles-empty');
 
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#6b7a99;">Cargando artículos...</td></tr>';
@@ -472,7 +454,6 @@ async function cargarListaArticulos() {
 
     if (error) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#e02424;">❌ Error al cargar artículos</td></tr>';
-        console.error(error);
         return;
     }
 
@@ -485,31 +466,33 @@ async function cargarListaArticulos() {
     tbody.innerHTML = '';
 
     data.forEach(art => {
-        const tr = document.createElement('tr');
+        const tr    = document.createElement('tr');
         const fecha = art.fecha_publicacion
             ? new Date(art.fecha_publicacion).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
             : '—';
         const estadoBadge = art.estado
             ? '<span class="badge badge--published">Publicado</span>'
             : '<span class="badge badge--draft">Borrador</span>';
-        const categoria = art.categorias?.nombre || '—';
 
+        // FIX: usar escapeHtml para datos de la DB en el HTML
         tr.innerHTML = `
-            <td class="article-title-cell" title="${art.titulo}">${art.titulo}</td>
-            <td>${categoria}</td>
+            <td class="article-title-cell" title="${escapeAttr(art.titulo)}">${escapeHtml(art.titulo)}</td>
+            <td>${escapeHtml(art.categorias?.nombre || '—')}</td>
             <td>${estadoBadge}</td>
-            <td class="articles-date">${fecha}</td>
+            <td class="articles-date">${escapeHtml(fecha)}</td>
             <td>
                 <div class="actions-cell">
                     <button class="btn-action btn-action--edit" data-id="${art.id}" title="Editar artículo">✏️ Editar</button>
-                    <button class="btn-action btn-action--delete" data-id="${art.id}" data-title="${art.titulo}" title="Eliminar artículo">🗑 Eliminar</button>
+                    <button class="btn-action btn-action--delete" data-id="${art.id}" title="Eliminar artículo">🗑 Eliminar</button>
                 </div>
             </td>
         `;
+        // FIX: guardar el título en el elemento directamente para evitar inyección via data-title
+        tr.querySelector('.btn-action--delete').__articuloTitulo = art.titulo;
         tbody.appendChild(tr);
     });
 }
- 
+
 document.getElementById('articles-tbody').addEventListener('click', handleArticleAction);
 
 function handleArticleAction(e) {
@@ -521,8 +504,9 @@ function handleArticleAction(e) {
     if (btn.classList.contains('btn-action--edit')) {
         editarArticulo(id);
     } else if (btn.classList.contains('btn-action--delete')) {
-        const title = btn.dataset.title;
-        abrirModalEliminar(id, title);
+        // FIX: recuperar el título desde la propiedad JS (no desde atributo HTML)
+        const titulo = btn.__articuloTitulo || 'este artículo';
+        abrirModalEliminar(id, titulo);
     }
 }
 
@@ -543,21 +527,17 @@ async function editarArticulo(id) {
         return;
     }
 
-    // Rellenar formulario
-    document.getElementById('titulo').value = art.titulo || '';
-    document.getElementById('slug').value = art.slug || '';
-    document.getElementById('descripcion').value = art.descripcion || '';
+    document.getElementById('titulo').value       = art.titulo || '';
+    document.getElementById('slug').value         = art.slug || '';
+    document.getElementById('descripcion').value  = art.descripcion || '';
     document.getElementById('categoria_id').value = art.categoria_id || '';
-    document.getElementById('estado').value = art.estado ? 'true' : 'false';
+    document.getElementById('estado').value       = art.estado ? 'true' : 'false';
 
-    // Cargar contenido en Quill
     quill.root.innerHTML = art.contenido || '';
 
-    // Imagen de portada
     if (art.imagen_portada) {
         inputImagenUrl.value = art.imagen_portada;
         mostrarPreviewImagen(art.imagen_portada);
-        // Activar pestaña URL
         document.querySelectorAll('.img-tab').forEach(t => t.classList.remove('active'));
         document.querySelector('.img-tab[data-tab="url"]').classList.add('active');
         document.getElementById('panel-upload').classList.add('hidden');
@@ -566,27 +546,21 @@ async function editarArticulo(id) {
         ocultarPreviewImagen();
     }
 
-    // Configurar modo edición
     articuloEditandoId = id;
     slugManual = true;
 
-    document.getElementById('editor-title').textContent = 'Editar Artículo';
-    document.getElementById('btn-submit').innerHTML = '💾 Guardar cambios';
+    document.getElementById('editor-title').textContent  = 'Editar Artículo';
+    document.getElementById('btn-submit').textContent     = '💾 Guardar cambios';
     document.getElementById('btn-cancel-edit').classList.remove('hidden');
-
-    // Ocultar lista de status
     document.getElementById('status-message-lista').classList.add('hidden');
 
-    // Navegar al editor
     document.getElementById('nav-nuevo').click();
 }
 
 // --------------------------------------------------
-// 11. CANCELAR EDICIÓN → volver a modo creación
+// 11. CANCELAR EDICIÓN
 // --------------------------------------------------
-document.getElementById('btn-cancel-edit').addEventListener('click', () => {
-    resetearEditor();
-});
+document.getElementById('btn-cancel-edit').addEventListener('click', resetearEditor);
 
 function resetearEditor() {
     articuloEditandoId = null;
@@ -596,19 +570,21 @@ function resetearEditor() {
     limpiarContenido();
     ocultarPreviewImagen();
 
-    document.getElementById('editor-title').textContent = 'Nuevo Artículo';
-    document.getElementById('btn-submit').innerHTML = '🚀 Publicar';
+    document.getElementById('editor-title').textContent  = 'Nuevo Artículo';
+    document.getElementById('btn-submit').textContent     = '🚀 Publicar';
     document.getElementById('btn-cancel-edit').classList.add('hidden');
     document.getElementById('status-message').classList.add('hidden');
 }
 
 // --------------------------------------------------
-// 12. ELIMINAR ARTÍCULO — Modal de confirmación
+// 12. ELIMINAR ARTÍCULO
+// FIX: título pasado via propiedad JS, no via innerHTML
 // --------------------------------------------------
 let articuloAEliminarId = null;
 
 function abrirModalEliminar(id, titulo) {
     articuloAEliminarId = id;
+    // FIX: textContent en lugar de innerHTML — evita XSS si el título tiene HTML
     document.getElementById('delete-modal-text').textContent = `¿Estás seguro de que quieres eliminar "${titulo}"?`;
     document.getElementById('delete-modal').classList.remove('hidden');
 }
@@ -630,10 +606,7 @@ document.getElementById('btn-delete-confirm').addEventListener('click', async ()
 
     mostrarStatusLista('⏳ Eliminando artículo...', 'loading');
 
-    const { error } = await supabase
-        .from('articulos')
-        .delete()
-        .eq('id', id);
+    const { error } = await supabase.from('articulos').delete().eq('id', id);
 
     if (error) {
         mostrarStatusLista('❌ Error al eliminar: ' + error.message, 'error');
@@ -681,4 +654,16 @@ function limpiarErrores() {
     document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
     document.querySelectorAll('.field-error-msg').forEach(el => el.remove());
     document.getElementById('status-message').classList.add('hidden');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+}
+
+function escapeAttr(str) {
+    if (!str) return '';
+    return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }

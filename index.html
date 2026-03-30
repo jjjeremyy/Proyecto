@@ -4,7 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SistemaBase | Inicio</title>
-    <!-- ✅ Rutas sin ../ porque index.html está en la raíz -->
+    <meta name="description" content="Información sobre computación de la mejor manera posible. Artículos sobre hardware, software, redes, IA, programación y más.">
+
+    <!-- FIX: Open Graph para compartir en redes sociales -->
+    <meta property="og:title" content="SistemaBase — Información sobre computación">
+    <meta property="og:description" content="Artículos sobre hardware, software, redes, IA, programación y más.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sistemabase.es/">
+    <meta property="og:site_name" content="SistemaBase">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="SistemaBase — Información sobre computación">
+    <meta property="twitter:description" content="Artículos sobre hardware, software, redes, IA y más.">
+
     <link rel="stylesheet" href="GuiaEstilosCSS/style.css">
     <link rel="stylesheet" href="Home/home.css">
     <link rel="stylesheet" href="Cookies/cookies-banner.css">
@@ -12,7 +23,6 @@
 <body>  
     <header>
         <section class="logo-container">
-            <!-- ✅ Imagen del logo sin ../ -->
             <img src="IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo" width="34" height="34">
             <a href="index.html" class="home">SistemaBase</a>
         </section>
@@ -33,19 +43,23 @@
     <section class="search-section">
         <div class="search-inner">
             <p class="search-label">¿Qué quieres aprender hoy?</p>
-            <div class="search-wrapper">
+            <div class="search-wrapper" role="search">
                 <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <input
-                    type="text"
+                    type="search"
                     id="search-input"
                     class="search-input"
                     placeholder="Busca artículos: hardware, redes, IA..."
                     autocomplete="off"
+                    aria-label="Buscar artículos"
+                    aria-controls="search-results"
+                    aria-autocomplete="list"
                 >
-                <div id="search-results" class="search-results hidden"></div>
+                <div id="search-results" class="search-results hidden" role="listbox" aria-label="Resultados de búsqueda"></div>
             </div>
         </div>
     </section>
@@ -60,7 +74,6 @@
     <footer>
         <section class="footer-info">
             <div class="footer-logo">
-                <!-- ✅ Logo del footer sin ../ -->
                 <img src="IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="footer-logo-img" width="52" height="52">
                 <div>
                     <p class="footer-brand-name">SistemaBase</p>
@@ -69,7 +82,6 @@
             </div>
             <section class="footer-links">
                 <h4>Navegación</h4>
-                <!-- ✅ Todos los enlaces del footer sin ../ -->
                 <a href="index.html">Inicio</a>
                 <a href="Categorias/categorias.html">Categorías</a>
                 <a href="SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
@@ -81,7 +93,8 @@
                 <p>sistemabase00@gmail.com</p>
             </section>
         </section>
-        <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
+        <!-- FIX: año dinámico en lugar de fijo -->
+        <p>&copy; <span id="footer-year"></span> SistemaBase. Todos los derechos reservados.</p>
     </footer>
 
     <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
@@ -89,7 +102,7 @@
             <span class="cookie-icon" aria-hidden="true">🍪</span>
             <div class="cookie-text">
                 <strong>Este sitio usa cookies</strong>
-                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
+                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense).
                    <a href="Politicas/politicas.html">Política de Cookies y Privacidad</a>.
                 </p>
             </div>
@@ -99,8 +112,10 @@
             </div>
         </div>
     </div>
-    <!-- ✅ Scripts sin ../ -->
+
     <script src="Cookies/cookies-banner.js"></script>
     <script type="module" src="Home/home.js"></script>
+    <!-- FIX: año dinámico en el copyright -->
+    <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 </body>
 </html>

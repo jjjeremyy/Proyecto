@@ -1,6 +1,7 @@
 // =============================================
 // CATEGORIAS.JS — SistemaBase
-// CORRECCIÓN GITHUB PAGES: rutas relativas
+// FIX: escape de HTML en interpolaciones (XSS)
+// FIX: encodeURIComponent en slugs de URL
 // =============================================
 import { supabase, obtenerIdCategoria } from '../Supabase/supabase.js';
 
@@ -39,6 +40,7 @@ botones.forEach(boton => {
 
 async function cargarArticulos(slug, nombre) {
     seccionResultados.classList.remove('hidden');
+    // FIX: usar textContent en vez de innerHTML para el título (evita XSS)
     tituloCategoria.textContent = nombre;
     contadorArticulos.textContent = '';
     listaArticulos.innerHTML = renderSkeletons();
@@ -71,21 +73,36 @@ async function cargarArticulos(slug, nombre) {
 
     contadorArticulos.textContent = `${data.length} artículo${data.length !== 1 ? 's' : ''}`;
 
-    // Ruta relativa: estamos en Categorias/, enlazamos a ../Articulo/
+    // FIX: escape de atributos y contenido HTML para prevenir XSS
     listaArticulos.innerHTML = data.map(articulo => `
-    <a href="../Articulo/articulo.html?slug=${articulo.slug}" class="article-card">
-        <div class="article-card-image-wrapper">
-            <img src="${articulo.imagen_portada || '../IMG/IMGprueba.png'}"
-                 alt="${articulo.titulo}"
-                 loading="lazy"
-                 width="400" height="170"
-                 decoding="async">
-        </div>
-        <div class="article-card-body">
-            <h3>${articulo.titulo}</h3>
-            <p>${articulo.descripcion || ''}</p>
-            <span class="article-card-link" aria-hidden="true">Leer artículo →</span>
-        </div>
-    </a>
-`).join('');
+        <a href="../Articulo/articulo.html?slug=${encodeURIComponent(articulo.slug)}" class="article-card">
+            <div class="article-card-image-wrapper">
+                <img src="${escapeAttr(articulo.imagen_portada || '../IMG/IMGprueba.png')}"
+                     alt="${escapeAttr(articulo.titulo)}"
+                     loading="lazy"
+                     width="400" height="170"
+                     decoding="async">
+            </div>
+            <div class="article-card-body">
+                <h3>${escapeHtml(articulo.titulo)}</h3>
+                <p>${escapeHtml(articulo.descripcion || '')}</p>
+                <span class="article-card-link" aria-hidden="true">Leer artículo →</span>
+            </div>
+        </a>
+    `).join('');
+}
+
+// --------------------------------------------------
+// UTILIDADES
+// --------------------------------------------------
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+}
+
+function escapeAttr(str) {
+    if (!str) return '';
+    return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
