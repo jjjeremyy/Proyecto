@@ -185,6 +185,8 @@ const btnRemoveImg = document.getElementById('btn-remove-img');
 
 let archivoImagenSeleccionado = null;
 let imagenUrlFinal = null;
+const TIPOS_IMAGEN_PERMITIDOS = ['image/jpeg', 'image/png', 'image/webp'];
+const EXTENSIONES_IMAGEN_PERMITIDAS = ['jpg', 'jpeg', 'png', 'webp'];
 
 // — Pestañas —
 document.querySelectorAll('.img-tab').forEach(tab => {
@@ -210,15 +212,30 @@ fileDropArea.addEventListener('drop', (e) => {
     e.preventDefault();
     fileDropArea.classList.remove('dragging');
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && esImagenPermitida(file)) {
         procesarArchivoImagen(file);
+    } else if (file) {
+        mostrarStatus('Solo se permiten imágenes JPG, PNG o WEBP.', 'error');
     }
 });
 
 fileInput.addEventListener('change', () => {
     const file = fileInput.files[0];
-    if (file) procesarArchivoImagen(file);
+    if (!file) return;
+
+    if (!esImagenPermitida(file)) {
+        fileInput.value = '';
+        mostrarStatus('Solo se permiten imágenes JPG, PNG o WEBP.', 'error');
+        return;
+    }
+
+    procesarArchivoImagen(file);
 });
+
+function esImagenPermitida(file) {
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
+    return TIPOS_IMAGEN_PERMITIDOS.includes(file.type) || EXTENSIONES_IMAGEN_PERMITIDAS.includes(extension);
+}
 
 function procesarArchivoImagen(file) {
     archivoImagenSeleccionado = file;
