@@ -10,6 +10,21 @@
     --color-text-secondary: #1a1a2e;
     --color-card-bg: #ffffff;
     --color-button-hover: #2165b3;
+    --color-primary-light: #0550a0;
+    --color-accent: #2e87f5;
+    --color-accent-glow: rgba(46, 135, 245, 0.25);
+    --color-secondary: #ffffff;
+    --color-bg-section: #f0f5ff;
+    --color-text: #ffffff;
+    --color-text-secondary: #1a1a2e;
+    --color-text-muted: #5a6a85;
+    --color-border: rgba(4, 56, 115, 0.15);
+    --color-success: #10b981;
+    --color-error: #ef4444;
+    --radius-card: 24px;
+    --radius-input: 12px;
+    --shadow-card: 0 20px 60px rgba(4, 56, 115, 0.15);
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Header tokens */
     --header-height: 64px;
