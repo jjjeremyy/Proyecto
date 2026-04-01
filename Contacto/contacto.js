@@ -1,46 +1,24 @@
-// ============================================================
-//  CONFIGURACION EMAILJS
-//  1. Crea una cuenta en https://www.emailjs.com
-//  2. Crea un Email Service
-//  3. Crea un Email Template con:
-//     {{nombre}}, {{email}}, {{mensaje}}
-// ============================================================
-
-const EMAILJS_PUBLIC_KEY = 'FtSzjNKM-LbfXmh6K';
-const EMAILJS_SERVICE_ID = 'default_service';
-const EMAILJS_TEMPLATE_ID = 'template_pb880xb';
-const CONTACT_DESTINATION_EMAIL = 'sistemabase00@gmail.com';
+const btn = document.getElementById('button');
+const form = document.getElementById('form');
+const feedback = document.getElementById('formFeedback');
+const nombreInput = document.getElementById('nombre');
+const emailInput = document.getElementById('email');
+const mensajeInput = document.getElementById('mensaje');
+const nameInput = document.getElementById('name');
+const timeInput = document.getElementById('time');
 
 if (typeof emailjs === 'undefined') {
     console.error('EmailJS no se ha cargado correctamente.');
+} else {
+    emailjs.init('FtSzjNKM-LbfXmh6K');
 }
 
-if (typeof emailjs !== 'undefined') {
-    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-}
+form.addEventListener('submit', function (event) {
+    event.preventDefault();
 
-const form = document.getElementById('contactForm');
-const submitBtn = document.getElementById('submitBtn');
-const feedback = document.getElementById('formFeedback');
-
-form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-
-    const nombre = document.getElementById('nombre').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const mensaje = document.getElementById('mensaje').value.trim();
-    const templateParams = {
-        nombre,
-        email,
-        mensaje,
-        from_name: nombre,
-        from_email: email,
-        reply_to: email,
-        message: mensaje,
-        to_email: CONTACT_DESTINATION_EMAIL,
-        subject: 'Nuevo mensaje desde el formulario de contacto',
-        title: 'Nuevo mensaje desde el formulario de contacto',
-    };
+    const nombre = nombreInput.value.trim();
+    const email = emailInput.value.trim();
+    const mensaje = mensajeInput.value.trim();
 
     if (!nombre || !email || !mensaje) {
         showFeedback('Por favor, rellena todos los campos.', 'error');
@@ -52,45 +30,58 @@ form.addEventListener('submit', async function (e) {
         return;
     }
 
+    nameInput.value = nombre;
+    timeInput.value = new Date().toLocaleString('es-ES');
+
     setLoading(true);
     hideFeedback();
 
-    try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-        showFeedback('Mensaje enviado. Nos pondremos en contacto pronto.', 'success');
-        form.reset();
-    } catch (err) {
-        console.error('EmailJS error:', err);
+    const serviceID = 'default_service';
+    const templateID = 'template_pb880xb';
 
-        const errorMessage =
-            err?.text ||
-            err?.message ||
-            'Error al enviar. Revisa el Service ID, la plantilla y el correo de destino configurados en EmailJS.';
-
-        showFeedback(errorMessage, 'error');
-    } finally {
-        setLoading(false);
-    }
+    emailjs.sendForm(serviceID, templateID, this).then(
+        () => {
+            setLoading(false);
+            showFeedback('Mensaje enviado correctamente.', 'success');
+            form.reset();
+        },
+        (err) => {
+            console.error('EmailJS error:', err);
+            setLoading(false);
+            showFeedback(err?.text || JSON.stringify(err), 'error');
+        }
+    );
 });
 
 function setLoading(isLoading) {
-    submitBtn.disabled = isLoading;
-    const btnText = submitBtn.querySelector('.btn-text');
-    const btnIcon = submitBtn.querySelector('.btn-icon');
+    btn.disabled = isLoading;
+
+    const btnText = btn.querySelector('.btn-text');
+    const btnIcon = btn.querySelector('.btn-icon');
 
     if (isLoading) {
-        btnText.textContent = 'Enviando...';
-        btnIcon.innerHTML = '<div class="btn-spinner"></div>';
+        if (btnText) {
+            btnText.textContent = 'Sending...';
+        }
+
+        if (btnIcon) {
+            btnIcon.innerHTML = '<div class="btn-spinner"></div>';
+        }
+
         return;
     }
 
-    btnText.textContent = 'Enviar mensaje';
-    btnIcon.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5">
-            <line x1="22" y1="2" x2="11" y2="13"/>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>`;
+    if (btnText) {
+        btnText.textContent = 'Enviar mensaje';
+    }
+
+    if (btnIcon) {
+        btnIcon.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>`;
+    }
 }
 
 function showFeedback(message, type) {

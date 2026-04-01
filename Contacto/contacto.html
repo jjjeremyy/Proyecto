@@ -60,9 +60,9 @@
         <div class="form-container">
             <h2 class="form-title">Envíanos un mensaje</h2>
 
-            <form class="contact-form" id="contactForm">
-                <input type="hidden" id="to_email" name="to_email" value="sistemabase00@gmail.com">
-                <input type="hidden" id="subject" name="subject" value="Nuevo mensaje desde el formulario de contacto">
+            <form class="contact-form" id="form">
+                <input type="hidden" id="name" name="name" value="">
+                <input type="hidden" id="time" name="time" value="">
                 <div class="form-group">
                     <label for="nombre" class="form-label">Nombre</label>
                     <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" class="form-input" required>
@@ -76,7 +76,7 @@
                     <textarea id="mensaje" name="mensaje" placeholder="¿En qué podemos ayudarte?" class="form-textarea" required></textarea>
                 </div>
 
-                <button type="submit" class="form-button" id="submitBtn">
+                <button type="submit" class="form-button" id="button">
                     <span class="btn-text">Enviar mensaje</span>
                     <span class="btn-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
