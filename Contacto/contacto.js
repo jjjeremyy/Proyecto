@@ -6,6 +6,11 @@ const emailInput = document.getElementById('email');
 const mensajeInput = document.getElementById('mensaje');
 const nameInput = document.getElementById('name');
 const timeInput = document.getElementById('time');
+const titleInput = document.getElementById('title');
+const messageInput = document.getElementById('message');
+const fromNameInput = document.getElementById('from_name');
+const replyToInput = document.getElementById('reply_to');
+const toEmailInput = document.getElementById('to_email');
 
 if (typeof emailjs === 'undefined') {
     console.error('EmailJS no se ha cargado correctamente.');
@@ -32,6 +37,11 @@ form.addEventListener('submit', function (event) {
 
     nameInput.value = nombre;
     timeInput.value = new Date().toLocaleString('es-ES');
+    titleInput.value = 'Nuevo mensaje desde el formulario de contacto';
+    messageInput.value = mensaje;
+    fromNameInput.value = nombre;
+    replyToInput.value = email;
+    toEmailInput.value = 'sistemabase00@gmail.com';
 
     setLoading(true);
     hideFeedback();
@@ -48,7 +58,7 @@ form.addEventListener('submit', function (event) {
         (err) => {
             console.error('EmailJS error:', err);
             setLoading(false);
-            showFeedback(err?.text || JSON.stringify(err), 'error');
+            showFeedback(formatEmailJSError(err), 'error');
         }
     );
 });
@@ -92,6 +102,17 @@ function showFeedback(message, type) {
 function hideFeedback() {
     feedback.className = 'form-feedback';
     feedback.textContent = '';
+}
+
+function formatEmailJSError(err) {
+    const status = err?.status ? ` (${err.status})` : '';
+    const text = err?.text || err?.message || '';
+
+    if (text) {
+        return `Error de EmailJS${status}: ${text}`;
+    }
+
+    return `Error de EmailJS${status}. Revisa el Service ID, la plantilla y el correo de destino en tu panel.`;
 }
 
 const toggle = document.getElementById('menuToggle');
