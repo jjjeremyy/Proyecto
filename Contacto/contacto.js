@@ -9,6 +9,7 @@
 const EMAILJS_PUBLIC_KEY = 'FtSzjNKM-LbfXmh6K';
 const EMAILJS_SERVICE_ID = 'default_service';
 const EMAILJS_TEMPLATE_ID = 'template_pb880xb';
+const CONTACT_DESTINATION_EMAIL = 'sistemabase00@gmail.com';
 
 if (typeof emailjs === 'undefined') {
     console.error('EmailJS no se ha cargado correctamente.');
@@ -28,6 +29,18 @@ form.addEventListener('submit', async function (e) {
     const nombre = document.getElementById('nombre').value.trim();
     const email = document.getElementById('email').value.trim();
     const mensaje = document.getElementById('mensaje').value.trim();
+    const templateParams = {
+        nombre,
+        email,
+        mensaje,
+        from_name: nombre,
+        from_email: email,
+        reply_to: email,
+        message: mensaje,
+        to_email: CONTACT_DESTINATION_EMAIL,
+        subject: 'Nuevo mensaje desde el formulario de contacto',
+        title: 'Nuevo mensaje desde el formulario de contacto',
+    };
 
     if (!nombre || !email || !mensaje) {
         showFeedback('Por favor, rellena todos los campos.', 'error');
@@ -43,7 +56,7 @@ form.addEventListener('submit', async function (e) {
     hideFeedback();
 
     try {
-        await emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, form);
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
         showFeedback('Mensaje enviado. Nos pondremos en contacto pronto.', 'success');
         form.reset();
     } catch (err) {
@@ -52,7 +65,7 @@ form.addEventListener('submit', async function (e) {
         const errorMessage =
             err?.text ||
             err?.message ||
-            'Error al enviar. Revisa el Service ID de EmailJS y que el servicio este configurado como predeterminado.';
+            'Error al enviar. Revisa el Service ID, la plantilla y el correo de destino configurados en EmailJS.';
 
         showFeedback(errorMessage, 'error');
     } finally {
