@@ -15,7 +15,7 @@ const toEmailInput = document.getElementById('to_email');
 if (typeof emailjs === 'undefined') {
     console.error('EmailJS no se ha cargado correctamente.');
 } else {
-    emailjs.init('Hg72zlUwzW9M2YAut');
+    emailjs.init('uXTjo90Pwv0fueks5');
 }
 
 form.addEventListener('submit', function (event) {
