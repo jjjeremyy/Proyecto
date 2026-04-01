@@ -82,3 +82,9 @@ function hideFeedback() {
     feedback.className = "form-feedback";
     feedback.textContent = "";
 }
+
+
+const toggle = document.getElementById('menuToggle');
+const nav = document.getElementById('navLinks');
+
+toggle.addEventListener('click', () => nav.classList.toggle('open'));

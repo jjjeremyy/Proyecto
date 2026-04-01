@@ -350,6 +350,14 @@
     border: 1px solid rgba(239, 68, 68, 0.25);
 }
 
+
+.menu-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
+.menu-toggle span {
+    display: block; width: 24px; height: 2px;
+    background: white; margin: 5px 0;
+    transition: all 0.3s;
+}
+
 /* =====================
    RESPONSIVE
 ===================== */
@@ -359,19 +367,31 @@
         padding: 50px 24px;
         gap: 36px;
     }
-
     .contact-left {
         flex: none;
         width: 100%;
     }
-
     .contact-title {
         font-size: 2rem;
     }
-
     .form-container {
         flex: none;
         width: 100%;
         padding: 32px 24px;
     }
+}
+
+@media (max-width: 560px) {
+    .menu-toggle { display: block; }
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: var(--header-height, 64px); left: 0; right: 0;
+        background: var(--color-primary-dark);
+        flex-direction: column;
+        padding: 20px;
+        gap: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-links.open { display: flex; }
 }
