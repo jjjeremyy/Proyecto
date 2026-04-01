@@ -10,7 +10,10 @@
 const EMAILJS_PUBLIC_KEY  = "TU_PUBLIC_KEY";    // Account > API Keys
 const EMAILJS_SERVICE_ID  = "TU_SERVICE_ID";    // Email Services > Service ID
 const EMAILJS_TEMPLATE_ID = "TU_TEMPLATE_ID";   // Email Templates > Template ID
+const toggle = document.getElementById('menuToggle');
+const nav = document.getElementById('navLinks');
 
+toggle.addEventListener('click', () => nav.classList.toggle('open'));
 // ============================================================
 
 (function () {
@@ -82,9 +85,3 @@ function hideFeedback() {
     feedback.className = "form-feedback";
     feedback.textContent = "";
 }
-
-
-const toggle = document.getElementById('menuToggle');
-const nav = document.getElementById('navLinks');
-
-toggle.addEventListener('click', () => nav.classList.toggle('open'));
