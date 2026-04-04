@@ -82,6 +82,7 @@ body > header::after {
     align-items: center;
     gap: 12px;
     text-decoration: none;
+    flex-shrink: 0;
 }
 
 .logo {
@@ -117,6 +118,8 @@ body > header::after {
     display: flex;
     align-items: center;
     gap: 4px;
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .nav-links a {
@@ -307,7 +310,10 @@ footer > p {
    ══════════════════════════════════════════════ */
 
 @media (max-width: 860px) {
-    body > header { padding: 0 20px; }
+    body > header {
+        padding: 0 20px;
+        gap: 12px;
+    }
 
     .nav-links { gap: 2px; }
     .nav-links a { font-size: 13px; padding: 6px 10px; }
@@ -323,7 +329,30 @@ footer > p {
 }
 
 @media (max-width: 540px) {
+    body > header {
+        padding: 0 12px;
+        gap: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    body > header::-webkit-scrollbar {
+        display: none;
+    }
+
     .logo-container a { display: none; }
+
+    .nav-links {
+        min-width: max-content;
+    }
+
+    .nav-links a {
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+
     .footer-info { grid-template-columns: 1fr; padding: 36px 24px 28px; }
     .footer-logo { grid-column: auto; }
 }
