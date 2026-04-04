@@ -127,51 +127,6 @@
     background: var(--color-primary);
 }
 
-@media (max-width: 700px) {
-    body > header {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        align-items: center;
-        min-height: var(--header-height);
-        height: auto;
-        padding: 10px 12px;
-        column-gap: 10px;
-        background: var(--color-primary);
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-    }
-
-    body > header .logo-container {
-        min-width: 0;
-    }
-
-    body > header .nav-links {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        justify-self: end;
-        width: max-content;
-        max-width: 100%;
-        min-width: 0;
-        gap: 2px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    body > header .nav-links::-webkit-scrollbar {
-        display: none;
-    }
-
-    body > header .nav-links a {
-        flex: 0 0 auto;
-        white-space: nowrap;
-        font-size: 12px;
-        padding: 6px 8px;
-    }
-}
-
 @media (max-width: 768px) {
     .about-section,
     .about-section.reverse {
