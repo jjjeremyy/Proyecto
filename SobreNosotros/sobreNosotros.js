@@ -1,9 +1,3 @@
-// ── HAMBURGER MENU ──
-const toggle = document.getElementById('menuToggle');
-const nav = document.getElementById('navLinks');
-
-toggle.addEventListener('click', () => nav.classList.toggle('open'));
-
 // ── FADE-IN ON SCROLL ──
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {

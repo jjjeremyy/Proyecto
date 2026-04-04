@@ -111,15 +111,6 @@
     background: var(--color-primary);
 }
 
-
-/* ── HAMBURGER MENU ── */
-.menu-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
-.menu-toggle span {
-    display: block; width: 24px; height: 2px;
-    background: white; margin: 5px 0;
-    transition: all 0.3s;
-}
-
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
     .about-section, .about-section.reverse {
@@ -128,19 +119,4 @@
     }
     .about-img-wrap { min-height: 260px; }
     .about-content { padding: 40px 28px; }
-}
-
-@media (max-width: 560px) {
-    .menu-toggle { display: block; }
-    .nav-links {
-        display: none;
-        position: absolute;
-        top: var(--header-height, 64px); left: 0; right: 0;
-        background: var(--color-primary-dark);
-        flex-direction: column;
-        padding: 20px;
-        gap: 16px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .nav-links.open { display: flex; }
 }
