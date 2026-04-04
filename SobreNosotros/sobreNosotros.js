@@ -1,22 +1,25 @@
 // ── FADE-IN ON SCROLL ──
-// Añadimos .js-ready al body SOLO después de registrar el observer,
-// así el CSS nunca oculta contenido si JS falla o tarda.
-document.body.classList.add('js-ready');
+// Sin condición de carrera: los elementos comienzan ocultos via CSS,
+// el observer los muestra al entrar en viewport.
+// threshold:0 garantiza que dispara en cuanto 1px es visible.
 
-const elements = document.querySelectorAll('.fade-in');
+document.addEventListener('DOMContentLoaded', function () {
+    var elements = document.querySelectorAll('.fade-in');
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-        }
-    });
-}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    if (!('IntersectionObserver' in window)) {
+        // Fallback para navegadores sin soporte
+        elements.forEach(function(el) { el.classList.add('visible'); });
+        return;
+    }
 
-elements.forEach(el => observer.observe(el));
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0, rootMargin: '0px 0px -20px 0px' });
 
-// Fallback: si algún elemento no se ha activado tras 1s, lo mostramos igualmente
-setTimeout(() => {
-    elements.forEach(el => el.classList.add('visible'));
-}, 1000);
+    elements.forEach(function(el) { observer.observe(el); });
+});

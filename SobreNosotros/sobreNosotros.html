@@ -12,14 +12,14 @@
 
     <header>
         <section class="logo-container">
-            <img src="../IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo">
-            <a href="../index.html">SistemaBase</a>
+            <img src="../IMG/LogoSistemaBaseBlanco.png" alt="Logo de SistemaBase" class="logo" width="34" height="34">
+            <a href="../index.html" class="home">SistemaBase</a>
         </section>
-        <nav class="nav-links" id="navLinks">
+        <section class="nav-links">
             <a href="../Categorias/categorias.html">Categorías</a>
             <a href="sobreNosotros.html" class="active">Sobre nosotros</a>
             <a href="../Contacto/contacto.html">Contacto</a>
-        </nav>
+        </section>
     </header>
 
     <div class="page-hero">
@@ -27,10 +27,10 @@
         <p>Conoce quiénes somos, de dónde venimos y hacia dónde vamos.</p>
     </div>
 
-    <section class="about-section fade-in">
+    <section class="about-section">
         <div class="about-img-wrap">
-            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&auto=format&fit=crop" alt="Pantalla de laptop con código" loading="lazy" width="900" height="480"
-                decoding="async">
+            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&auto=format&fit=crop"
+                 alt="Pantalla de laptop con código" loading="lazy" width="900" height="480" decoding="async">
         </div>
         <div class="about-content">
             <div class="section-number">01 / 05</div>
@@ -40,10 +40,10 @@
         </div>
     </section>
 
-    <section class="about-section reverse fade-in">
+    <section class="about-section reverse">
         <div class="about-img-wrap">
-            <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=900&auto=format&fit=crop" alt="Código en pantalla" loading="lazy" width="900" height="480"
-                decoding="async">
+            <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=900&auto=format&fit=crop"
+                 alt="Código en pantalla" loading="lazy" width="900" height="480" decoding="async">
         </div>
         <div class="about-content light">
             <div class="section-number">02 / 05</div>
@@ -53,10 +53,10 @@
         </div>
     </section>
 
-    <section class="about-section fade-in">
+    <section class="about-section">
         <div class="about-img-wrap">
-            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop" alt="Circuito electrónico de cerca" loading="lazy" width="900" height="480"
-                decoding="async">
+            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop"
+                 alt="Circuito electrónico de cerca" loading="lazy" width="900" height="480" decoding="async">
         </div>
         <div class="about-content">
             <div class="section-number">03 / 05</div>
@@ -66,10 +66,10 @@
         </div>
     </section>
 
-    <section class="about-section reverse fade-in">
+    <section class="about-section reverse">
         <div class="about-img-wrap">
-            <img src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=900&auto=format&fit=crop" alt="Teclado de laptop iluminado" loading="lazy" width="900" height="480"
-                decoding="async">
+            <img src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=900&auto=format&fit=crop"
+                 alt="Teclado de laptop iluminado" loading="lazy" width="900" height="480" decoding="async">
         </div>
         <div class="about-content light">
             <div class="section-number">04 / 05</div>
@@ -79,10 +79,10 @@
         </div>
     </section>
 
-    <section class="about-section fade-in">
+    <section class="about-section">
         <div class="about-img-wrap">
-            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=900&auto=format&fit=crop" alt="Monitor retro con código" loading="lazy" width="900" height="480"
-                decoding="async">
+            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=900&auto=format&fit=crop"
+                 alt="Monitor retro con código" loading="lazy" width="900" height="480" decoding="async">
         </div>
         <div class="about-content">
             <div class="section-number">05 / 05</div>
@@ -114,7 +114,7 @@
                 <p>sistemabase00@gmail.com</p>
             </section>
         </section>
-        <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
+        <p>&copy; <span id="footer-year"></span> SistemaBase. Todos los derechos reservados.</p>
     </footer>
 
     <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
@@ -122,7 +122,7 @@
             <span class="cookie-icon" aria-hidden="true">🍪</span>
             <div class="cookie-text">
                 <strong>Este sitio usa cookies</strong>
-                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
+                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense).
                    <a href="../Politicas/politicas.html">Política de Cookies y Privacidad</a>.
                 </p>
             </div>
@@ -133,8 +133,8 @@
         </div>
     </div>
 
-    <script src="sobreNosotros.js"></script>
     <script src="../Cookies/cookies-banner.js"></script>
+    <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
 </body>
 </html>
