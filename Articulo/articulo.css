@@ -797,8 +797,8 @@
     height: 5px;
     width: 0%;
     z-index: 9999;
-    background: linear-gradient(90deg, #f97316 0%, #fb923c 60%, #fdba74 100%);
-    box-shadow: 0 -2px 10px rgba(249, 115, 22, 0.5);
+    background: var(--color-primary);
+    box-shadow: 0 -2px 10px rgba(4, 56, 115, 0.4);
     transition: width 0.1s linear;
     border-radius: 0 3px 0 0;
 }
