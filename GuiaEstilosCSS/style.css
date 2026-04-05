@@ -85,9 +85,17 @@ body > header::after {
     flex-shrink: 0;
 }
 
+.logo-link {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    line-height: 0;
+}
+
 .logo {
     width: 34px;
     height: 34px;
+    display: block;
     border-radius: 8px;
     /* Sutil halo */
     filter: drop-shadow(0 0 6px rgba(78,155,255,0.4));
@@ -97,7 +105,7 @@ body > header::after {
     filter: drop-shadow(0 0 10px rgba(78,155,255,0.7));
 }
 
-.logo-container a {
+.logo-container .home {
     color: var(--color-secondary);
     text-decoration: none;
     font-family: 'Space Mono', monospace;
@@ -111,7 +119,7 @@ body > header::after {
     background-clip: text;
     transition: opacity 0.2s;
 }
-.logo-container a:hover { opacity: 0.85; }
+.logo-container .home:hover { opacity: 0.85; }
 
 /* ── Navegación ── */
 .nav-links {
@@ -342,7 +350,7 @@ footer > p {
         display: none;
     }
 
-    .logo-container a { display: none; }
+    .logo-container .home { display: none; }
 
     .nav-links {
         min-width: max-content;
