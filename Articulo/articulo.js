@@ -3,6 +3,7 @@
 // FIX: XSS sanitizado con DOMPurify
 // FIX: Tiempo de lectura calculado y mostrado
 // FIX: Meta OG tags para SEO/redes sociales
+// FIX: AdSense inicializado DESPUÉS de mostrar el contenedor
 // =============================================
 import {
     obtenerArticuloPorSlug,
@@ -94,6 +95,7 @@ async function cargarArticulo(slug) {
 // FIX: DOMPurify aplicado al contenido HTML
 // FIX: Tiempo de lectura calculado
 // FIX: Meta OG y Twitter añadidos
+// FIX: AdSense push() llamado después de mostrar el contenedor
 // --------------------------------------------------
 function rellenarArticulo(a) {
     const categoria = a.categorias?.nombre || '';
@@ -101,7 +103,7 @@ function rellenarArticulo(a) {
     document.title = `SistemaBase | ${a.titulo}`;
     setMeta('description', a.descripcion || a.titulo);
 
-    // FIX: Open Graph + Twitter Card para compartir en redes
+    // Open Graph + Twitter Card para compartir en redes
     setMetaProperty('og:title',       `SistemaBase | ${a.titulo}`);
     setMetaProperty('og:description', a.descripcion || a.titulo);
     setMetaProperty('og:type',        'article');
@@ -123,7 +125,7 @@ function rellenarArticulo(a) {
     setText('article-title',    a.titulo);
     setText('article-subtitle', a.descripcion || '');
 
-    // FIX: Tiempo de lectura
+    // Tiempo de lectura
     const textoPlano = (a.contenido || '').replace(/<[^>]*>/g, '');
     const palabras   = textoPlano.trim().split(/\s+/).filter(Boolean).length;
     const minutos    = Math.max(1, Math.ceil(palabras / 200));
@@ -142,7 +144,7 @@ function rellenarArticulo(a) {
         if (fig) fig.style.display = 'none';
     }
 
-    // FIX: Sanitizar HTML con DOMPurify antes de inyectar en el DOM
+    // Sanitizar HTML con DOMPurify antes de inyectar en el DOM
     const bodyEl = document.getElementById('article-body-content');
     if (bodyEl) {
         if (purify) {
@@ -152,13 +154,31 @@ function rellenarArticulo(a) {
                 FORBID_TAGS: ['script', 'style'],
             });
         } else {
-            // Fallback si DOMPurify no cargó (no debería ocurrir)
             console.warn('[Seguridad] DOMPurify no disponible. Contenido renderizado sin sanitizar.');
             bodyEl.innerHTML = a.contenido || '';
         }
     }
 
+    // FIX: Mostrar el contenedor ANTES de inicializar AdSense
+    // para que los <ins> tengan dimensiones reales cuando AdSense los mida
     document.getElementById('article-main').classList.remove('hidden');
+
+    // FIX: Inicializar los anuncios AdSense que estaban dentro del contenedor hidden.
+    // Se usa requestAnimationFrame para garantizar que el navegador haya pintado
+    // el layout antes de que AdSense calcule el espacio disponible.
+    requestAnimationFrame(() => {
+        document.querySelectorAll('#article-main .adsbygoogle').forEach(ins => {
+            // AdSense lanza error si se intenta hacer push() en un <ins> ya inicializado
+            if (!ins.getAttribute('data-adsbygoogle-status')) {
+                try {
+                    (window.adsbygoogle = window.adsbygoogle || []).push({});
+                } catch (e) {
+                    console.warn('[AdSense] Error al inicializar bloque:', e);
+                }
+            }
+        });
+    });
+
     configurarCompartir(a.titulo, a.slug);
 }
 
@@ -262,7 +282,6 @@ function setMeta(name, content) {
     tag.setAttribute('content', content);
 }
 
-// FIX: soporte para og: y twitter: meta properties
 function setMetaProperty(property, content) {
     let tag = document.querySelector(`meta[property="${property}"]`);
     if (!tag) {
@@ -284,7 +303,6 @@ function truncar(texto, max) {
     return texto && texto.length > max ? texto.substring(0, max) + '…' : texto;
 }
 
-// FIX: escape de HTML para prevenir XSS en interpolaciones de strings
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>"']/g, m => ({

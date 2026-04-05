@@ -6,7 +6,7 @@
     <title>SistemaBase | Artículo</title>
     <meta name="description" content="">
 
-    <!-- FIX: Meta OG base (se sobreescriben dinámicamente desde articulo.js) -->
+    <!-- Meta OG base (se sobreescriben dinámicamente desde articulo.js) -->
     <meta property="og:site_name" content="SistemaBase">
     <meta property="og:type" content="article">
     <meta property="twitter:card" content="summary_large_image">
@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
 
-    <!-- FIX: DOMPurify cargado ANTES del módulo JS para garantizar disponibilidad -->
+    <!-- DOMPurify cargado ANTES del módulo JS -->
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 </head>
 <body>
@@ -36,15 +36,17 @@
             <a href="../SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
             <a href="../Contacto/contacto.html">Contacto</a>
         </section>
-    </header> 
+    </header>
 
-    <!-- ANUNCIO SUPERIOR (728x90) -->
+    <!-- ============================================================
+         ANUNCIO SUPERIOR (728x90) — SIEMPRE VISIBLE, push() inline OK
+    ============================================================ -->
     <div class="ad-container ad-leaderboard">
         <p class="ad-label">Publicidad</p>
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-             data-ad-slot="XXXXXXXXXX"
+             data-ad-slot="SLOT_LEADERBOARD_TOP"
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
@@ -63,7 +65,13 @@
         <a href="../index.html" class="btn-back">← Volver al inicio</a>
     </div>
 
-    <!-- CONTENIDO -->
+    <!-- ============================================================
+         CONTENIDO PRINCIPAL
+         FIX: Los <ins> de aquí NO llevan <script> inline.
+              AdSense se inicializa desde articulo.js DESPUÉS de
+              hacer classList.remove('hidden'), cuando el contenedor
+              ya es visible y tiene dimensiones reales.
+    ============================================================ -->
     <main id="article-main" class="article-layout hidden">
 
         <!-- SIDEBAR IZQUIERDO -->
@@ -73,20 +81,18 @@
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-slot="SLOT_SIDEBAR_LEFT_1"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
             <div class="ad-container ad-sidebar" style="margin-top:30px;">
                 <p class="ad-label">Publicidad</p>
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-slot="SLOT_SIDEBAR_LEFT_2"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
         </aside>
 
@@ -109,7 +115,6 @@
                 <div class="article-meta-top">
                     <span id="article-category-badge" class="article-category"></span>
                     <span id="article-date" class="article-date"></span>
-                    <!-- FIX: elemento de tiempo de lectura que ahora sí se rellena -->
                     <span id="article-read-time" class="article-read-time"></span>
                 </div>
                 <h1 id="article-title" class="article-title"></h1>
@@ -126,31 +131,29 @@
                 <img id="article-featured-img" src="" alt="" class="featured-img">
             </figure>
 
-            <!-- ANUNCIO IN-CONTENT SUPERIOR -->
+            <!-- ANUNCIO IN-CONTENT SUPERIOR — sin <script> inline -->
             <div class="ad-container ad-in-content">
                 <p class="ad-label">Publicidad</p>
                 <ins class="adsbygoogle"
                      style="display:block; text-align:center;"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-slot="SLOT_INCONTENT"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
 
             <!-- CUERPO DEL ARTÍCULO -->
             <div id="article-body-content" class="article-body"></div>
 
-            <!-- ANUNCIO POST-ARTÍCULO -->
+            <!-- ANUNCIO POST-ARTÍCULO — sin <script> inline -->
             <div class="ad-container ad-post-article">
                 <p class="ad-label">Publicidad</p>
                 <ins class="adsbygoogle"
                      style="display:block; text-align:center;"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-slot="SLOT_POST_ARTICLE"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
 
             <!-- ARTÍCULOS RELACIONADOS -->
@@ -168,32 +171,32 @@
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-slot="SLOT_SIDEBAR_RIGHT_1"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
             <div class="ad-container ad-sidebar" style="margin-top:30px;">
                 <p class="ad-label">Publicidad</p>
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
+                     data-ad-slot="SLOT_SIDEBAR_RIGHT_2"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
         </aside>
 
     </main>
 
-    <!-- ANUNCIO PIE DE PÁGINA -->
+    <!-- ============================================================
+         ANUNCIO PIE DE PÁGINA — SIEMPRE VISIBLE, push() inline OK
+    ============================================================ -->
     <div class="ad-container ad-footer-banner">
         <p class="ad-label">Publicidad</p>
         <ins class="adsbygoogle"
              style="display:block; text-align:center;"
              data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
-             data-ad-slot="XXXXXXXXXX"
+             data-ad-slot="SLOT_FOOTER_BANNER"
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
@@ -241,7 +244,6 @@
     </div>
 
     <script src="../Cookies/cookies-banner.js"></script>
-    <!-- FIX: DOMPurify se carga en <head> antes del módulo. Este script aquí es redundante, eliminado. -->
     <script type="module" src="articulo.js"></script>
     <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 </body>

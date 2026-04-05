@@ -94,6 +94,7 @@
 }
 
 .ad-leaderboard ins {
+    display: block;
     min-height: 90px;
 }
 
@@ -102,7 +103,9 @@
     width: 100%;
 }
 
+/* FIX: min-height explícito para que AdSense mida el espacio correctamente */
 .ad-sidebar ins {
+    display: block;
     min-height: 250px;
 }
 
@@ -111,8 +114,10 @@
     margin: 30px 0;
 }
 
+/* FIX: min-height explícito */
 .ad-in-content ins {
-    min-height: 280px;
+    display: block;
+    min-height: 100px;
 }
 
 /* Post-artículo */
@@ -120,8 +125,10 @@
     margin: 30px 0;
 }
 
+/* FIX: min-height explícito */
 .ad-post-article ins {
-    min-height: 250px;
+    display: block;
+    min-height: 100px;
 }
 
 /* Banner pie de página */
@@ -138,6 +145,7 @@
 }
 
 .ad-footer-banner ins {
+    display: block;
     min-height: 90px;
 }
 
@@ -245,6 +253,7 @@
     box-shadow: 0 6px 16px rgba(4, 56, 115, 0.25);
     transform: translateY(-1px);
 }
+
 /* ==========================================
    IMAGEN DESTACADA
 ========================================== */
@@ -595,7 +604,6 @@
     text-decoration: underline;
 }
 
-
 /* ==========================================
    ESTADOS: CARGANDO / ERROR
 ========================================== */
@@ -659,8 +667,6 @@
 .hidden {
     display: none !important;
 }
-
-
 
 /* ==========================================
    CONTENIDO DINÁMICO (generado por Quill)
@@ -778,13 +784,16 @@
     overflow: hidden;
 }
 
+/* ==========================================
+   BARRA DE PROGRESO DE LECTURA
+========================================== */
 #reading-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 3px;
-  background: var(--color-primary);
-  width: 0%;
-  z-index: 9999;
-  transition: width 0.1s linear;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--color-primary);
+    width: 0%;
+    z-index: 9999;
+    transition: width 0.1s linear;
 }
