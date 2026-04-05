@@ -43,6 +43,9 @@ body {
     .login-left {
         display: none;
     }
+    .mobile-brand {
+        display: inline-flex;
+    }
 }
 
 /* ==========================================
@@ -73,9 +76,17 @@ body {
     gap: 14px;
 }
 
+.brand-link,
+.mobile-brand {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
 .brand-logo {
     width: 48px;
     height: 48px;
+    display: block;
 }
 
 .brand-name {
@@ -84,6 +95,13 @@ body {
     font-weight: 700;
     color: #fff;
     letter-spacing: 0.02em;
+    text-decoration: none;
+}
+
+.mobile-brand {
+    display: none;
+    gap: 12px;
+    margin-bottom: 24px;
 }
 
 .login-left-text h2 {

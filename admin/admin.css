@@ -63,9 +63,21 @@ body {
     font-size: 15px;
 }
 
+.admin-brand-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
 .admin-logo {
     width: 32px;
     height: 32px;
+    display: block;
+}
+
+.admin-brand-name {
+    color: #fff;
+    text-decoration: none;
 }
 
 .admin-nav {
