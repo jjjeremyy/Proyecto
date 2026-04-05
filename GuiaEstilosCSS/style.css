@@ -221,6 +221,13 @@ footer::after {
     gap: 12px;
 }
 
+.footer-logo-link {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    line-height: 0;
+}
+
 .footer-logo-img {
     width: 52px;
     height: 52px;
@@ -340,20 +347,34 @@ footer > p {
     body > header {
         padding: 0 12px;
         gap: 8px;
+        overflow: hidden;
+    }
+
+    .logo-container {
+        min-width: 34px;
+    }
+
+    .logo-link,
+    .logo {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    .logo-container .home { display: none; }
+
+    .nav-links {
+        min-width: 0;
+        flex: 1;
+        justify-content: flex-end;
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
     }
 
-    body > header::-webkit-scrollbar {
+    .nav-links::-webkit-scrollbar {
         display: none;
-    }
-
-    .logo-container .home { display: none; }
-
-    .nav-links {
-        min-width: max-content;
     }
 
     .nav-links a {

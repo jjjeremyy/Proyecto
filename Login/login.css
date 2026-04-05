@@ -104,6 +104,12 @@ body {
     margin-bottom: 24px;
 }
 
+@media (max-width: 768px) {
+    .mobile-brand {
+        display: inline-flex;
+    }
+}
+
 .login-left-text h2 {
     font-family: 'Lora', Georgia, serif;
     font-size: clamp(1.6rem, 3vw, 2.2rem);
