@@ -320,7 +320,7 @@ function escapeAttr(str) {
 // --------------------------------------------------
 const bar = document.createElement('div');
 bar.id = 'reading-progress';
-document.body.prepend(bar);
+document.body.appendChild(bar);
 
 window.addEventListener('scroll', () => {
     const doc = document.documentElement;

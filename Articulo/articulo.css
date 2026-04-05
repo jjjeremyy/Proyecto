@@ -786,14 +786,19 @@
 
 /* ==========================================
    BARRA DE PROGRESO DE LECTURA
+   — Fija en la parte inferior, más gruesa y
+     con color acento naranja cálido que
+     contrasta bien sobre el azul del tema.
 ========================================== */
 #reading-progress {
     position: fixed;
-    top: 0;
+    bottom: 0;
     left: 0;
-    height: 3px;
-    background: var(--color-primary);
+    height: 5px;
     width: 0%;
     z-index: 9999;
+    background: linear-gradient(90deg, #f97316 0%, #fb923c 60%, #fdba74 100%);
+    box-shadow: 0 -2px 10px rgba(249, 115, 22, 0.5);
     transition: width 0.1s linear;
+    border-radius: 0 3px 0 0;
 }
