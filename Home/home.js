@@ -3,6 +3,8 @@
 // FIX: prefetch movido a DESPUÉS de renderizar las tarjetas
 // FIX: escape de HTML en interpolaciones para prevenir XSS
 // FIX: Promise.all corregido
+// FIX: límite de artículos recientes explícito en 4
+// FIX: nombre de categoría formateado (sin guiones bajos)
 // =============================================
 import { obtenerArticulosRecientes, obtenerArticulosBuscador } from '../Supabase/supabase.js';
 
@@ -33,7 +35,8 @@ async function cargarArticulosRecientes() {
 
     let data;
     try {
-        data = await obtenerArticulosRecientes(4);
+        // FIX: límite explícito de 4 artículos
+        data = await obtenerArticulosRecientes(4, true);
     } catch (err) {
         console.error('[SistemaBase] Error al cargar artículos recientes:', err);
         lista.innerHTML = `<p class="home-no-results">Error al cargar artículos. Revisa la consola para más detalles.</p>`;
@@ -53,7 +56,7 @@ async function cargarArticulosRecientes() {
                      loading="lazy"
                      width="400" height="160"
                      decoding="async">
-                <span class="recent-card-cat">${escapeHtml(art.categorias?.nombre || '')}</span>
+                <span class="recent-card-cat">${escapeHtml(formatearNombreCategoria(art.categorias?.nombre || ''))}</span>
             </div>
             <div class="recent-card-body">
                 <h3>${escapeHtml(art.titulo)}</h3>
@@ -114,7 +117,7 @@ function inicializarBuscador() {
                          alt="${escapeAttr(art.titulo)}"
                          width="46" height="46">
                     <div>
-                        <span class="search-result-cat">${escapeHtml(art.categorias?.nombre || '')}</span>
+                        <span class="search-result-cat">${escapeHtml(formatearNombreCategoria(art.categorias?.nombre || ''))}</span>
                         <p>${resaltarTexto(escapeHtml(art.titulo), query)}</p>
                     </div>
                 </a>
@@ -167,6 +170,17 @@ function formatearFecha(fecha) {
     return new Date(fecha + 'T00:00').toLocaleDateString('es-ES', {
         day: 'numeric', month: 'short', year: 'numeric'
     });
+}
+
+// FIX: convierte "conceptos_basicos" → "Conceptos Básicos" (o cualquier nombre con guiones bajos/guiones)
+function formatearNombreCategoria(nombre) {
+    if (!nombre) return '';
+    // Si el nombre ya tiene espacios y mayúsculas, lo devuelve tal cual
+    if (/[A-ZÁÉÍÓÚÑ ]/.test(nombre)) return nombre;
+    // Si tiene guiones bajos o guiones, los reemplaza por espacios y capitaliza
+    return nombre
+        .replace(/[_-]/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function resaltarTexto(textoEscapado, query) {
