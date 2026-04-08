@@ -137,3 +137,71 @@ export async function fetchConCache(cacheKey, fetchFn, forceRefresh = false, ttl
   // 4. Devolver los datos
   return data;
 }
+
+// cache.js — no cachear datos sensibles y añadir integridad
+
+const CACHE_VERSION = 'v2'; // Incrementar para invalidar caché antigua
+
+export function setCache(key, data, ttl = CACHE_TTL.articleList) {
+    const fullKey = CACHE_PREFIX + key;
+    
+    // No cachear datos que puedan contener información sensible del admin
+    const CLAVES_NO_CACHEABLES = ['session', 'user', 'token', 'auth'];
+    if (CLAVES_NO_CACHEABLES.some(k => key.toLowerCase().includes(k))) {
+        console.warn('[Cache] Clave denegada por política de seguridad:', key);
+        return;
+    }
+
+    const entry = {
+        data,
+        timestamp: Date.now(),
+        version: CACHE_VERSION
+    };
+
+    memoryCache.set(fullKey, entry);
+
+    try {
+        localStorage.setItem(fullKey, JSON.stringify(entry));
+    } catch (e) {
+        console.warn('[Cache] No se pudo guardar en localStorage:', e);
+        clearCache();
+    }
+}
+
+export function getCache(key, ttl = CACHE_TTL.articleList) {
+    const fullKey = CACHE_PREFIX + key;
+
+    if (memoryCache.has(fullKey)) {
+        const entry = memoryCache.get(fullKey);
+        // Verificar versión y TTL
+        if (entry.version === CACHE_VERSION && Date.now() - entry.timestamp < ttl) {
+            return entry.data;
+        }
+        memoryCache.delete(fullKey);
+    }
+
+    try {
+        const raw = localStorage.getItem(fullKey);
+        if (!raw) return null;
+
+        const entry = JSON.parse(raw);
+        
+        // Validar versión
+        if (entry.version !== CACHE_VERSION) {
+            localStorage.removeItem(fullKey);
+            return null;
+        }
+        
+        if (Date.now() - entry.timestamp < ttl) {
+            memoryCache.set(fullKey, entry);
+            return entry.data;
+        }
+
+        localStorage.removeItem(fullKey);
+    } catch (e) {
+        console.warn('[Cache] Error leyendo localStorage:', e);
+        try { localStorage.removeItem(fullKey); } catch (_) {}
+    }
+
+    return null;
+}
