@@ -204,6 +204,18 @@ function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// home.js — resaltarTexto seguro
+
+function resaltarTexto(textoYaEscapado, query) {
+    // textoYaEscapado ya viene sanitizado con escapeHtml()
+    // Solo necesitamos escapar la query para la regex
+    const queryEscapada = escapeHtml(query);
+    const regexPattern  = escapeRegex(queryEscapada);
+    const regex = new RegExp(`(${regexPattern})`, 'gi');
+    // El reemplazo solo envuelve en <mark>, no introduce HTML del usuario
+    return textoYaEscapado.replace(regex, '<mark>$1</mark>');
+}
+
 // --------------------------------------------------
 // INICIO
 // --------------------------------------------------
