@@ -116,11 +116,11 @@ function rellenarArticulo(a) {
     setMetaProperty('twitter:title',       `SistemaBase | ${a.titulo}`);
     setMetaProperty('twitter:description', a.descripcion || a.titulo);
 
-    setText('breadcrumb-categoria-text', categoria);
+    setText('breadcrumb-categoria-text', categoria.replace(/_/g, ' '));
     setAttr('breadcrumb-categoria-link', 'href', `../Categorias/categorias.html`);
     setText('breadcrumb-titulo-text', truncar(a.titulo, 45));
 
-    setText('article-category-badge', categoria.toUpperCase());
+    setText('article-category-badge', categoria.replace(/_/g, ' ').toUpperCase());
     setText('article-date', formatearFecha(a.fecha_publicacion));
     setText('article-title',    a.titulo);
     setText('article-subtitle', a.descripcion || '');
@@ -217,7 +217,7 @@ async function cargarRelacionados(categoriaId, articuloActualId) {
                  loading="lazy"
                  width="400" height="130">
             <div class="related-card-info">
-                <span class="related-category">${escapeHtml(art.categorias?.nombre || '')}</span>
+                <span class="related-category">${escapeHtml((art.categorias?.nombre || '').replace(/_/g, ' '))}</span>
                 <h4>${escapeHtml(art.titulo)}</h4>
             </div>
         </a>
