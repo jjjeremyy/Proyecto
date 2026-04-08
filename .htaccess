@@ -1,0 +1,35 @@
+# .htaccess — Cabeceras de seguridad HTTP
+
+# Forzar HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Cabeceras de seguridad
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # Ocultar versión del servidor
+    Header unset Server
+    Header unset X-Powered-By
+</IfModule>
+
+# No exponer listado de directorios
+Options -Indexes
+
+# Bloquear acceso a archivos sensibles
+<FilesMatch "\.(env|json|md|git|sql|log|bak)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Bloquear acceso directo a carpeta Supabase
+<DirectoryMatch "^.*/Supabase/">
+    Order Allow,Deny
+    Deny from all
+</DirectoryMatch>
