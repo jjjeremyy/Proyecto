@@ -209,7 +209,7 @@ fileInput.addEventListener('change', () => {
     if (file) procesarArchivoImagen(file);
 });
 
-function procesarArchivoImagen(file) {
+function procesarArchivoImagenLegacy(file) {
     // FIX: validación de tipo de archivo
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
         mostrarStatus(`❌ Tipo de archivo no permitido. Usa: JPEG, PNG, WebP, GIF o SVG.`, 'error');
@@ -763,8 +763,10 @@ async function procesarArchivoImagen(file) {
     const nombreSeguro = `portada-${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
 
     archivoImagenSeleccionado = new File([file], nombreSeguro, { type: file.type });
-    
-    // ... resto del procesamiento
+    imagenUrlFinal = null;
+    fileNameDisplay.textContent = `${archivoImagenSeleccionado.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    const objectUrl = URL.createObjectURL(archivoImagenSeleccionado);
+    mostrarPreviewImagen(objectUrl);
 }
 
 // admin/admin.js — añadir logout seguro
