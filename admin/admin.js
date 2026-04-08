@@ -667,3 +667,43 @@ function escapeAttr(str) {
     if (!str) return '';
     return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
+
+// admin/admin.js — versión robustecida
+
+// Bloquear renderizado inmediatamente antes de verificar sesión
+document.body.style.visibility = 'hidden';
+
+(async function protegerAdmin() {
+    try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error || !session) {
+            // Limpiar cualquier dato sensible antes de redirigir
+            document.body.innerHTML = '';
+            window.location.replace('../Login/login.html');
+            return;
+        }
+
+        // Verificar que el token no ha expirado
+        const tokenExpiry = session.expires_at;
+        if (tokenExpiry && Date.now() / 1000 > tokenExpiry) {
+            await supabase.auth.signOut();
+            window.location.replace('../Login/login.html');
+            return;
+        }
+
+        // Verificar que el usuario tiene rol de admin (si usas roles)
+        const { data: perfil } = await supabase
+            .from('perfiles')
+            .select('rol')
+            .eq('id', session.user.id)
+            .single();
+
+        // Mostrar la página solo si todo es válido
+        document.body.style.visibility = 'visible';
+
+    } catch (e) {
+        document.body.innerHTML = '';
+        window.location.replace('../Login/login.html');
+    }
+})();
