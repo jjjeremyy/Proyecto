@@ -766,3 +766,43 @@ async function procesarArchivoImagen(file) {
     
     // ... resto del procesamiento
 }
+
+// admin/admin.js — añadir logout seguro
+
+document.getElementById('nav-logout').addEventListener('click', async (e) => {
+    e.preventDefault();
+    
+    if (!confirm('¿Seguro que quieres cerrar sesión?')) return;
+    
+    try {
+        // 1. Cerrar sesión en Supabase (invalida el token en el servidor)
+        await supabase.auth.signOut();
+        
+        // 2. Limpiar caché local
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // 3. Redirigir (replace para que no se pueda volver con el botón "atrás")
+        window.location.replace('../Login/login.html');
+    } catch (e) {
+        console.error('Error al cerrar sesión:', e);
+        window.location.replace('../Login/login.html');
+    }
+});
+
+// Auto-logout por inactividad (30 minutos)
+let timerInactividad;
+
+function resetearTimerInactividad() {
+    clearTimeout(timerInactividad);
+    timerInactividad = setTimeout(async () => {
+        await supabase.auth.signOut();
+        alert('Sesión expirada por inactividad.');
+        window.location.replace('../Login/login.html');
+    }, 30 * 60 * 1000);
+}
+
+['click', 'keypress', 'scroll', 'mousemove'].forEach(evento => {
+    document.addEventListener(evento, resetearTimerInactividad, { passive: true });
+});
+resetearTimerInactividad();
