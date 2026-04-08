@@ -1,21 +1,9 @@
-// =============================================
-// HOME.JS — SistemaBase
-// FIX: prefetch movido a DESPUÉS de renderizar las tarjetas
-// FIX: escape de HTML en interpolaciones para prevenir XSS
-// FIX: Promise.all corregido
-// FIX: límite de artículos recientes explícito en 4
-// FIX: nombre de categoría formateado (sin guiones bajos)
-// =============================================
 import { obtenerArticulosRecientes, obtenerArticulosBuscador } from '../Supabase/supabase.js';
 
-// --------------------------------------------------
-// 1. ARTÍCULOS RECIENTES
-// --------------------------------------------------
 async function cargarArticulosRecientes() {
     const lista = document.getElementById('recent-articles-list');
     if (!lista) return;
 
-    // Skeleton loader
     lista.innerHTML = Array.from({ length: 4 }, () => `
         <div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(4,56,115,0.08);">
             <div style="height:160px;background:linear-gradient(90deg,#eef2f8 25%,#e2e8f4 50%,#eef2f8 75%);background-size:200% 100%;animation:sk-home 1.4s infinite;"></div>
@@ -26,70 +14,82 @@ async function cargarArticulosRecientes() {
         </div>
     `).join('');
 
-    if (!document.getElementById('sk-home-style')) {
-        const s = document.createElement('style');
-        s.id = 'sk-home-style';
-        s.textContent = `@keyframes sk-home { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`;
-        document.head.appendChild(s);
-    }
+    asegurarEstilosSkeleton();
 
-    let data;
+    let articulos;
     try {
-        // FIX: límite explícito de 4 artículos
-        data = await obtenerArticulosRecientes(4, true);
-    } catch (err) {
-        console.error('[SistemaBase] Error al cargar artículos recientes:', err);
-        lista.innerHTML = `<p class="home-no-results">Error al cargar artículos. Revisa la consola para más detalles.</p>`;
+        articulos = await obtenerArticulosRecientes(4, true);
+    } catch (error) {
+        console.error('[SistemaBase] Error al cargar articulos recientes:', error);
+        lista.innerHTML = '<p class="home-no-results">Error al cargar los articulos recientes.</p>';
         return;
     }
 
-    if (!data || data.length === 0) {
-        lista.innerHTML = '<p class="home-no-results">No hay artículos publicados todavía.</p>';
+    if (!Array.isArray(articulos) || articulos.length === 0) {
+        lista.innerHTML = '<p class="home-no-results">No hay articulos publicados todavia.</p>';
         return;
     }
 
-    lista.innerHTML = data.map(art => `
-        <a href="Articulo/articulo.html?slug=${encodeURIComponent(art.slug)}" class="recent-card">
+    lista.innerHTML = articulos.map((articulo) => `
+        <a href="Articulo/articulo.html?slug=${encodeURIComponent(articulo.slug)}" class="recent-card">
             <div class="recent-card-img-wrap">
-                <img src="${escapeAttr(art.imagen_portada || 'IMG/IMGprueba.png')}"
-                     alt="${escapeAttr(art.titulo)}"
-                     loading="lazy"
-                     width="400" height="160"
-                     decoding="async">
-                <span class="recent-card-cat">${escapeHtml(formatearNombreCategoria(art.categorias?.nombre || ''))}</span>
+                <img
+                    src="${escapeAttr(articulo.imagen_portada || 'IMG/IMGprueba.png')}"
+                    alt="${escapeAttr(articulo.titulo)}"
+                    loading="lazy"
+                    width="400"
+                    height="160"
+                    decoding="async"
+                >
+                <span class="recent-card-cat">${escapeHtml(formatearNombreCategoria(articulo.categorias?.nombre || ''))}</span>
             </div>
             <div class="recent-card-body">
-                <h3>${escapeHtml(art.titulo)}</h3>
-                <p>${escapeHtml(art.descripcion || '')}</p>
-                <span class="recent-card-date">${formatearFecha(art.fecha_publicacion)}</span>
+                <h3>${escapeHtml(articulo.titulo)}</h3>
+                <p>${escapeHtml(articulo.descripcion || '')}</p>
+                <span class="recent-card-date">${formatearFecha(articulo.fecha_publicacion)}</span>
             </div>
         </a>
     `).join('');
 
-    añadirPrefetchListeners();
+    anadirPrefetchListeners();
 }
 
-// --------------------------------------------------
-// 2. BUSCADOR
-// --------------------------------------------------
+function asegurarEstilosSkeleton() {
+    if (document.getElementById('sk-home-style')) return;
+
+    const estilo = document.createElement('style');
+    estilo.id = 'sk-home-style';
+    estilo.textContent = '@keyframes sk-home { 0%{background-position:200% 0} 100%{background-position:-200% 0} }';
+    document.head.appendChild(estilo);
+}
+
 function inicializarBuscador() {
-    const input      = document.getElementById('search-input');
+    const input = document.getElementById('search-input');
     const resultados = document.getElementById('search-results');
     if (!input || !resultados) return;
 
-    let todosLosArticulos = [];
-    let cargado  = false;
+    let articulos = [];
+    let cargado = false;
     let cargando = false;
 
-    async function cargarDatosBuscador() {
+    async function cargarDatos() {
         if (cargado || cargando) return;
+
         cargando = true;
-        const data = await obtenerArticulosBuscador();
-        if (data) { todosLosArticulos = data; cargado = true; }
-        cargando = false;
+        try {
+            const data = await obtenerArticulosBuscador();
+            if (Array.isArray(data)) {
+                articulos = data;
+                cargado = true;
+            }
+        } catch (error) {
+            console.error('[SistemaBase] Error al cargar datos del buscador:', error);
+        } finally {
+            cargando = false;
+        }
     }
 
-    input.addEventListener('focus', cargarDatosBuscador, { once: true });
+    input.addEventListener('focus', cargarDatos, { once: true });
 
     input.addEventListener('input', async () => {
         const query = input.value.trim().toLowerCase();
@@ -100,25 +100,30 @@ function inicializarBuscador() {
             return;
         }
 
-        if (!cargado) await cargarDatosBuscador();
+        if (!cargado) {
+            await cargarDatos();
+        }
 
-        const filtrados = todosLosArticulos.filter(art =>
-            art.titulo.toLowerCase().includes(query) ||
-            (art.descripcion || '').toLowerCase().includes(query) ||
-            (art.categorias?.nombre || '').toLowerCase().includes(query)
+        const filtrados = articulos.filter((articulo) =>
+            articulo.titulo.toLowerCase().includes(query) ||
+            (articulo.descripcion || '').toLowerCase().includes(query) ||
+            (articulo.categorias?.nombre || '').toLowerCase().includes(query)
         );
 
         if (filtrados.length === 0) {
             resultados.innerHTML = `<p class="search-no-results">Sin resultados para "<strong>${escapeHtml(input.value)}</strong>"</p>`;
         } else {
-            resultados.innerHTML = filtrados.slice(0, 6).map(art => `
-                <a href="Articulo/articulo.html?slug=${encodeURIComponent(art.slug)}" class="search-result-item">
-                    <img src="${escapeAttr(art.imagen_portada || 'IMG/IMGprueba.png')}"
-                         alt="${escapeAttr(art.titulo)}"
-                         width="46" height="46">
+            resultados.innerHTML = filtrados.slice(0, 6).map((articulo) => `
+                <a href="Articulo/articulo.html?slug=${encodeURIComponent(articulo.slug)}" class="search-result-item">
+                    <img
+                        src="${escapeAttr(articulo.imagen_portada || 'IMG/IMGprueba.png')}"
+                        alt="${escapeAttr(articulo.titulo)}"
+                        width="46"
+                        height="46"
+                    >
                     <div>
-                        <span class="search-result-cat">${escapeHtml(formatearNombreCategoria(art.categorias?.nombre || ''))}</span>
-                        <p>${resaltarTexto(escapeHtml(art.titulo), query)}</p>
+                        <span class="search-result-cat">${escapeHtml(formatearNombreCategoria(articulo.categorias?.nombre || ''))}</span>
+                        <p>${resaltarTexto(escapeHtml(articulo.titulo), query)}</p>
                     </div>
                 </a>
             `).join('');
@@ -127,60 +132,63 @@ function inicializarBuscador() {
         resultados.classList.remove('hidden');
     });
 
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-wrapper')) {
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest('.search-wrapper')) {
             resultados.classList.add('hidden');
         }
     });
 
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const query = encodeURIComponent(input.value.trim());
-            if (query) window.location.href = `Categorias/categorias.html?q=${query}`;
-        }
+    input.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') return;
+
+        const query = input.value.trim();
+        if (!query) return;
+
+        window.location.href = `Categorias/categorias.html?q=${encodeURIComponent(query)}`;
     });
 }
 
-// --------------------------------------------------
-// FIX: prefetch — se llama DESPUÉS de renderizar las tarjetas
-// --------------------------------------------------
-function añadirPrefetchListeners() {
-    document.querySelectorAll('.recent-card').forEach(card => {
+function anadirPrefetchListeners() {
+    document.querySelectorAll('.recent-card').forEach((card) => {
         card.addEventListener('mouseenter', () => {
             const href = card.getAttribute('href');
             if (!href) return;
+
             try {
-                const slug = new URL(href, location.href).searchParams.get('slug');
-                if (slug) {
-                    const link = document.createElement('link');
-                    link.rel = 'prefetch';
-                    link.href = `Articulo/articulo.html?slug=${encodeURIComponent(slug)}`;
-                    document.head.appendChild(link);
-                }
-            } catch (_) {}
+                const slug = new URL(href, window.location.href).searchParams.get('slug');
+                if (!slug) return;
+
+                const link = document.createElement('link');
+                link.rel = 'prefetch';
+                link.href = `Articulo/articulo.html?slug=${encodeURIComponent(slug)}`;
+                document.head.appendChild(link);
+            } catch (error) {
+                console.debug('[SistemaBase] Prefetch omitido:', error);
+            }
         }, { once: true });
     });
 }
 
-// --------------------------------------------------
-// UTILIDADES
-// --------------------------------------------------
 function formatearFecha(fecha) {
     if (!fecha) return '';
-    return new Date(fecha + 'T00:00').toLocaleDateString('es-ES', {
-        day: 'numeric', month: 'short', year: 'numeric'
+
+    return new Date(`${fecha}T00:00`).toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
     });
 }
 
-// FIX: convierte "conceptos_basicos" → "Conceptos Básicos" (o cualquier nombre con guiones bajos/guiones)
 function formatearNombreCategoria(nombre) {
     if (!nombre) return '';
-    // Si el nombre ya tiene espacios y mayúsculas, lo devuelve tal cual
-    if (/[A-ZÁÉÍÓÚÑ ]/.test(nombre)) return nombre;
-    // Si tiene guiones bajos o guiones, los reemplaza por espacios y capitaliza
+
+    if (/[A-ZÁÉÍÓÚÑ ]/.test(nombre)) {
+        return nombre;
+    }
+
     return nombre
         .replace(/[_-]/g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase());
+        .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function resaltarTexto(textoEscapado, query) {
@@ -188,36 +196,26 @@ function resaltarTexto(textoEscapado, query) {
     return textoEscapado.replace(regex, '<mark>$1</mark>');
 }
 
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>"']/g, m => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[m]));
+function escapeHtml(valor) {
+    if (!valor) return '';
+
+    return String(valor).replace(/[&<>"']/g, (match) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        '\'': '&#39;',
+    }[match]));
 }
 
-function escapeAttr(str) {
-    if (!str) return '';
-    return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+function escapeAttr(valor) {
+    if (!valor) return '';
+    return String(valor).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function escapeRegex(valor) {
+    return String(valor).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// home.js — resaltarTexto seguro
-
-function resaltarTexto(textoYaEscapado, query) {
-    // textoYaEscapado ya viene sanitizado con escapeHtml()
-    // Solo necesitamos escapar la query para la regex
-    const queryEscapada = escapeHtml(query);
-    const regexPattern  = escapeRegex(queryEscapada);
-    const regex = new RegExp(`(${regexPattern})`, 'gi');
-    // El reemplazo solo envuelve en <mark>, no introduce HTML del usuario
-    return textoYaEscapado.replace(regex, '<mark>$1</mark>');
-}
-
-// --------------------------------------------------
-// INICIO
-// --------------------------------------------------
 await cargarArticulosRecientes();
 inicializarBuscador();
