@@ -27,6 +27,14 @@ body {
     color: var(--color-text);
 }
 
+body.admin-pending {
+    visibility: hidden;
+}
+
+body.admin-ready {
+    visibility: visible;
+}
+
 .hidden { display: none !important; }
 
 /* ==========================================

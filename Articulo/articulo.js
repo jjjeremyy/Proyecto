@@ -6,6 +6,11 @@ import {
 const purify = window.DOMPurify;
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
+const footerYear = document.getElementById('footer-year');
+
+if (footerYear) {
+    footerYear.textContent = new Date().getFullYear();
+}
 
 const bar = document.createElement('div');
 bar.id = 'reading-progress';
@@ -32,6 +37,8 @@ window.addEventListener('scroll', () => {
     btnTop.style.opacity = window.scrollY > 400 ? '1' : '0';
     btnTop.style.pointerEvents = window.scrollY > 400 ? 'auto' : 'none';
 }, { passive: true });
+
+inicializarAds(document.querySelectorAll('.ad-leaderboard .adsbygoogle, .ad-footer-banner .adsbygoogle'));
 
 if (!slug) {
     mostrarError('No se ha especificado ningun articulo.');
@@ -154,17 +161,7 @@ function rellenarArticulo(articulo) {
 
     document.getElementById('article-main').classList.remove('hidden');
 
-    requestAnimationFrame(() => {
-        document.querySelectorAll('#article-main .adsbygoogle').forEach(ins => {
-            if (!ins.getAttribute('data-adsbygoogle-status')) {
-                try {
-                    (window.adsbygoogle = window.adsbygoogle || []).push({});
-                } catch (error) {
-                    console.warn('[AdSense] Error al inicializar bloque:', error);
-                }
-            }
-        });
-    });
+    inicializarAds(document.querySelectorAll('#article-main .adsbygoogle'));
 
     configurarCompartir(articulo.titulo, articulo.slug);
 }
@@ -181,6 +178,20 @@ function sanitizarContenido(html) {
         FORBID_TAGS: ['script', 'style', 'svg', 'math', 'object', 'embed'],
         FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit', 'javascript'],
         ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    });
+}
+
+function inicializarAds(nodos) {
+    requestAnimationFrame(() => {
+        nodos.forEach(ins => {
+            if (!ins.getAttribute('data-adsbygoogle-status')) {
+                try {
+                    (window.adsbygoogle = window.adsbygoogle || []).push({});
+                } catch (error) {
+                    console.warn('[AdSense] Error al inicializar bloque:', error);
+                }
+            }
+        });
     });
 }
 

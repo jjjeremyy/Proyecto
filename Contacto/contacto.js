@@ -1,45 +1,28 @@
-const btn = document.getElementById('button');
 const form = document.getElementById('form');
+const btn = document.getElementById('button');
 const feedback = document.getElementById('formFeedback');
 const nombreInput = document.getElementById('nombre');
 const emailInput = document.getElementById('email');
 const mensajeInput = document.getElementById('mensaje');
-const nameInput = document.getElementById('name');
-const timeInput = document.getElementById('time');
-const titleInput = document.getElementById('title');
-const messageInput = document.getElementById('message');
-const fromNameInput = document.getElementById('from_name');
-const replyToInput = document.getElementById('reply_to');
-const toEmailInput = document.getElementById('to_email');
 const toggle = document.getElementById('menuToggle');
 const nav = document.getElementById('navLinks');
 
-const RATE_LIMIT_KEY = 'sb_contact_last_submit';
-const RATE_LIMIT_MS = 60 * 1000;
-let intentosFallidos = 0;
-const MAX_INTENTOS = 5;
+const DEFAULT_CONTACT_ENDPOINT = 'https://xylvokwwiiirjlcjrafb.functions.supabase.co/contact-form';
+const endpoint = form?.dataset.contactEndpoint?.trim() || DEFAULT_CONTACT_ENDPOINT;
+const turnstileSiteKey = form?.dataset.turnstileSiteKey?.trim() || '';
 
-if (typeof emailjs === 'undefined') {
-    console.error('EmailJS no se ha cargado correctamente.');
-} else {
-    emailjs.init('uXTjo90Pwv0fueks5');
-}
+let widgetId = null;
 
 if (toggle && nav) {
     toggle.addEventListener('click', () => nav.classList.toggle('open'));
 }
 
-form?.addEventListener('submit', async function (event) {
+window.addEventListener('load', () => {
+    inicializarTurnstile();
+});
+
+form?.addEventListener('submit', async (event) => {
     event.preventDefault();
-
-    const ahora = Date.now();
-    const lastSubmit = parseInt(localStorage.getItem(RATE_LIMIT_KEY) || '0', 10);
-
-    if (ahora - lastSubmit < RATE_LIMIT_MS) {
-        const segundos = Math.ceil((RATE_LIMIT_MS - (ahora - lastSubmit)) / 1000);
-        showFeedback(`Por favor espera ${segundos} segundos antes de enviar otro mensaje.`, 'error');
-        return;
-    }
 
     const nombre = nombreInput.value.trim();
     const email = emailInput.value.trim();
@@ -60,33 +43,80 @@ form?.addEventListener('submit', async function (event) {
         return;
     }
 
-    if (typeof emailjs === 'undefined') {
-        showFeedback('Error de carga de EmailJS. Recarga la pagina e intentalo de nuevo.', 'error');
+    if (!endpoint) {
+        showFeedback('Configura el endpoint seguro del formulario antes de enviar mensajes.', 'error');
         return;
     }
 
-    nameInput.value = nombre;
-    timeInput.value = new Date().toLocaleString('es-ES');
-    titleInput.value = 'Nuevo mensaje desde el formulario de contacto';
-    messageInput.value = mensaje;
-    fromNameInput.value = nombre;
-    replyToInput.value = email;
-    toEmailInput.value = 'sistemabase00@gmail.com';
+    if (!widgetId || !window.turnstile) {
+        showFeedback('Configura Turnstile antes de usar el formulario de contacto.', 'error');
+        return;
+    }
 
-    localStorage.setItem(RATE_LIMIT_KEY, ahora.toString());
+    const turnstileToken = window.turnstile.getResponse(widgetId);
+    if (!turnstileToken) {
+        showFeedback('Completa la verificacion anti-spam antes de enviar el formulario.', 'error');
+        return;
+    }
+
     setLoading(true);
     hideFeedback();
 
     try {
-        await emailjs.sendForm('default_service', 'template_pb880xb', this);
-        intentosFallidos = 0;
-        setLoading(false);
-        showFeedback('Mensaje enviado correctamente.', 'success');
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                nombre,
+                email,
+                mensaje,
+                turnstileToken,
+            }),
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(result.error || 'No se pudo enviar el mensaje.');
+        }
+
+        showFeedback('Mensaje enviado correctamente. Gracias por contactar con SistemaBase.', 'success');
         form.reset();
-    } catch (err) {
-        manejarErrorEnvio(err);
+        if (window.turnstile && widgetId !== null) {
+            window.turnstile.reset(widgetId);
+        }
+    } catch (error) {
+        console.error('Error enviando contacto:', error);
+        showFeedback(error.message || 'No se pudo enviar el mensaje.', 'error');
+    } finally {
+        setLoading(false);
     }
 });
+
+function inicializarTurnstile() {
+    if (!form) return;
+
+    if (!turnstileSiteKey) {
+        btn.disabled = true;
+        showFeedback('Configura una clave publica de Turnstile en el formulario para activar el contacto.', 'error');
+        return;
+    }
+
+    if (!window.turnstile) {
+        btn.disabled = true;
+        showFeedback('No se ha podido cargar Turnstile. Recarga la pagina e intentalo de nuevo.', 'error');
+        return;
+    }
+
+    widgetId = window.turnstile.render('#turnstile-widget', {
+        sitekey: turnstileSiteKey,
+        theme: 'light',
+    });
+
+    btn.disabled = false;
+    hideFeedback();
+}
 
 function setLoading(isLoading) {
     if (!btn) return;
@@ -124,31 +154,6 @@ function hideFeedback() {
     feedback.textContent = '';
 }
 
-function formatEmailJSError(err) {
-    const status = err?.status ? ` (${err.status})` : '';
-    const text = err?.text || err?.message || '';
-
-    if (text) {
-        return `Error de EmailJS${status}: ${text}`;
-    }
-
-    return `Error de EmailJS${status}. Revisa el Service ID, la plantilla y el correo de destino en tu panel.`;
-}
-
 function validarEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-}
-
-function manejarErrorEnvio(err) {
-    intentosFallidos++;
-    setLoading(false);
-
-    if (intentosFallidos >= MAX_INTENTOS) {
-        localStorage.setItem(RATE_LIMIT_KEY, (Date.now() + 10 * 60 * 1000).toString());
-        if (btn) btn.disabled = true;
-        showFeedback('Demasiados intentos fallidos. Espera 10 minutos.', 'error');
-        return;
-    }
-
-    showFeedback(formatEmailJSError(err), 'error');
 }

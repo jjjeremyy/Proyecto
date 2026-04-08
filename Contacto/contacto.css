@@ -329,6 +329,23 @@
     border: 1px solid rgba(239, 68, 68, 0.25);
 }
 
+.captcha-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.turnstile-widget {
+    min-height: 68px;
+}
+
+.captcha-help {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+}
+
 
 
 /* =====================

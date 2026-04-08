@@ -9,24 +9,52 @@ import { supabase } from '../Supabase/supabase.js';
 const MAX_IMAGE_SIZE_MB = 5;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
-
-// --------------------------------------------------
-// 0. PROTECCIÓN: redirige si no hay sesión activa
-// --------------------------------------------------
-try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-        window.location.href = '../Login/login.html';
-    }
-} catch (e) {
-    console.error('Error verificando sesión:', e);
-    window.location.href = '../Login/login.html';
+const LOGIN_PATH = '../Login/login.html';
+const adminContext = await exigirRolAdmin();
+if (!adminContext) {
+    throw new Error('Acceso de administrador denegado.');
 }
-
 // --------------------------------------------------
-// 0b. VARIABLE DE EDICIÓN
+// 0b. VARIABLE DE EDICION
 // --------------------------------------------------
 let articuloEditandoId = null;
+async function exigirRolAdmin() {
+    try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session) {
+            redirigirALogin();
+            return null;
+        }
+        if (session.expires_at && Date.now() / 1000 > session.expires_at) {
+            await supabase.auth.signOut();
+            redirigirALogin();
+            return null;
+        }
+        const { data: perfil, error: perfilError } = await supabase
+            .from('perfiles')
+            .select('rol')
+            .eq('id', session.user.id)
+            .maybeSingle();
+        const rol = String(perfil?.rol || '').toLowerCase();
+        if (perfilError || rol !== 'admin') {
+            await supabase.auth.signOut();
+            redirigirALogin();
+            return null;
+        }
+        document.body.classList.remove('admin-pending');
+        document.body.classList.add('admin-ready');
+        return { session, perfil };
+    } catch (error) {
+        console.error('Error verificando rol admin:', error);
+        redirigirALogin();
+        return null;
+    }
+}
+function redirigirALogin() {
+    document.body.classList.remove('admin-ready');
+    document.body.classList.add('admin-pending');
+    window.location.replace(LOGIN_PATH);
+}
 
 // --------------------------------------------------
 // 1. INICIALIZAR QUILL
@@ -668,46 +696,6 @@ function escapeAttr(str) {
     return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// admin/admin.js — versión robustecida
-
-// Bloquear renderizado inmediatamente antes de verificar sesión
-document.body.style.visibility = 'hidden';
-
-(async function protegerAdmin() {
-    try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error || !session) {
-            // Limpiar cualquier dato sensible antes de redirigir
-            document.body.innerHTML = '';
-            window.location.replace('../Login/login.html');
-            return;
-        }
-
-        // Verificar que el token no ha expirado
-        const tokenExpiry = session.expires_at;
-        if (tokenExpiry && Date.now() / 1000 > tokenExpiry) {
-            await supabase.auth.signOut();
-            window.location.replace('../Login/login.html');
-            return;
-        }
-
-        // Verificar que el usuario tiene rol de admin (si usas roles)
-        const { data: perfil } = await supabase
-            .from('perfiles')
-            .select('rol')
-            .eq('id', session.user.id)
-            .single();
-
-        // Mostrar la página solo si todo es válido
-        document.body.style.visibility = 'visible';
-
-    } catch (e) {
-        document.body.innerHTML = '';
-        window.location.replace('../Login/login.html');
-    }
-})();
-
 // admin/admin.js — validación robusta de imágenes
 
 const MAGIC_BYTES = {
@@ -808,3 +796,4 @@ function resetearTimerInactividad() {
     document.addEventListener(evento, resetearTimerInactividad, { passive: true });
 });
 resetearTimerInactividad();
+

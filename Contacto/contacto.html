@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>     
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SistemaBase | Contacto</title>
     <link rel="stylesheet" href="../GuiaEstilosCSS/style.css">
     <link rel="stylesheet" href="contacto.css">
     <link rel="stylesheet" href="../Cookies/cookies-banner.css">
-
-    <!-- ✅ EmailJS SDK en el <head>, antes que cualquier script que lo use -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
 </head>
-<body>  
+<body>
     <header>
         <section class="logo-container">
             <a href="../index.html" class="logo-link" aria-label="Ir al inicio">
@@ -20,14 +18,13 @@
             <a href="../index.html" class="home">SistemaBase</a>
         </section>
         <nav class="nav-links">
-            <a href="../Categorias/categorias.html">Categorías</a>
+            <a href="../Categorias/categorias.html">Categorias</a>
             <a href="../SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
             <a href="contacto.html" class="active">Contacto</a>
         </nav>
     </header>
 
     <section class="contact-info-form">
-
         <div class="contact-left">
             <div class="contact-badge">Contacto</div>
             <h1 class="contact-title">Hablanos<br><span>sobre ti</span></h1>
@@ -49,23 +46,21 @@
                     </div>
                     <div>
                         <p class="detail-label">Horario</p>
-                        <p class="detail-value">Lun–Vie, 9:00–18:00</p>
+                        <p class="detail-value">Lun-Vie, 9:00-18:00</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="form-container">
-            <h2 class="form-title">Envíanos un mensaje</h2>
+            <h2 class="form-title">Envianos un mensaje</h2>
 
-            <form class="contact-form" id="form">
-                <input type="hidden" id="name" name="name" value="">
-                <input type="hidden" id="time" name="time" value="">
-                <input type="hidden" id="title" name="title" value="">
-                <input type="hidden" id="message" name="message" value="">
-                <input type="hidden" id="from_name" name="from_name" value="">
-                <input type="hidden" id="reply_to" name="reply_to" value="">
-                <input type="hidden" id="to_email" name="to_email" value="sistemabase00@gmail.com">
+            <form
+                class="contact-form"
+                id="form"
+                data-contact-endpoint="https://xylvokwwiiirjlcjrafb.functions.supabase.co/contact-form"
+                data-turnstile-site-key=""
+            >
                 <div class="form-group">
                     <label for="nombre" class="form-label">Nombre</label>
                     <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" class="form-input" required>
@@ -76,10 +71,15 @@
                 </div>
                 <div class="form-group">
                     <label for="mensaje" class="form-label">Mensaje</label>
-                    <textarea id="mensaje" name="mensaje" placeholder="¿En qué podemos ayudarte?" class="form-textarea" required></textarea>
+                    <textarea id="mensaje" name="mensaje" placeholder="En que podemos ayudarte?" class="form-textarea" required></textarea>
                 </div>
 
-                <button type="submit" class="form-button" id="button">
+                <div class="captcha-group">
+                    <div id="turnstile-widget" class="turnstile-widget" aria-live="polite"></div>
+                    <p class="captcha-help">Protegemos este formulario con Turnstile para frenar spam y abusos.</p>
+                </div>
+
+                <button type="submit" class="form-button" id="button" disabled>
                     <span class="btn-text">Enviar mensaje</span>
                     <span class="btn-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -92,7 +92,6 @@
                 <div class="form-feedback" id="formFeedback"></div>
             </form>
         </div>
-
     </section>
 
     <footer>
@@ -103,13 +102,13 @@
                 </a>
                 <div>
                     <p class="footer-brand-name">SistemaBase</p>
-                    <p class="footer-tagline">Información sobre computación de la mejor manera posible.</p>
+                    <p class="footer-tagline">Informacion sobre computacion de la mejor manera posible.</p>
                 </div>
             </div>
             <section class="footer-links">
-                <h4>Navegación</h4>
+                <h4>Navegacion</h4>
                 <a href="../index.html">Inicio</a>
-                <a href="../Categorias/categorias.html">Categorías</a>
+                <a href="../Categorias/categorias.html">Categorias</a>
                 <a href="../SobreNosotros/sobreNosotros.html">Sobre nosotros</a>
                 <a href="contacto.html">Contacto</a>
                 <a href="../Politicas/politicas.html">Privacidad y Cookies</a>
@@ -119,16 +118,16 @@
                 <p>sistemabase00@gmail.com</p>
             </section>
         </section>
-        <p>&copy; 2024 SistemaBase. Todos los derechos reservados.</p>
+        <p>&copy; <span id="footer-year"></span> SistemaBase. Todos los derechos reservados.</p>
     </footer>
 
     <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
         <div class="cookie-banner-inner">
-            <span class="cookie-icon" aria-hidden="true">🍪</span>
+            <span class="cookie-icon" aria-hidden="true">Cookie</span>
             <div class="cookie-text">
                 <strong>Este sitio usa cookies</strong>
-                <p>Utilizamos cookies propias y de terceros (incluyendo Google AdSense)...
-                   <a href="../Politicas/politicas.html">Política de Cookies y Privacidad</a>.
+                <p>Utilizamos cookies propias y de terceros.
+                   <a href="../Politicas/politicas.html">Politica de Cookies y Privacidad</a>.
                 </p>
             </div>
             <div class="cookie-actions">
@@ -139,7 +138,7 @@
     </div>
 
     <script src="../Cookies/cookies-banner.js"></script>
+    <script src="../Cookies/site-shell.js"></script>
     <script src="contacto.js"></script>
 </body>
 </html>
-
