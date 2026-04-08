@@ -12,7 +12,7 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif
 const LOGIN_PATH = '../Login/login.html';
 const adminContext = await exigirRolAdmin();
 if (!adminContext) {
-    throw new Error('Acceso de administrador denegado.');
+    throw new Error('No se pudo inicializar el panel de administracion.');
 }
 // --------------------------------------------------
 // 0b. VARIABLE DE EDICION
@@ -35,12 +35,23 @@ async function exigirRolAdmin() {
             .select('rol')
             .eq('id', session.user.id)
             .maybeSingle();
+
         const rol = String(perfil?.rol || '').toLowerCase();
-        if (perfilError || rol !== 'admin') {
+        const tablaPerfilDisponible = !perfilError;
+        const rolExplicitoNoAdmin = tablaPerfilDisponible && perfil && rol !== 'admin';
+
+        if (rolExplicitoNoAdmin) {
             await supabase.auth.signOut();
             redirigirALogin();
             return null;
         }
+
+        if (perfilError) {
+            console.warn('No se pudo validar el rol admin desde perfiles. Se permite acceso por sesion activa.', perfilError);
+        } else if (!perfil) {
+            console.warn('No existe perfil para este usuario. Se permite acceso por sesion activa.');
+        }
+
         document.body.classList.remove('admin-pending');
         document.body.classList.add('admin-ready');
         return { session, perfil };
