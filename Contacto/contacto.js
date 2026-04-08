@@ -119,3 +119,73 @@ const toggle = document.getElementById('menuToggle');
 const nav = document.getElementById('navLinks');
 
 toggle.addEventListener('click', () => nav.classList.toggle('open'));
+
+// contacto.js — añadir rate limiting en cliente
+
+const RATE_LIMIT_KEY = 'sb_contact_last_submit';
+const RATE_LIMIT_MS  = 60 * 1000; // 1 minuto entre envíos
+
+form.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    // Rate limiting en cliente
+    const lastSubmit = parseInt(localStorage.getItem(RATE_LIMIT_KEY) || '0', 10);
+    const ahora = Date.now();
+    
+    if (ahora - lastSubmit < RATE_LIMIT_MS) {
+        const segundos = Math.ceil((RATE_LIMIT_MS - (ahora - lastSubmit)) / 1000);
+        showFeedback(`Por favor espera ${segundos} segundos antes de enviar otro mensaje.`, 'error');
+        return;
+    }
+
+    const nombre  = nombreInput.value.trim();
+    const email   = emailInput.value.trim();
+    const mensaje = mensajeInput.value.trim();
+
+    // Validación más robusta
+    if (!nombre || nombre.length < 2 || nombre.length > 100) {
+        showFeedback('El nombre debe tener entre 2 y 100 caracteres.', 'error');
+        return;
+    }
+
+    if (!email || !validarEmail(email)) {
+        showFeedback('Introduce un email válido.', 'error');
+        return;
+    }
+
+    if (!mensaje || mensaje.length < 10 || mensaje.length > 2000) {
+        showFeedback('El mensaje debe tener entre 10 y 2000 caracteres.', 'error');
+        return;
+    }
+
+    // Guardar timestamp ANTES del envío (para evitar doble clic)
+    localStorage.setItem(RATE_LIMIT_KEY, ahora.toString());
+
+    // ... resto del código de envío
+});
+
+function validarEmail(email) {
+    // RFC 5322 simplificado
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+// Contador de intentos fallidos
+let intentosFallidos = 0;
+const MAX_INTENTOS = 5;
+
+// En el callback de error de EmailJS:
+function manejarErrorEnvio(err) {
+    intentosFallidos++;
+    
+    if (intentosFallidos >= MAX_INTENTOS) {
+        // Bloquear durante 10 minutos
+        localStorage.setItem(RATE_LIMIT_KEY, (Date.now() + 9 * 60 * 1000).toString());
+        setLoading(false);
+        showFeedback('Demasiados intentos fallidos. Espera 10 minutos.', 'error');
+        btn.disabled = true;
+        return;
+    }
+    
+    setLoading(false);
+    showFeedback(formatEmailJSError(err), 'error');
+}
