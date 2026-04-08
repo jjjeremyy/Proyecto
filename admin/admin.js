@@ -707,3 +707,62 @@ document.body.style.visibility = 'hidden';
         window.location.replace('../Login/login.html');
     }
 })();
+
+// admin/admin.js — validación robusta de imágenes
+
+const MAGIC_BYTES = {
+    'image/jpeg': [[0xFF, 0xD8, 0xFF]],
+    'image/png':  [[0x89, 0x50, 0x4E, 0x47]],
+    'image/gif':  [[0x47, 0x49, 0x46, 0x38]],
+    'image/webp': [[0x52, 0x49, 0x46, 0x46]], // RIFF....WEBP
+};
+
+async function validarMagicBytes(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = (e) => {
+            const arr = new Uint8Array(e.target.result);
+            const signatures = MAGIC_BYTES[file.type] || [];
+            
+            const valido = signatures.some(sig =>
+                sig.every((byte, i) => arr[i] === byte)
+            );
+            resolve(valido);
+        };
+        reader.readAsArrayBuffer(file.slice(0, 8));
+    });
+}
+
+async function procesarArchivoImagen(file) {
+    // 1. Validar tipo MIME declarado
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        mostrarStatus('❌ Tipo de archivo no permitido.', 'error');
+        fileInput.value = '';
+        return;
+    }
+
+    // 2. Validar tamaño
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        mostrarStatus(`❌ La imagen supera ${MAX_IMAGE_SIZE_MB} MB.`, 'error');
+        fileInput.value = '';
+        return;
+    }
+
+    // 3. Validar magic bytes (firma real del archivo)
+    if (file.type !== 'image/svg+xml') { // SVG es XML, no tiene magic bytes
+        const bytesValidos = await validarMagicBytes(file);
+        if (!bytesValidos) {
+            mostrarStatus('❌ El archivo no es una imagen válida.', 'error');
+            fileInput.value = '';
+            return;
+        }
+    }
+
+    // 4. Sanitizar nombre de archivo
+    const extension = file.name.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const nombreSeguro = `portada-${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+
+    archivoImagenSeleccionado = new File([file], nombreSeguro, { type: file.type });
+    
+    // ... resto del procesamiento
+}
