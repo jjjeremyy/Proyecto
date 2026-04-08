@@ -20,6 +20,20 @@ function normalizarTexto(valor) {
         .toLowerCase();
 }
 
+function normalizarTextoCanonico(valor) {
+    return normalizarTexto(valor)
+        .split('_')
+        .filter(Boolean)
+        .map((segmento) => {
+            if (segmento.length <= 3 || !segmento.endsWith('s')) {
+                return segmento;
+            }
+
+            return segmento.slice(0, -1);
+        })
+        .join('_');
+}
+
 async function ejecutarConsultaPublicados(crearConsulta) {
     let ultimoError = null;
 
@@ -154,10 +168,13 @@ export async function obtenerIdCategoria(slug, forceRefresh = false) {
         if (!categorias) return null;
 
         const slugNormalizado = normalizarTexto(slug);
+        const slugCanonico = normalizarTextoCanonico(slug);
         const categoria = categorias.find((item) =>
             item.slug === slug ||
             normalizarTexto(item.slug) === slugNormalizado ||
-            normalizarTexto(item.nombre) === slugNormalizado
+            normalizarTexto(item.nombre) === slugNormalizado ||
+            normalizarTextoCanonico(item.slug) === slugCanonico ||
+            normalizarTextoCanonico(item.nombre) === slugCanonico
         );
 
         return categoria?.id ?? null;
