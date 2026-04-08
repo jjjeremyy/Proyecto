@@ -348,3 +348,29 @@ window.addEventListener('scroll', () => {
     btnTop.style.opacity = window.scrollY > 400 ? '1' : '0';
     btnTop.style.pointerEvents = window.scrollY > 400 ? 'auto' : 'none';
 }, { passive: true });
+
+// articulo.js — configuración más estricta de DOMPurify
+
+bodyEl.innerHTML = purify.sanitize(a.contenido || '', {
+    ADD_TAGS: ['iframe'],
+    ADD_ATTR: [
+        'allow', 'allowfullscreen', 'frameborder', 
+        'scrolling', 'loading', 'target'
+    ],
+    FORBID_TAGS: ['script', 'style', 'svg', 'math', 'object', 'embed'],
+    FORBID_ATTR: [
+        'onerror', 'onload', 'onclick', 'onmouseover',
+        'onfocus', 'onblur', 'onchange', 'onsubmit',
+        'javascript'
+    ],
+    // Solo permitir iframes de fuentes confiables
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+});
+
+// Forzar que todos los enlaces externos abran en nueva pestaña con seguridad
+bodyEl.querySelectorAll('a[href^="http"]').forEach(link => {
+    if (!link.href.startsWith(window.location.origin)) {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+    }
+});
