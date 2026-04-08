@@ -104,3 +104,77 @@ function traducirError(mensajeIngles) {
     }
     return 'Error al iniciar sesión. Inténtalo de nuevo.';
 }
+
+// login.js — añadir protección contra fuerza bruta
+
+const BRUTE_FORCE_KEY = 'sb_login_attempts';
+const MAX_INTENTOS_LOGIN = 5;
+const BLOQUEO_MS = 15 * 60 * 1000; // 15 minutos
+
+function obtenerEstadoLogin() {
+    try {
+        const raw = localStorage.getItem(BRUTE_FORCE_KEY);
+        return raw ? JSON.parse(raw) : { intentos: 0, bloqueadoHasta: 0 };
+    } catch {
+        return { intentos: 0, bloqueadoHasta: 0 };
+    }
+}
+
+function guardarEstadoLogin(estado) {
+    localStorage.setItem(BRUTE_FORCE_KEY, JSON.stringify(estado));
+}
+
+async function iniciarSesion() {
+    const estado = obtenerEstadoLogin();
+    
+    // Verificar si está bloqueado
+    if (Date.now() < estado.bloqueadoHasta) {
+        const minutos = Math.ceil((estado.bloqueadoHasta - Date.now()) / 60000);
+        mostrarError(`Demasiados intentos fallidos. Espera ${minutos} minutos.`);
+        btnLogin.disabled = true;
+        return;
+    }
+
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+        mostrarError('Por favor rellena el email y la contraseña.');
+        return;
+    }
+
+    // Validar formato email
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        mostrarError('El formato del email no es válido.');
+        return;
+    }
+
+    setBtnCargando(true);
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+        setBtnCargando(false);
+        
+        // Incrementar contador de intentos fallidos
+        estado.intentos++;
+        
+        if (estado.intentos >= MAX_INTENTOS_LOGIN) {
+            estado.bloqueadoHasta = Date.now() + BLOQUEO_MS;
+            estado.intentos = 0;
+            guardarEstadoLogin(estado);
+            mostrarError('Demasiados intentos fallidos. Cuenta bloqueada 15 minutos.');
+            btnLogin.disabled = true;
+            return;
+        }
+        
+        guardarEstadoLogin(estado);
+        const restantes = MAX_INTENTOS_LOGIN - estado.intentos;
+        mostrarError(`${traducirError(error.message)} (${restantes} intentos restantes)`);
+        return;
+    }
+
+    // Login correcto — resetear contador
+    guardarEstadoLogin({ intentos: 0, bloqueadoHasta: 0 });
+    window.location.replace('../admin/admin.html');
+}
