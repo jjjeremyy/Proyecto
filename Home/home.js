@@ -63,6 +63,127 @@ function asegurarEstilosSkeleton() {
     document.head.appendChild(estilo);
 }
 
+/* ══════════════════════════════════════════════
+   BÚSQUEDA FUZZY
+   ══════════════════════════════════════════════ */
+
+/**
+ * Elimina acentos y convierte a minúsculas.
+ * "Programación" → "programacion"
+ */
+function normalizar(texto) {
+    if (!texto) return '';
+    return String(texto)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Distancia de Levenshtein entre dos cadenas.
+ * Mide cuántas ediciones (inserción, borrado, sustitución)
+ * separan a y b.
+ */
+function levenshtein(a, b) {
+    const m = a.length;
+    const n = b.length;
+
+    // Matriz de (m+1) x (n+1)
+    const dp = Array.from({ length: m + 1 }, (_, i) =>
+        Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+    );
+
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (a[i - 1] === b[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+            }
+        }
+    }
+
+    return dp[m][n];
+}
+
+/**
+ * Comprueba si query coincide con texto con tolerancia a errores.
+ *
+ * Estrategia por capas (de más a menos estricta):
+ *   1. Coincidencia exacta de subcadena  → score 0  (mejor)
+ *   2. Todas las palabras del query aparecen en el texto → score 1
+ *   3. Alguna palabra del query está cerca por Levenshtein → score 2
+ *
+ * Devuelve { match: boolean, score: number }
+ * score más bajo = mejor resultado.
+ */
+function puntuarCoincidencia(textoOriginal, queryOriginal) {
+    const texto = normalizar(textoOriginal);
+    const query = normalizar(queryOriginal);
+
+    if (!query) return { match: false, score: Infinity };
+
+    // Capa 1: subcadena exacta (normalizada)
+    if (texto.includes(query)) return { match: true, score: 0 };
+
+    const palabrasQuery = query.split(/\s+/).filter(Boolean);
+    const palabrasTexto = texto.split(/\s+/).filter(Boolean);
+
+    // Capa 2: todas las palabras del query aparecen en el texto
+    const todasPresentes = palabrasQuery.every((pq) =>
+        palabrasTexto.some((pt) => pt.includes(pq) || pq.includes(pt))
+    );
+    if (todasPresentes) return { match: true, score: 1 };
+
+    // Capa 3: fuzzy — tolerancia proporcional a la longitud de la palabra
+    // Umbral: 1 error por cada 4 caracteres (mínimo 1, máximo 3)
+    const hayCoincidenciaFuzzy = palabrasQuery.some((pq) => {
+        const umbral = Math.min(3, Math.max(1, Math.floor(pq.length / 4)));
+        return palabrasTexto.some((pt) => levenshtein(pq, pt) <= umbral);
+    });
+    if (hayCoincidenciaFuzzy) return { match: true, score: 2 };
+
+    return { match: false, score: Infinity };
+}
+
+/**
+ * Filtra y ordena artículos según relevancia al query.
+ */
+function buscarArticulos(articulos, query) {
+    if (!query || query.length < 2) return [];
+
+    const resultados = [];
+
+    for (const articulo of articulos) {
+        // Puntuamos título (más peso), descripción y categoría
+        const pTitulo      = puntuarCoincidencia(articulo.titulo, query);
+        const pDescripcion = puntuarCoincidencia(articulo.descripcion || '', query);
+        const pCategoria   = puntuarCoincidencia(articulo.categorias?.nombre || '', query);
+
+        // El título tiene prioridad: si coincide allí, el score es mejor
+        const scores = [
+            pTitulo.match      ? pTitulo.score      : Infinity,
+            pDescripcion.match ? pDescripcion.score + 3 : Infinity,
+            pCategoria.match   ? pCategoria.score   + 2 : Infinity,
+        ];
+
+        const mejorScore = Math.min(...scores);
+
+        if (mejorScore < Infinity) {
+            resultados.push({ articulo, score: mejorScore });
+        }
+    }
+
+    // Ordenar de mejor a peor score
+    resultados.sort((a, b) => a.score - b.score);
+
+    return resultados.map((r) => r.articulo);
+}
+
+/* ══════════════════════════════════════════════
+   INICIALIZAR BUSCADOR
+   ══════════════════════════════════════════════ */
+
 function inicializarBuscador() {
     const input = document.getElementById('search-input');
     const resultados = document.getElementById('search-results');
@@ -92,7 +213,7 @@ function inicializarBuscador() {
     input.addEventListener('focus', cargarDatos, { once: true });
 
     input.addEventListener('input', async () => {
-        const query = input.value.trim().toLowerCase();
+        const query = input.value.trim();
 
         if (query.length < 2) {
             resultados.classList.add('hidden');
@@ -104,11 +225,7 @@ function inicializarBuscador() {
             await cargarDatos();
         }
 
-        const filtrados = articulos.filter((articulo) =>
-            articulo.titulo.toLowerCase().includes(query) ||
-            (articulo.descripcion || '').toLowerCase().includes(query) ||
-            (articulo.categorias?.nombre || '').toLowerCase().includes(query)
-        );
+        const filtrados = buscarArticulos(articulos, query);
 
         if (filtrados.length === 0) {
             resultados.innerHTML = `<p class="search-no-results">Sin resultados para "<strong>${escapeHtml(input.value)}</strong>"</p>`;
@@ -148,6 +265,10 @@ function inicializarBuscador() {
     });
 }
 
+/* ══════════════════════════════════════════════
+   PREFETCH
+   ══════════════════════════════════════════════ */
+
 function anadirPrefetchListeners() {
     document.querySelectorAll('.recent-card').forEach((card) => {
         card.addEventListener('mouseenter', () => {
@@ -168,6 +289,10 @@ function anadirPrefetchListeners() {
         }, { once: true });
     });
 }
+
+/* ══════════════════════════════════════════════
+   UTILIDADES
+   ══════════════════════════════════════════════ */
 
 function formatearFecha(fecha) {
     if (!fecha) return '';
@@ -192,8 +317,27 @@ function formatearNombreCategoria(nombre) {
 }
 
 function resaltarTexto(textoEscapado, query) {
-    const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
-    return textoEscapado.replace(regex, '<mark>$1</mark>');
+    // Resaltar ignorando acentos: normalizamos el texto escapado para buscar,
+    // pero marcamos la posición en el texto original
+    const queryNorm = normalizar(query);
+    const palabras = queryNorm.split(/\s+/).filter(Boolean);
+
+    let resultado = textoEscapado;
+    for (const palabra of palabras) {
+        // Regex que ignora acentos usando una aproximación simple de caracteres
+        const regex = new RegExp(
+            palabra.split('').map((c) => {
+                const variantes = {
+                    a: '[aáàäâã]', e: '[eéèëê]', i: '[iíìïî]',
+                    o: '[oóòöôõ]', u: '[uúùüû]', n: '[nñ]',
+                };
+                return variantes[c] || escapeRegex(c);
+            }).join(''),
+            'gi'
+        );
+        resultado = resultado.replace(regex, '<mark>$&</mark>');
+    }
+    return resultado;
 }
 
 function escapeHtml(valor) {
