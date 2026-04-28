@@ -44,10 +44,9 @@
     </header>
 
     <!-- ============================================================
-         ANUNCIO SUPERIOR (728x90) — SIEMPRE VISIBLE, push() inline OK
+         ANUNCIO SUPERIOR (728x90)
     ============================================================ -->
-    <div class="ad-container ad-leaderboard">
-        <p class="ad-label">Publicidad</p>
+    <div class="ad-leaderboard">
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
@@ -71,17 +70,12 @@
 
     <!-- ============================================================
          CONTENIDO PRINCIPAL
-         FIX: Los <ins> de aquí NO llevan <script> inline.
-              AdSense se inicializa desde articulo.js DESPUÉS de
-              hacer classList.remove('hidden'), cuando el contenedor
-              ya es visible y tiene dimensiones reales.
     ============================================================ -->
     <main id="article-main" class="article-layout hidden">
 
         <!-- SIDEBAR IZQUIERDO -->
         <aside class="sidebar sidebar-left">
-            <div class="ad-container ad-sidebar sticky-ad">
-                <p class="ad-label">Publicidad</p>
+            <div class="ad-sidebar sticky-ad">
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
@@ -89,8 +83,7 @@
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
             </div>
-            <div class="ad-container ad-sidebar" style="margin-top:30px;">
-                <p class="ad-label">Publicidad</p>
+            <div class="ad-sidebar" style="margin-top:30px;">
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
@@ -135,9 +128,8 @@
                 <img id="article-featured-img" src="" alt="" class="featured-img">
             </figure>
 
-            <!-- ANUNCIO IN-CONTENT SUPERIOR — sin <script> inline -->
-            <div class="ad-container ad-in-content">
-                <p class="ad-label">Publicidad</p>
+            <!-- ANUNCIO IN-CONTENT SUPERIOR -->
+            <div class="ad-in-content">
                 <ins class="adsbygoogle"
                      style="display:block; text-align:center;"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
@@ -149,9 +141,8 @@
             <!-- CUERPO DEL ARTÍCULO -->
             <div id="article-body-content" class="article-body"></div>
 
-            <!-- ANUNCIO POST-ARTÍCULO — sin <script> inline -->
-            <div class="ad-container ad-post-article">
-                <p class="ad-label">Publicidad</p>
+            <!-- ANUNCIO POST-ARTÍCULO -->
+            <div class="ad-post-article">
                 <ins class="adsbygoogle"
                      style="display:block; text-align:center;"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
@@ -170,8 +161,7 @@
 
         <!-- SIDEBAR DERECHO -->
         <aside class="sidebar sidebar-right">
-            <div class="ad-container ad-sidebar sticky-ad">
-                <p class="ad-label">Publicidad</p>
+            <div class="ad-sidebar sticky-ad">
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
@@ -179,8 +169,7 @@
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
             </div>
-            <div class="ad-container ad-sidebar" style="margin-top:30px;">
-                <p class="ad-label">Publicidad</p>
+            <div class="ad-sidebar" style="margin-top:30px;">
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
@@ -193,10 +182,9 @@
     </main>
 
     <!-- ============================================================
-         ANUNCIO PIE DE PÁGINA — SIEMPRE VISIBLE, push() inline OK
+         ANUNCIO PIE DE PÁGINA
     ============================================================ -->
-    <div class="ad-container ad-footer-banner">
-        <p class="ad-label">Publicidad</p>
+    <div class="ad-footer-banner">
         <ins class="adsbygoogle"
              style="display:block; text-align:center;"
              data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
@@ -252,5 +240,3 @@
     <script type="module" src="articulo.js"></script>
 </body>
 </html>
-
-

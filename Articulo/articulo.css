@@ -118,22 +118,8 @@
 /* ==========================================
    ANUNCIOS ADSENSE — ESTILOS GENERALES
 ========================================== */
-.ad-container {
-    background-color: #f0f4fa;
-    border: 1px dashed #b0bcd4;
-    border-radius: 6px;
-    padding: 8px;
-    text-align: center;
-}
 
-.ad-label {
-    font-size: 10px;
-    color: #8a9ab5;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin: 0 0 4px 0;
-    font-family: Arial, sans-serif;
-}
+/* Eliminado: .ad-container y .ad-label (fondo, borde y etiqueta visual) */
 
 /* Leaderboard superior */
 .ad-leaderboard {
@@ -185,12 +171,7 @@
     max-width: 1280px;
     margin: 0 auto 0 auto;
     padding: 10px 20px;
-    border-top: 1px dashed #b0bcd4;
-    border-bottom: none;
-    border-left: none;
-    border-right: none;
-    border-radius: 0;
-    background-color: #edf1f9;
+    border-top: 1px solid #e2e8f4;
 }
 
 .ad-footer-banner ins {
@@ -835,9 +816,6 @@
 
 /* ==========================================
    BARRA DE PROGRESO DE LECTURA
-   — Fija en la parte inferior, más gruesa y
-     con color acento naranja cálido que
-     contrasta bien sobre el azul del tema.
 ========================================== */
 #reading-progress {
     position: fixed;
