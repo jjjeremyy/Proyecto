@@ -39,11 +39,10 @@
     }
 }
 
-/* En móvil: una sola columna */
 @media (max-width: 768px) {
     .article-layout {
         grid-template-columns: 1fr;
-        padding: 15px 20px;
+        padding: 15px 16px;  /* ← era 15px 20px, ahora simétrico */
         gap: 20px;
     }
     .sidebar-left,
@@ -52,9 +51,26 @@
     }
 
     html, body {
-    max-width: 100%;
-    overflow-x: hidden;
-}
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Proteger título y texto */
+    .article-title {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .article-content {
+        min-width: 0;
+        max-width: 100%;
+        padding: 0;
+    }
+    
+    .ad-leaderboard,
+    .ad-footer-banner {
+        padding: 10px 16px;
+    }
 }
 
 /* ==========================================

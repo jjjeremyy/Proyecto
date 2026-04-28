@@ -389,7 +389,18 @@
 }
 
 @media (max-width: 580px) {
-    .categories-container { grid-template-columns: 1fr; }
-    .articles-list { grid-template-columns: 1fr; }
-    .category-button { height: 60px; font-size: 15px; }
+    .categories-container { 
+        grid-template-columns: 1fr;
+        padding: 28px 16px 16px;  /* ← simétrico */
+    }
+    .articles-list { 
+        grid-template-columns: 1fr;
+        padding: 0 16px;  /* ← simétrico */
+    }
+    .categories-section {
+        padding: 40px 16px 32px;  /* ← simétrico */
+    }
+    .articles-result {
+        padding: 32px 16px 48px;  /* ← simétrico */
+    }
 }

@@ -385,3 +385,14 @@ footer > p {
     .footer-info { grid-template-columns: 1fr; padding: 36px 24px 28px; }
     .footer-logo { grid-column: auto; }
 }
+
+@media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+    
+    body > header {
+        padding: 0 16px;
+    }
+}
