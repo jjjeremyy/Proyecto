@@ -42,7 +42,7 @@
 @media (max-width: 768px) {
     .article-layout {
         grid-template-columns: 1fr;
-        padding: 15px 16px;  /* ← era 15px 20px, ahora simétrico */
+        padding: 15px 16px;
         gap: 20px;
     }
     .sidebar-left,
@@ -70,6 +70,34 @@
     .ad-leaderboard,
     .ad-footer-banner {
         padding: 10px 16px;
+    }
+
+    /* ── FIX: evitar solapamiento entre anuncio post-artículo
+          y la sección de artículos relacionados en móvil ── */
+    .ad-in-content {
+        margin: 24px 0;
+    }
+
+    .ad-post-article {
+        margin: 24px 0 36px 0;   /* más espacio inferior antes de relacionados */
+        clear: both;
+        position: relative;
+        z-index: 0;
+    }
+
+    .related-articles {
+        margin-top: 0;
+        padding-top: 4px;
+        clear: both;
+        position: relative;
+        z-index: 0;
+    }
+
+    /* Asegurar que los ins de AdSense no se desborden */
+    .ad-post-article ins,
+    .ad-in-content ins {
+        max-width: 100%;
+        overflow: hidden;
     }
 }
 
