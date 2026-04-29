@@ -7,6 +7,7 @@ const purify = window.DOMPurify;
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
 const footerYear = document.getElementById('footer-year');
+const FAVORITOS_KEY = 'sistemabase_favoritos';
 
 if (footerYear) {
     footerYear.textContent = new Date().getFullYear();
@@ -164,6 +165,7 @@ function rellenarArticulo(articulo) {
     inicializarAds(document.querySelectorAll('#article-main .adsbygoogle'));
 
     configurarCompartir(articulo.titulo, articulo.slug);
+    configurarFavorito(articulo);
 }
 
 function sanitizarContenido(html) {
@@ -258,6 +260,75 @@ function configurarCompartir(titulo, currentSlug) {
             btn.textContent = 'Compartir';
         }, 2500);
     });
+}
+
+function configurarFavorito(articulo) {
+    const btn = document.getElementById('btn-favorite');
+    if (!btn || !articulo?.slug) return;
+
+    const favorito = normalizarFavorito(articulo);
+
+    function actualizarBoton() {
+        const estaGuardado = existeFavorito(favorito.slug);
+        btn.classList.toggle('is-favorite', estaGuardado);
+        btn.setAttribute('aria-pressed', String(estaGuardado));
+
+        const icono = btn.querySelector('.favorite-icon');
+        const texto = btn.querySelector('.favorite-text');
+        if (icono) icono.textContent = estaGuardado ? '★' : '☆';
+        if (texto) texto.textContent = estaGuardado ? 'Quitar favorito' : 'Guardar favorito';
+        btn.setAttribute('aria-label', estaGuardado ? 'Quitar articulo de favoritos' : 'Guardar articulo en favoritos');
+    }
+
+    actualizarBoton();
+
+    btn.addEventListener('click', () => {
+        const favoritos = obtenerFavoritos();
+        const indice = favoritos.findIndex((item) => item.slug === favorito.slug);
+
+        if (indice >= 0) {
+            favoritos.splice(indice, 1);
+        } else {
+            favoritos.unshift(favorito);
+        }
+
+        guardarFavoritos(favoritos);
+        actualizarBoton();
+    });
+}
+
+function normalizarFavorito(articulo) {
+    return {
+        slug: articulo.slug,
+        titulo: articulo.titulo || '',
+        descripcion: articulo.descripcion || '',
+        imagen_portada: articulo.imagen_portada || '',
+        fecha_publicacion: articulo.fecha_publicacion || '',
+        categoria: articulo.categorias?.nombre || '',
+        guardado_en: new Date().toISOString(),
+    };
+}
+
+function existeFavorito(currentSlug) {
+    return obtenerFavoritos().some((item) => item.slug === currentSlug);
+}
+
+function obtenerFavoritos() {
+    try {
+        const data = JSON.parse(localStorage.getItem(FAVORITOS_KEY) || '[]');
+        return Array.isArray(data) ? data.filter((item) => item?.slug) : [];
+    } catch (error) {
+        console.warn('[SistemaBase] No se pudieron leer los favoritos:', error);
+        return [];
+    }
+}
+
+function guardarFavoritos(favoritos) {
+    try {
+        localStorage.setItem(FAVORITOS_KEY, JSON.stringify(favoritos));
+    } catch (error) {
+        console.warn('[SistemaBase] No se pudieron guardar los favoritos:', error);
+    }
 }
 
 function mostrarError(mensaje) {

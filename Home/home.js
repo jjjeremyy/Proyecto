@@ -1,5 +1,7 @@
 import { obtenerArticulosRecientes, obtenerArticulosBuscador } from '../Supabase/supabase.js';
 
+const FAVORITOS_KEY = 'sistemabase_favoritos';
+
 async function cargarArticulosRecientes() {
     const lista = document.getElementById('recent-articles-list');
     if (!lista) return;
@@ -52,6 +54,55 @@ async function cargarArticulosRecientes() {
     `).join('');
 
     anadirPrefetchListeners();
+}
+
+function cargarArticulosFavoritos() {
+    const section = document.getElementById('favorite-topics');
+    const lista = document.getElementById('favorite-articles-list');
+    if (!section || !lista) return;
+
+    const favoritos = obtenerFavoritos();
+
+    if (favoritos.length === 0) {
+        section.classList.add('hidden');
+        lista.innerHTML = '';
+        return;
+    }
+
+    section.classList.remove('hidden');
+    lista.innerHTML = favoritos.map((articulo) => `
+        <a href="Articulo/articulo.html?slug=${encodeURIComponent(articulo.slug)}" class="recent-card">
+            <div class="recent-card-img-wrap">
+                <img
+                    src="${escapeAttr(articulo.imagen_portada || 'IMG/IMGprueba.png')}"
+                    alt="${escapeAttr(articulo.titulo)}"
+                    loading="lazy"
+                    width="400"
+                    height="160"
+                    decoding="async"
+                >
+                <span class="recent-card-cat">${escapeHtml(formatearNombreCategoria(articulo.categoria || ''))}</span>
+                <span class="favorite-card-badge" aria-label="Articulo favorito">★</span>
+            </div>
+            <div class="recent-card-body">
+                <h3>${escapeHtml(articulo.titulo)}</h3>
+                <p>${escapeHtml(articulo.descripcion || '')}</p>
+                <span class="recent-card-date">${formatearFecha(articulo.fecha_publicacion)}</span>
+            </div>
+        </a>
+    `).join('');
+
+    anadirPrefetchListeners();
+}
+
+function obtenerFavoritos() {
+    try {
+        const data = JSON.parse(localStorage.getItem(FAVORITOS_KEY) || '[]');
+        return Array.isArray(data) ? data.filter((item) => item?.slug) : [];
+    } catch (error) {
+        console.warn('[SistemaBase] No se pudieron leer los favoritos:', error);
+        return [];
+    }
 }
 
 function asegurarEstilosSkeleton() {
@@ -271,6 +322,9 @@ function inicializarBuscador() {
 
 function anadirPrefetchListeners() {
     document.querySelectorAll('.recent-card').forEach((card) => {
+        if (card.dataset.prefetchReady === 'true') return;
+        card.dataset.prefetchReady = 'true';
+
         card.addEventListener('mouseenter', () => {
             const href = card.getAttribute('href');
             if (!href) return;
@@ -362,4 +416,5 @@ function escapeRegex(valor) {
 }
 
 await cargarArticulosRecientes();
+cargarArticulosFavoritos();
 inicializarBuscador();
